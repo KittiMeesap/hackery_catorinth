@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Localization-String-Tables-Thai (Thailand) (th-TH)
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Localization-String-Tables-Thai (Thailand) (th-TH)
+  m_GUID: cbb1bbf11b72c354b84d353e494ed085
+  m_SerializeEntries:
+  - m_GUID: 67e07d42cb754ec4f91bc924e3c3c76e
+    m_Address: Localization_MainMenu_th-TH
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-th-TH
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bc28e035fd0adf84793228f440e12087
+    m_Address: Localization_Dialogue_Map0_th-TH
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-th-TH
+    - Preload
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d97525c0c1e53b44abf6cdc67bcdc172
+    m_Address: Localization_Map0_th-TH
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-th-TH
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 1
+  m_Settings: {fileID: 11400000, guid: 6d5d01a46f2d377418f7f60ffcbab29a, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 0f72ae29c2ac8ed4cabd8de258dc78aa, type: 2}
+    - {fileID: 11400000, guid: caaf437c59c86e943b0a6265ebeb55d0, type: 2}

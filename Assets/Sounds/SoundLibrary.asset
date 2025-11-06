@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f49f5e9cd07eb64da7aa8fe0198923b, type: 3}
+  m_Name: SoundLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::SoundLibrary
+  sounds:
+  - key: SFX_FridgeOn
+    clip: {fileID: 8300000, guid: e2ae28156eeffab45ace8513a8fd9ecc, type: 3}
+  - key: SFX_FridgeOff
+    clip: {fileID: 8300000, guid: e2ae28156eeffab45ace8513a8fd9ecc, type: 3}
+  - key: SFX_Footstep
+    clip: {fileID: 8300000, guid: 731b754dd4c89f349b4795bd659734ac, type: 3}
+  - key: SFX_PlayerHurt
+    clip: {fileID: 8300000, guid: 4e5dc71571c23494bbee4530f3908096, type: 3}
+  - key: SFX_PlayerDeath
+    clip: {fileID: 0}
+  - key: SFX_OvenOn
+    clip: {fileID: 8300000, guid: 00ddd0da36af4594fb40904c930913a0, type: 3}
+  - key: SFX_OvenOff
+    clip: {fileID: 8300000, guid: 00ddd0da36af4594fb40904c930913a0, type: 3}
+  - key: SFX_Alarm
+    clip: {fileID: 8300000, guid: 389ef3d6fcd334040bab5aa0cbca2361, type: 3}
+  - key: SFX_BoxOpen
+    clip: {fileID: 8300000, guid: 57e6f2444c7f60d4db7167b890d1515f, type: 3}
+  - key: SFX_BoxClose
+    clip: {fileID: 8300000, guid: 57e6f2444c7f60d4db7167b890d1515f, type: 3}
+  - key: SFX_SugarFreeze
+    clip: {fileID: 8300000, guid: 8af0990543b954f4c97881db6d04025a, type: 3}
+  - key: SFX_SugarMelt
+    clip: {fileID: 8300000, guid: b335a78151fed3e4fb88fb65c45e1534, type: 3}
+  - key: SFX_LockerOpen
+    clip: {fileID: 8300000, guid: b438a66b5a83af94687203cd48f8983e, type: 3}
+  - key: SFX_LockerClose
+    clip: {fileID: 8300000, guid: eb6e1f7100d110448b42a7359975038e, type: 3}
+  - key: SFX_DoorSugarOpening
+    clip: {fileID: 8300000, guid: e2ae28156eeffab45ace8513a8fd9ecc, type: 3}
+  - key: SFX_DoorSugarClosing
+    clip: {fileID: 8300000, guid: b438a66b5a83af94687203cd48f8983e, type: 3}
+  - key: SFX_DoorMelt
+    clip: {fileID: 8300000, guid: b335a78151fed3e4fb88fb65c45e1534, type: 3}
+  - key: SFX_ChocolateDoor_Break
+    clip: {fileID: 8300000, guid: 73352f0b7002c614fab3b330dda65bf3, type: 3}
+  - key: SFX_HackInput
+    clip: {fileID: 8300000, guid: e8c1bbfd5bc9bce44aeb67cc81583ca6, type: 3}
+  - key: SFX_HackFail
+    clip: {fileID: 8300000, guid: f222c27289aa8fc4e8dfe91a2da3726b, type: 3}
+  - key: SFX_HackPopup
+    clip: {fileID: 8300000, guid: 9263ef99786161f4fb5cfbdb6e6506dd, type: 3}
+  - key: BGM_ROOM1
+    clip: {fileID: 8300000, guid: 4fb45f330b52f094d8647678614ff4e5, type: 3}

@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: CatMonitorVeticalAnimator
+  m_Controller: {fileID: 9100000, guid: 962e6b60a4e32a243b3633edfeb3cc4e, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: d02cf083fc5df2349abac9dc75116a47, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 9b201dc635bd27d4280e25db78cb0bc3, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: ac1353d0154b8dc479d4e4cb46dc5dde, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: c6a1b11995f2b4748849f902ce83618d, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 9a7567709e7c32e4bae90f875c910b4a, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 660723afe51b0c545a49ea8c1e240389, type: 2}

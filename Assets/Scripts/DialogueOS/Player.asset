@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6a0e519f2486344e8e1948f55b2af47, type: 3}
+  m_Name: Player
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  characterId: 01
+  displayName:
+    m_TableReference:
+      m_TableCollectionName: GUID:ee7df1b222e149d448e7ff928539ef8a
+    m_TableEntryReference:
+      m_KeyId: 8624803840
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  defaultPortrait: {fileID: 3427114271967980436, guid: d54ecb6e78dad7843bdcea1525db47e3, type: 3}
+  references:
+    version: 2
+    RefIds: []

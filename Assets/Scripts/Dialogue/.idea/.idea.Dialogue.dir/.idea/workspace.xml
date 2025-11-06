@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d2f58161-0189-4aa2-9bb8-4007054801c5" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../AddressableAssetsData/AddressableAssetSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../../AddressableAssetsData/AddressableAssetSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Scenes/Map 0 - Tutorial.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../../Scenes/Map 0 - Tutorial.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Cog.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Cog.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Credits.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Credits.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Play.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Play.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Quit.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Button_UI_Quit.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Credit_menu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Credit_menu.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Exit_menu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Exit_menu.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Floors_Button_.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Floors_Button_.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Game_LOGO.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Game_LOGO.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Danger.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Danger.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Lock.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Lock.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Sound.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Sound.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Trap.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Hack_Icon_Trap.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Play_menu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/Play_menu.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Alert.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Alert.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Floor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Floor.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Question.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Question.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Arrow_Hacking 1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Arrow_Hacking 1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Arrow_Hacking.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Arrow_Hacking.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Crouch_Lctrl.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Crouch_Lctrl.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Interact_Hide_UseObject_E.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Interact_Hide_UseObject_E.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_PickupPhone_SpaceBar.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_PickupPhone_SpaceBar.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Walk_A.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Walk_A.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Walk_D.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/Toturial_Walk_D.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Button_Home.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Button_Home.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Button_Reset.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Button_Reset.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Button_Resume.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Button_Resume.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Destroy.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Destroy.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_LOCK.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_LOCK.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Sound.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Sound.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Trap.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Trap.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_HackedObject.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_HackedObject.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_LeftClick.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_LeftClick.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_PressE.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_PressE.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_Walk.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Sprites/UI/UI_Tutorial/UI_Tutorial_Walk.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ProjectId" id="32eGgt9FVAEdkZspVqx8e7EEB23" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <created>1757773740503</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1757773740503</updated>
+      <workItem from="1757773745848" duration="8000" />
+    </task>
+    <servers />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

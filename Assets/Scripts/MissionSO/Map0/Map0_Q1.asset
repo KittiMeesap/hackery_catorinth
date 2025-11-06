@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b38f353e5c90d642b1d4ed56fd91508, type: 3}
+  m_Name: Map0_Q1
+  m_EditorClassIdentifier: 
+  missions:
+  - {fileID: 11400000, guid: 6591a582adc74664497ab36e9d359ce9, type: 2}
+  - {fileID: 11400000, guid: 1cfc8a0199d4f2d4a83b7b5135a8651d, type: 2}
+  - {fileID: 11400000, guid: 633706d8b68d4e7498f70ae5004cd4e3, type: 2}

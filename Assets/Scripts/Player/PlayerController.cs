@@ -1,0 +1,427 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectable
+{
+    public static Transform PlayerTransform { get; private set; }
+
+    [Header("Movement")]
+    public float walkSpeed = 2f;
+
+    [Header("Sound Effects")]
+    public string footstepKey = "SFX_Footstep";
+    public float footstepInterval = 0.4f;
+
+    [Header("Temperature System")]
+    [SerializeField] private float maxHeat = 5f;
+    [SerializeField] private float maxCold = 5f;
+    [SerializeField] private float decayRate = 1f;
+
+    [Header("Heat Damage")]
+    [SerializeField] private float overheatDamageInterval = 1f;
+    [SerializeField] private int overheatDamage = 1;
+    [SerializeField, Range(0f, 1f)] private float damageHeatThreshold = 0.9f;
+
+    [Header("Cold Damage")]
+    [SerializeField] private float coldDamageInterval = 2f;
+    [SerializeField] private int coldDamage = 1;
+    [SerializeField, Range(0f, 1f)] private float damageColdThreshold = 0.9f;
+
+    [Header("Cold Slow")]
+    [SerializeField] private float coldSlowThreshold = -1.5f;
+
+    [Header("Idle to Sleep Settings")]
+    [SerializeField] private float afkDelay = 5f;
+
+    private float temperature = 0f;
+    private float visualTemp = 0f;
+    private float lastHeatDamageTime = -999f;
+    private float lastColdDamageTime = -999f;
+
+    public float CurrentTemperature => temperature;
+
+    private Rigidbody2D rb;
+    private Animator anim;
+    private PlayerInput playerInput;
+    private SpriteRenderer[] sprites;
+
+    private Vector2 moveInput;
+    private bool isFrozen = false;
+    private Vector3 defaultScale;
+
+    private float lastFootstepTime;
+    private IInteractable currentInteractable;
+
+    private float idleTimer = 0f;
+    private bool isAFKTriggered = false;
+    private bool isSleeping = false;
+    private bool isWaking = false;
+
+    public bool IsIdle => moveInput.sqrMagnitude < 0.0001f;
+    public bool IsPhoneOut { get; private set; } = false;
+
+    public static PlayerController Instance { get; private set; }
+
+    private readonly Dictionary<object, float> speedModifiers = new();
+
+    // ---------- Temperature ----------
+    public void ApplyHeat(float amt) => temperature = Mathf.Clamp(temperature + amt, -maxCold, maxHeat);
+    public void ApplyCold(float amt) => temperature = Mathf.Clamp(temperature - amt, -maxCold, maxHeat);
+
+    public void CoolDown(float amt)
+    {
+        if (temperature < 0)
+            temperature = Mathf.MoveTowards(temperature, 0, amt);
+    }
+
+    private void UpdateTemperature()
+    {
+        if (Mathf.Abs(temperature) > 0.01f)
+        {
+            float sign = Mathf.Sign(temperature);
+            temperature -= sign * decayRate * Time.deltaTime;
+            if (Mathf.Sign(temperature) != sign) temperature = 0f;
+        }
+
+        if (temperature >= maxHeat * damageHeatThreshold)
+        {
+            if (Time.time > lastHeatDamageTime + overheatDamageInterval)
+            {
+                PlayerHealth.TryDamagePlayer(overheatDamage, transform.position);
+                lastHeatDamageTime = Time.time;
+            }
+        }
+
+        if (temperature <= -maxCold * damageColdThreshold)
+        {
+            if (Time.time > lastColdDamageTime + coldDamageInterval)
+            {
+                PlayerHealth.TryDamagePlayer(coldDamage, transform.position);
+                lastColdDamageTime = Time.time;
+            }
+        }
+
+        UpdateTemperatureVisual();
+    }
+
+    private void UpdateTemperatureVisual()
+    {
+        if (sprites == null || sprites.Length == 0) return;
+
+        visualTemp = Mathf.MoveTowards(visualTemp, temperature, Time.deltaTime);
+
+        if (visualTemp > 0)
+        {
+            float t = Mathf.InverseLerp(0, maxHeat, visualTemp);
+            Color c = Color.Lerp(Color.white, new Color(1f, 0.5f, 0f), t);
+            foreach (var sr in sprites) sr.color = c;
+        }
+        else if (visualTemp < 0)
+        {
+            float t = Mathf.InverseLerp(0, -maxCold, visualTemp);
+            Color c = Color.Lerp(Color.white, Color.cyan, t);
+            foreach (var sr in sprites) sr.color = c;
+        }
+        else
+        {
+            foreach (var sr in sprites) sr.color = Color.white;
+        }
+    }
+
+    private float CurrentSpeed
+    {
+        get
+        {
+            float mult = 1f;
+
+            if (temperature <= coldSlowThreshold)
+            {
+                float t = Mathf.InverseLerp(0, -maxCold, temperature);
+                mult *= Mathf.Lerp(1f, 0.2f, t);
+            }
+
+            foreach (var kv in speedModifiers)
+                mult *= Mathf.Clamp(kv.Value, 0.01f, 10f);
+
+            return walkSpeed * mult;
+        }
+    }
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        playerInput = GetComponent<PlayerInput>();
+        sprites = GetComponentsInChildren<SpriteRenderer>();
+    }
+
+    private void Start()
+    {
+        Instance = this;
+        PlayerTransform = transform;
+        defaultScale = transform.localScale;
+    }
+
+    private void OnEnable()
+    {
+        playerInput.actions["Move"].performed += OnMovePerformed;
+        playerInput.actions["Move"].canceled += OnMoveCanceled;
+        playerInput.actions["Interact"].performed += OnInteractPerformed;
+    }
+
+    private void OnDisable()
+    {
+        playerInput.actions["Move"].performed -= OnMovePerformed;
+        playerInput.actions["Move"].canceled -= OnMoveCanceled;
+        playerInput.actions["Interact"].performed -= OnInteractPerformed;
+
+    }
+
+    // ---------- Update ----------
+    private void Update()
+    {
+        UpdateTemperature();
+
+        if (isFrozen)
+        {
+            StopMovement(true);
+            return;
+        }
+
+        if (isSleeping && moveInput.sqrMagnitude > 0.0001f && !isWaking)
+        {
+            anim.SetTrigger("Wake");
+            StartCoroutine(RestoreIdleAfterWake());
+            StopMovement(true);
+            return;
+        }
+
+        if (isWaking)
+        {
+            StopMovement(true);
+            return;
+        }
+
+        if (moveInput.sqrMagnitude > 0.0001f)
+            MoveCharacter();
+        else
+            StopMovement(false);
+
+        UpdateInteractPrompt();
+        FlipCharacter();
+        HandleIdleSleepSystem();
+    }
+
+    private void LateUpdate() => UpdateAnimation();
+
+    // ---------- Movement ----------
+    private void MoveCharacter()
+    {
+        Vector2 targetVel = moveInput.normalized * CurrentSpeed;
+        rb.linearVelocity = targetVel;
+
+        if (AudioManager.Instance != null
+            && targetVel.sqrMagnitude > 0.01f
+            && Time.time > lastFootstepTime + footstepInterval)
+        {
+            AudioManager.Instance.PlaySFX(footstepKey);
+            lastFootstepTime = Time.time;
+        }
+    }
+
+    private void StopMovement(bool resetInput)
+    {
+        rb.linearVelocity = Vector2.zero;
+        if (resetInput) moveInput = Vector2.zero;
+    }
+
+    private void FlipCharacter()
+    {
+        if (Mathf.Abs(moveInput.x) > 0.01f)
+        {
+            transform.localScale = new Vector3(
+                defaultScale.x * Mathf.Sign(moveInput.x),
+                defaultScale.y,
+                defaultScale.z
+            );
+        }
+    }
+
+    // ---------- Animations ----------
+    private void UpdateAnimation()
+    {
+        if (anim == null) return;
+
+        if (isSleeping || isWaking)
+        {
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
+            anim.SetBool("IsOpenBook", false);
+            anim.SetBool("IsSpelling", false);
+            return;
+        }
+
+        if (IsPhoneOut)
+        {
+            anim.SetBool("IsOpenBook", true);
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
+            return;
+        }
+
+        anim.SetBool("IsOpenBook", false);
+        anim.SetBool("IsSpelling", false);
+        anim.SetBool("IsIdle", IsIdle);
+        anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.0001f);
+    }
+
+    // ---------- Interactions / Sleep ----------
+    private void HandleIdleSleepSystem()
+    {
+        if (isSleeping || isWaking)
+            return;
+
+        if (IsIdle)
+        {
+            idleTimer += Time.deltaTime;
+            if (!isAFKTriggered && idleTimer >= afkDelay)
+            {
+                anim.SetTrigger("AFK");
+                isAFKTriggered = true;
+                isSleeping = true;
+            }
+        }
+        else
+        {
+            idleTimer = 0f;
+            if (isAFKTriggered)
+            {
+                anim.SetTrigger("Wake");
+                isAFKTriggered = false;
+            }
+        }
+    }
+
+    private void Interact() => currentInteractable?.Interact();
+
+    private void UpdateInteractPrompt()
+    {
+        if (isFrozen)
+        {
+            UIManager.Instance?.HideInteractPrompt(currentInteractable);
+            currentInteractable = null;
+            return;
+        }
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.6f);
+        foreach (var hit in hits)
+        {
+            if (hit.TryGetComponent<IInteractable>(out var interactable))
+            {
+                if (currentInteractable != interactable)
+                {
+                    currentInteractable = interactable;
+                    UIManager.Instance?.ShowInteractPrompt(currentInteractable);
+                }
+                return;
+            }
+        }
+
+        if (currentInteractable != null)
+        {
+            UIManager.Instance?.HideInteractPrompt(currentInteractable);
+            currentInteractable = null;
+        }
+    }
+
+    private IEnumerator RestoreIdleAfterWake()
+    {
+        if (!isSleeping) yield break;
+        isWaking = true;
+        isSleeping = false;
+
+        yield return new WaitForSeconds(1.2f);
+
+        isWaking = false;
+        isAFKTriggered = false;
+        idleTimer = 0f;
+
+        moveInput = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
+
+        anim.ResetTrigger("AFK");
+        anim.ResetTrigger("Wake");
+        anim.SetBool("IsIdle", true);
+    }
+
+    // ---------- State ----------
+    public void SetFrozen(bool frozen)
+    {
+        isFrozen = frozen;
+        if (frozen)
+        {
+            rb.linearVelocity = Vector2.zero;
+            moveInput = Vector2.zero;
+        }
+    }
+
+    public void SetPhoneOut(bool isOut) => IsPhoneOut = isOut;
+
+    public void ClearInputAndVelocity()
+    {
+        moveInput = Vector2.zero;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+    }
+
+    private void OnMovePerformed(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
+    private void OnMoveCanceled(InputAction.CallbackContext ctx) => moveInput = Vector2.zero;
+    private void OnInteractPerformed(InputAction.CallbackContext ctx) => Interact();
+
+    // ---------- Spell Animation Control ----------
+    public void PlayOpenBook()
+    {
+        anim.SetBool("IsOpenBook", true);
+        anim.SetBool("IsSpelling", false);
+        anim.ResetTrigger("SpellFinish");
+        SetPhoneOut(true);
+    }
+
+    public void PlayStartSpell()
+    {
+        anim.SetBool("IsSpelling", true);
+        anim.ResetTrigger("SpellFinish");
+    }
+
+    public void PlaySpellFinish()
+    {
+        anim.SetTrigger("SpellFinish");
+        anim.SetBool("IsSpelling", false);
+    }
+
+    public void PlayCloseBook()
+    {
+        anim.SetBool("IsOpenBook", false);
+        anim.SetBool("IsSpelling", false);
+        anim.ResetTrigger("SpellFinish");
+        SetPhoneOut(false);
+    }
+
+
+    // ---------- Damage ----------
+    public void TakeDamage(int amount) => PlayerHealth.TryDamagePlayer(amount, transform.position);
+
+    public void SetSpeedModifier(object key, float multiplier) => speedModifiers[key] = multiplier;
+    public void RemoveSpeedModifier(object key)
+    {
+        if (speedModifiers.ContainsKey(key)) speedModifiers.Remove(key);
+    }
+
+    void IDamageable.TakeDamage(int amount) => TakeDamage(amount);
+    void IHeatable.ApplyHeat(float amt) => ApplyHeat(amt);
+    void IHeatable.CoolDown(float amt) => CoolDown(amt);
+    void IFreezable.ApplyCold(float amt) => ApplyCold(amt);
+    void IFreezable.CoolDown(float amt) => CoolDown(amt);
+}

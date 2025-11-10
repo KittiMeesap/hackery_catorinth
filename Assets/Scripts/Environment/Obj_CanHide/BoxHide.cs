@@ -1,21 +1,26 @@
 using System.Collections;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 public class BoxHide : HidingSpot, IInteractable
 {
+    public enum PlayerState { Idle, Walk }
+
     [Header("Animator & States")]
     [SerializeField] private Animator anim;
-    [SerializeField] private string idleStateName = "Idle";
+    [SerializeField] private string normalStateName = "Box_Normal";
+    [SerializeField] private string idleStateName = "Box_PlayerIdle";
+    [SerializeField] private string walkStateName = "Box_PlayerWalk";
     [SerializeField] private string getInTriggerParam = "GetIn";
     [SerializeField] private string getOutTriggerParam = "GetOut";
+    [SerializeField] private string isWalkingBoolParam = "IsWalking";
 
     [Header("Timings")]
     [SerializeField] private float enterAnimTime = 0.35f;
     [SerializeField] private float exitAnimTime = 0.35f;
     [SerializeField] private float idleBlendTime = 0.05f;
+
+    [Header("Movement Settings")]
+    [SerializeField] private float moveSpeed = 2f;
 
     [Header("Mission")]
     [SerializeField] private bool completeMissionOnEnterHide = false;
@@ -26,10 +31,8 @@ public class BoxHide : HidingSpot, IInteractable
     [SerializeField] private bool autoPlacePromptAbove = true;
     [SerializeField] private float promptMarginY = 0.15f;
 
-    [Header("Audio ( key SoundLibrary)")]
-    [Tooltip(" key SFX_BoxOpen")]
+    [Header("Audio")]
     [SerializeField] private string sfxOpenKey = "SFX_BoxOpen";
-    [Tooltip("key SFX_BoxClose")]
     [SerializeField] private string sfxCloseKey = "SFX_BoxClose";
 
     [Header("Highlight")]
@@ -38,55 +41,97 @@ public class BoxHide : HidingSpot, IInteractable
     [Header("Cooldown")]
     [SerializeField] private float hideCooldown = 0.75f;
 
-    private int hashIdle, hashGetIn, hashGetOut;
+    private int hashNormal, hashIdle, hashWalk, hashGetIn, hashGetOut, hashIsWalking;
     private bool isPlayerNear;
     private bool isInside;
     private bool isBusy;
     private float lastHideTime = -999f;
 
     private PlayerHiding currentPlayer;
+    private PlayerController playerController;
     private Vector2 cachedPlayerPosition;
     private SpriteRenderer sr;
+    private PlayerState currentState = PlayerState.Idle;
+
+    private float lastFacingDir = 1f;
+    private Vector3 defaultScale;
 
     private void Awake()
     {
         if (anim == null) anim = GetComponent<Animator>();
         sr = GetComponentInChildren<SpriteRenderer>();
+        defaultScale = transform.localScale;
 
-        hashIdle = string.IsNullOrEmpty(idleStateName) ? 0 : Animator.StringToHash(idleStateName);
-        hashGetIn = string.IsNullOrEmpty(getInTriggerParam) ? 0 : Animator.StringToHash(getInTriggerParam);
-        hashGetOut = string.IsNullOrEmpty(getOutTriggerParam) ? 0 : Animator.StringToHash(getOutTriggerParam);
+        hashNormal = Animator.StringToHash(normalStateName);
+        hashIdle = Animator.StringToHash(idleStateName);
+        hashWalk = Animator.StringToHash(walkStateName);
+        hashGetIn = Animator.StringToHash(getInTriggerParam);
+        hashGetOut = Animator.StringToHash(getOutTriggerParam);
+        hashIsWalking = Animator.StringToHash(isWalkingBoolParam);
 
         EnsurePromptPoint();
         if (autoPlacePromptAbove) UpdatePromptPointPosition();
-
         if (highlightSprite != null) highlightSprite.enabled = false;
 
-        PlayIdleImmediate();
+        if (anim.HasState(0, hashNormal))
+            anim.Play(hashNormal, 0, 0f);
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
+    private void Update()
     {
-        if (Application.isPlaying) return;
-        if (anim == null) anim = GetComponent<Animator>();
-        EnsurePromptPoint();
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
+        if (isInside && currentPlayer != null && !isBusy)
+        {
+            playerController = currentPlayer.GetComponent<PlayerController>();
+
+            HandleBoxMovement();
+            FlipWithPlayer();
+        }
     }
-#endif
 
     private void LateUpdate()
     {
         if (autoPlacePromptAbove) UpdatePromptPointPosition();
     }
 
+    // ======================================
+    // Movement System for the Box
+    // ======================================
+    private void HandleBoxMovement()
+    {
+        if (playerController == null) return;
+
+        Vector2 input = playerController.GetMoveInput();
+
+        if (input.sqrMagnitude > 0.01f)
+        {
+            transform.Translate(input.normalized * moveSpeed * Time.deltaTime);
+            SetPlayerState(PlayerState.Walk);
+        }
+        else
+        {
+            SetPlayerState(PlayerState.Idle);
+        }
+    }
+
+    private void FlipWithPlayer()
+    {
+        if (playerController == null) return;
+        Vector2 input = playerController.GetMoveInput();
+        if (Mathf.Abs(input.x) > 0.05f)
+        {
+            lastFacingDir = Mathf.Sign(input.x);
+            transform.localScale = new Vector3(defaultScale.x * lastFacingDir, defaultScale.y, defaultScale.z);
+        }
+    }
+
+    // ======================================
+    // Interaction Logic
+    // ======================================
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-
         isPlayerNear = true;
         currentPlayer = other.GetComponent<PlayerHiding>();
-
         UIManager.Instance?.ShowInteractPrompt(this);
         RefreshHighlight();
     }
@@ -94,10 +139,8 @@ public class BoxHide : HidingSpot, IInteractable
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-
         isPlayerNear = false;
         if (!isInside) currentPlayer = null;
-
         UIManager.Instance?.HideInteractPrompt(this);
         RefreshHighlight();
     }
@@ -109,17 +152,21 @@ public class BoxHide : HidingSpot, IInteractable
         if (!isPlayerNear && !isInside) return;
         if (currentPlayer == null) return;
 
-        if (!isInside) StartCoroutine(EnterRoutine(currentPlayer));
-        else StartCoroutine(ExitRoutine(currentPlayer));
+        if (!isInside)
+            StartCoroutine(EnterRoutine(currentPlayer));
+        else
+            StartCoroutine(ExitRoutine(currentPlayer));
 
         lastHideTime = Time.time;
     }
 
+    // ======================================
+    // Hiding System
+    // ======================================
     public override void OnEnterHiding(PlayerHiding player)
     {
         isInside = true;
         RefreshHighlight();
-
         if (completeMissionOnEnterHide && !string.IsNullOrEmpty(missionIdOnEnterHide))
             MissionManager.Instance?.MarkInteractComplete(missionIdOnEnterHide);
     }
@@ -133,9 +180,9 @@ public class BoxHide : HidingSpot, IInteractable
     private IEnumerator EnterRoutine(PlayerHiding p)
     {
         isBusy = true;
-
         OnEnterHiding(p);
         currentPlayer = p;
+        playerController = p.GetComponent<PlayerController>();
         cachedPlayerPosition = p.transform.position;
 
         p.EnterHiding(this);
@@ -148,6 +195,7 @@ public class BoxHide : HidingSpot, IInteractable
             AudioManager.Instance.PlaySFX(sfxOpenKey);
 
         yield return new WaitForSeconds(enterAnimTime);
+
         PlayIdleBlend();
         isBusy = false;
     }
@@ -164,23 +212,28 @@ public class BoxHide : HidingSpot, IInteractable
 
         yield return new WaitForSeconds(exitAnimTime);
 
+        transform.position = cachedPlayerPosition;
+        transform.localScale = new Vector3(defaultScale.x * lastFacingDir, defaultScale.y, defaultScale.z);
+
         p.transform.position = cachedPlayerPosition;
         p.ExitHiding(this);
 
-        OnExitHiding(p);
         currentPlayer = p;
-
         if (isPlayerNear) UIManager.Instance?.ShowInteractPrompt(this);
-        PlayIdleBlend();
 
+        PlayNormalIdle();
         isBusy = false;
     }
 
-    private void PlayIdleImmediate()
+    // ======================================
+    // Animation Control
+    // ======================================
+    private void PlayNormalIdle()
     {
-        if (anim == null || hashIdle == 0) return;
-        if (anim.HasState(0, hashIdle))
-            anim.Play(hashIdle, 0, 0f);
+        if (anim == null) return;
+        if (anim.HasState(0, hashNormal))
+            anim.CrossFade(hashNormal, 0.1f, 0, 0f);
+        if (hashIsWalking != 0) anim.SetBool(hashIsWalking, false);
     }
 
     private void PlayIdleBlend()
@@ -188,14 +241,38 @@ public class BoxHide : HidingSpot, IInteractable
         if (anim == null || hashIdle == 0) return;
         if (anim.HasState(0, hashIdle))
             anim.CrossFade(hashIdle, idleBlendTime, 0, 0f);
+        if (hashIsWalking != 0) anim.SetBool(hashIsWalking, false);
     }
 
+    public void SetPlayerState(PlayerState newState)
+    {
+        if (anim == null || isBusy) return;
+        if (currentState == newState) return;
+
+        currentState = newState;
+
+        switch (newState)
+        {
+            case PlayerState.Idle:
+                if (anim.HasState(0, hashIdle))
+                    anim.CrossFade(hashIdle, 0.1f, 0, 0f);
+                if (hashIsWalking != 0)
+                    anim.SetBool(hashIsWalking, false);
+                break;
+            case PlayerState.Walk:
+                if (anim.HasState(0, hashWalk))
+                    anim.CrossFade(hashWalk, 0.1f, 0, 0f);
+                if (hashIsWalking != 0)
+                    anim.SetBool(hashIsWalking, true);
+                break;
+        }
+    }
+
+    // ======================================
+    // Prompt & Visual
+    // ======================================
     private void EnsurePromptPoint()
     {
-#if UNITY_EDITOR
-        if (!Application.isPlaying && PrefabUtility.IsPartOfPrefabAsset(this))
-            return;
-#endif
         if (promptPoint == null)
         {
             var go = new GameObject("PromptPoint");
@@ -207,7 +284,6 @@ public class BoxHide : HidingSpot, IInteractable
     private void UpdatePromptPointPosition()
     {
         if (promptPoint == null) return;
-
         Bounds b = default;
         bool hasBounds = false;
 

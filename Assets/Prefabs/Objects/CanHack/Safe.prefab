@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7875224135263865799}
   m_Layer: 0
   m_Name: Safe
-  m_TagString: CanCast
+  m_TagString: CanHack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -175,13 +175,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Safe
   triggerType: 0
-  defaultSpellOption: {fileID: 0}
-  useSpellOptions: 0
-  spellOptions: []
-  useSpellTimer: 0
-  spellTimeLimit: 5
-  allowRepeatCast: 0
-  completeMissionOnCast: 0
+  defaultHackOption: {fileID: 11400000, guid: 3b5eb2e1c5684b445ba7f8467dc5e5a3, type: 2}
+  useHackOptions: 0
+  hackOptions: []
+  useHackTimer: 0
+  hackTimeLimit: 5
+  allowRepeatHack: 0
+  completeMissionOnHack: 0
   missionId: 
   animator: {fileID: 2230301828402174973}
   openParam: isOpen
@@ -193,9 +193,6 @@ MonoBehaviour:
   disappearDelay: 0.3
   sfxOpenKey: SFX_SafeOpen
   sfxPaperKey: SFX_PaperFly
-  uiAnchor: 0
-  uiYOffset: 0
-  uiXOffset: 0
 --- !u!1 &9119421961869656463
 GameObject:
   m_ObjectHideFlags: 0

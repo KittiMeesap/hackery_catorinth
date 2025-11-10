@@ -6,8 +6,6 @@ using static HackableObject;
 
 public class HackingUI : MonoBehaviour
 {
-    public enum PanelAnchor { Above, Below }
-
     [Header("UI Elements")]
     [SerializeField] private GameObject hackPanel;
     [SerializeField] private Transform multiOptionParent;
@@ -27,24 +25,15 @@ public class HackingUI : MonoBehaviour
     [SerializeField] private float shakeIntensity = 2f;
     [SerializeField] private float shakeDuration = 0.3f;
 
-    [Header("Positioning")]
-    [SerializeField] private PanelAnchor anchor = PanelAnchor.Above;
-    [SerializeField] private float yOffset = 0f;
-    [SerializeField] private float xOffset = 0f;
-
     [Header("Audio Keys (from SoundLibrary)")]
     [SerializeField] private string hackingSoundKey = "SFX_HackInput";
     [SerializeField] private string failSoundKey = "SFX_HackFail";
     [SerializeField] private string popupSoundKey = "SFX_HackPopup";
 
-    private Canvas rootCanvas;
-    private RectTransform canvasRect;
-    private RectTransform panelRect;
-
     private Dictionary<ArrowUI.Direction, GameObject> arrowPrefabs;
     private List<HackOptionUI> activeOptions = new();
     private List<ArrowUI.Direction> currentInput = new();
-    private Transform targetTransform;
+
     private System.Action<HackOptionSO> onOptionSelected;
     private Coroutine timerRoutine;
     private System.Action onTimerFail;
@@ -54,10 +43,6 @@ public class HackingUI : MonoBehaviour
 
     private void Awake()
     {
-        rootCanvas = GetComponentInParent<Canvas>();
-        if (rootCanvas != null) canvasRect = rootCanvas.transform as RectTransform;
-        if (hackPanel != null) panelRect = hackPanel.transform as RectTransform;
-
         arrowPrefabs = new()
         {
             { ArrowUI.Direction.Up, arrowUpPrefab },
@@ -66,63 +51,11 @@ public class HackingUI : MonoBehaviour
             { ArrowUI.Direction.Right, arrowRightPrefab }
         };
 
-        if (hackPanel != null) hackPanel.SetActive(false);
-        if (hackTimerSlider != null) hackTimerSlider.gameObject.SetActive(false);
-    }
+        if (hackPanel != null)
+            hackPanel.SetActive(false);
 
-    private void Update()
-    {
-        if (IsActive && targetTransform != null && hackPanel != null)
-            PositionPanel();
-    }
-
-    public void SetAnchor(Transform target, PanelAnchor anchor, float yOffset = 0f, float xOffset = 0f)
-    {
-        if (target == null) return;
-
-        this.targetTransform = target;
-        this.anchor = anchor;
-        this.yOffset = yOffset;
-        this.xOffset = xOffset;
-
-        ApplyPivotForAnchor();
-        PositionPanel();
-    }
-
-    private void ApplyPivotForAnchor()
-    {
-        if (panelRect == null) return;
-        panelRect.pivot = (anchor == PanelAnchor.Above)
-            ? new Vector2(0.5f, 0f)
-            : new Vector2(0.5f, 1f);
-    }
-
-    private void PositionPanel()
-    {
-        if (rootCanvas == null || canvasRect == null || panelRect == null || targetTransform == null) return;
-
-        Camera cam = null;
-        if (rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            cam = rootCanvas.worldCamera != null ? rootCanvas.worldCamera : Camera.main;
-
-        Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(cam, targetTransform.position);
-
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, cam, out Vector2 localPoint))
-        {
-            float signedYOffset = (anchor == PanelAnchor.Above) ? Mathf.Abs(yOffset) : -Mathf.Abs(yOffset);
-            Vector2 finalAnchored = localPoint + new Vector2(xOffset, signedYOffset);
-            panelRect.anchoredPosition = finalAnchored;
-        }
-
-        if (hackTimerSlider != null && hackTimerSlider.gameObject.activeSelf)
-        {
-            RectTransform sliderRect = hackTimerSlider.transform as RectTransform;
-            if (sliderRect != null)
-            {
-                Vector2 sliderOffset = new Vector2(0f, -panelRect.rect.height * 0.5f - 30f);
-                sliderRect.anchoredPosition = panelRect.anchoredPosition + sliderOffset;
-            }
-        }
+        if (hackTimerSlider != null)
+            hackTimerSlider.gameObject.SetActive(false);
     }
 
     public void ShowMultiOptionUI(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onSuccess)
@@ -132,12 +65,10 @@ public class HackingUI : MonoBehaviour
 
         if (hackPanel != null)
         {
-            ApplyPivotForAnchor();
             hackPanel.SetActive(true);
             StartCoroutine(PopInPanelRoutine());
         }
 
-        targetTransform = worldTarget;
         onOptionSelected = onSuccess;
 
         foreach (var option in options)
@@ -169,7 +100,7 @@ public class HackingUI : MonoBehaviour
         }
 
         StartCoroutine(AnimateArrowsRoutine());
-        PositionPanel();
+        UpdateTimerPosition(); // ensure timer placed correctly if visible
     }
 
     public void ShowMultiOptionUI(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onSuccess, bool useTimer, float timerDuration)
@@ -177,6 +108,8 @@ public class HackingUI : MonoBehaviour
         ShowMultiOptionUI(options, worldTarget, onSuccess);
         if (useTimer)
             StartHackTimer(timerDuration, () => onSuccess?.Invoke(null));
+        else
+            StopHackTimer();
     }
 
     public void SubmitInput(ArrowUI.Direction input)
@@ -256,7 +189,6 @@ public class HackingUI : MonoBehaviour
         }
         else
         {
-            Debug.Log("[HackingUI] Wrong input — Player unfrozen (MouseHover)");
             PlayerController.Instance?.SetFrozen(false);
             PlayerController.Instance?.SetPhoneOut(false);
         }
@@ -275,6 +207,7 @@ public class HackingUI : MonoBehaviour
             StopCoroutine(timerRoutine);
 
         timerRoutine = StartCoroutine(HackCountdownRoutine(duration));
+        UpdateTimerPosition();
     }
 
     private IEnumerator HackCountdownRoutine(float time)
@@ -288,6 +221,22 @@ public class HackingUI : MonoBehaviour
 
         onTimerFail?.Invoke();
         HideHackingUI();
+    }
+
+    private void UpdateTimerPosition()
+    {
+        if (hackTimerSlider == null || !hackTimerSlider.gameObject.activeSelf) return;
+
+        // วางให้ Timer อยู่ใต้ panel เสมอ
+        RectTransform timerRect = hackTimerSlider.transform as RectTransform;
+        RectTransform panelRect = hackPanel.transform as RectTransform;
+
+        if (timerRect != null && panelRect != null)
+        {
+            float offset = 30f;
+            Vector2 pos = new Vector2(0f, -panelRect.rect.height * 0.5f - offset);
+            timerRect.anchoredPosition = pos;
+        }
     }
 
     public void StopHackTimer()
@@ -309,6 +258,8 @@ public class HackingUI : MonoBehaviour
 
         if (useTimer)
             StartHackTimer(timerDuration, onFail);
+        else
+            StopHackTimer();
     }
 
     public void HideHackingUI()
@@ -317,7 +268,6 @@ public class HackingUI : MonoBehaviour
             hackPanel.SetActive(false);
 
         ClearMultiOptions();
-        targetTransform = null;
         currentInput.Clear();
         StopHackTimer();
 
@@ -335,11 +285,6 @@ public class HackingUI : MonoBehaviour
             Destroy(multiOptionParent.GetChild(i).gameObject);
 
         activeOptions.Clear();
-    }
-
-    public bool IsSameTarget(Transform t)
-    {
-        return targetTransform == t;
     }
 
     private IEnumerator PopInPanelRoutine()

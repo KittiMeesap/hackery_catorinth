@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 3783632591370347938}
   m_Layer: 0
   m_Name: Oven
-  m_TagString: CanCast
+  m_TagString: CanHack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -177,13 +177,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   triggerType: 0
-  defaultSpellOption: {fileID: 0}
-  useSpellOptions: 0
-  spellOptions: []
-  useSpellTimer: 0
-  spellTimeLimit: 5
-  allowRepeatCast: 0
-  completeMissionOnCast: 0
+  defaultHackOption: {fileID: 0}
+  useHackOptions: 1
+  hackOptions:
+  - {fileID: 11400000, guid: 6a7741e21ee995c47a2316be5b394868, type: 2}
+  - {fileID: 11400000, guid: 627f5f345af959c49bcebb9e15f3ffcd, type: 2}
+  useHackTimer: 0
+  hackTimeLimit: 5
+  allowRepeatHack: 1
+  completeMissionOnHack: 0
   missionId: cookiedead
   heatRadius: 2.5
   heatLayer:
@@ -201,9 +203,6 @@ MonoBehaviour:
   sfxOffKey: SFX_OvenOff
   sfxLoopKey: SFX_OvenHum
   ambientSoundGate: {fileID: 3783632591370347938}
-  uiAnchor: 0
-  uiYOffset: 0
-  uiXOffset: 0
   startOn: 0
   spellCooldown: 2
 --- !u!82 &932201039070264378

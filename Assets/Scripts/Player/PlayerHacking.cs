@@ -18,14 +18,16 @@ public class PlayerHacking : MonoBehaviour
 
     public void SetHackingDisabled(bool disabled) => hackingDisabled = disabled;
 
-    private void Awake() => playerInput = GetComponent<PlayerInput>();
+    private void Awake()
+    {
+        playerInput = GetComponent<PlayerInput>();
+    }
 
     private void Update()
     {
         if (GameManager.Instance == null || UIManager.Instance == null) return;
         if (hackingDisabled) return;
         if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer) return;
-
 
         isUsingController = playerInput.currentControlScheme == "Gamepad";
 
@@ -40,6 +42,9 @@ public class PlayerHacking : MonoBehaviour
         HandleArrowInput();
     }
 
+    // ==============================
+    // Mouse Detection
+    // ==============================
     private void DetectHoverHackable_Mouse()
     {
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
@@ -69,16 +74,21 @@ public class PlayerHacking : MonoBehaviour
             {
                 PlayerController.Instance.SetFrozen(true);
                 hovered.OnEnterHackingMode();
+                currentHackedObject = hovered;
             }
-            else if (currentHackedObject != null &&
-                     UIManager.Instance.hackingUI.IsSameTarget(currentHackedObject.transform))
+            else if (currentHackedObject != null)
             {
                 currentHackedObject.HideHackingUI();
+                PlayerController.Instance.TriggerMoveDelay(0.3f);
+                PlayerController.Instance.SetFrozen(false);
                 currentHackedObject = null;
             }
         }
     }
 
+    // ==============================
+    // Gamepad Detection
+    // ==============================
     private void DetectHackableNearby_Gamepad()
     {
         Vector2 pos = PlayerController.Instance.transform.position;
@@ -89,23 +99,21 @@ public class PlayerHacking : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (hit.CompareTag("CanHack"))
+            if (!hit.CompareTag("CanHack")) continue;
+
+            HackableObject hackable = hit.GetComponentInParent<HackableObject>();
+            if (hackable != null && hackable.triggerType == HackableObject.HackTriggerType.ProximityInteract)
             {
-                HackableObject hackable = hit.GetComponentInParent<HackableObject>();
-                if (hackable != null && hackable.triggerType == HackableObject.HackTriggerType.ProximityInteract)
+                float dist = Vector2.Distance(pos, hackable.transform.position);
+                if (dist < nearestDist)
                 {
-                    float dist = Vector2.Distance(pos, hackable.transform.position);
-                    if (dist < nearestDist)
-                    {
-                        nearestDist = dist;
-                        nearest = hackable;
-                    }
+                    nearestDist = dist;
+                    nearest = hackable;
                 }
             }
         }
 
         currentHoverHackable = nearest;
-
         if (nearest == null) return;
 
         bool inputPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
@@ -118,23 +126,28 @@ public class PlayerHacking : MonoBehaviour
             {
                 PlayerController.Instance.SetFrozen(true);
                 nearest.OnEnterHackingMode();
+                currentHackedObject = nearest;
             }
-            else if (currentHackedObject != null &&
-                     UIManager.Instance.hackingUI.IsSameTarget(currentHackedObject.transform))
+            else if (currentHackedObject != null)
             {
                 currentHackedObject.HideHackingUI();
+                PlayerController.Instance.TriggerMoveDelay(0.3f);
+                PlayerController.Instance.SetFrozen(false);
                 currentHackedObject = null;
             }
         }
     }
 
-
+    // ==============================
+    // Handle Arrow Inputs (WASD / D-Pad)
+    // ==============================
     private void HandleArrowInput()
     {
         if (!GameManager.Instance.IsInHackingMode) return;
 
         ArrowUI.Direction? input = null;
 
+        // Keyboard input
         if (Keyboard.current != null)
         {
             if (Keyboard.current.wKey.wasPressedThisFrame) input = ArrowUI.Direction.Up;
@@ -143,6 +156,7 @@ public class PlayerHacking : MonoBehaviour
             else if (Keyboard.current.dKey.wasPressedThisFrame) input = ArrowUI.Direction.Right;
         }
 
+        // Gamepad input
         if (Gamepad.current != null)
         {
             if (Gamepad.current.dpad.up.wasPressedThisFrame) input = ArrowUI.Direction.Up;

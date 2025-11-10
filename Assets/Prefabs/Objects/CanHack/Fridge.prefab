@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 1844864913675655203}
   m_Layer: 0
   m_Name: Fridge
-  m_TagString: CanCast
+  m_TagString: CanHack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -177,15 +177,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fridge
   triggerType: 0
-  defaultSpellOption: {fileID: 0}
-  useSpellOptions: 1
-  spellOptions:
-  - {fileID: 11400000, guid: 12110052f1fbeaa4697d3963a063f5f2, type: 2}
+  defaultHackOption: {fileID: 0}
+  useHackOptions: 1
+  hackOptions:
   - {fileID: 11400000, guid: c13cdbd4e54b94344bcbd3b9c7e500f1, type: 2}
-  useSpellTimer: 0
-  spellTimeLimit: 5
-  allowRepeatCast: 0
-  completeMissionOnCast: 0
+  - {fileID: 11400000, guid: 12110052f1fbeaa4697d3963a063f5f2, type: 2}
+  useHackTimer: 0
+  hackTimeLimit: 5
+  allowRepeatHack: 1
+  completeMissionOnHack: 0
   missionId: hackfridge
   coldRadius: 2.5
   coldLayer:

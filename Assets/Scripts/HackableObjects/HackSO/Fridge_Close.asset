@@ -17,5 +17,5 @@ MonoBehaviour:
   optionType: 2
   isRandom: 0
   randomLength: 5
-  sequence: 01000000
+  sequence: 0100000001000000
   description: 

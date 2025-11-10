@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     [Header("Movement")]
     public float walkSpeed = 2f;
+    [Range(0f, 1f)] public float hidingMoveMultiplier = 0.5f;
 
     [Header("Sound Effects")]
     public string footstepKey = "SFX_Footstep";
@@ -33,6 +34,10 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     [Header("Cold Slow")]
     [SerializeField] private float coldSlowThreshold = -1.5f;
 
+    [Header("Control Delay Settings")]
+    [SerializeField] private float unlockMoveDelay = 0.3f;
+    private float controlUnlockTime = 0f;
+
     [Header("Idle to Sleep Settings")]
     [SerializeField] private float afkDelay = 5f;
 
@@ -50,6 +55,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     private Vector2 moveInput;
     private bool isFrozen = false;
+    private bool isControlLocked = false;
     private Vector3 defaultScale;
 
     private float lastFootstepTime;
@@ -143,6 +149,18 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
                 mult *= Mathf.Lerp(1f, 0.2f, t);
             }
 
+            if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer)
+            {
+                var spot = typeof(PlayerHiding)
+                    .GetField("currentSpot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
+                    .GetValue(PlayerHiding.Instance) as HidingSpot;
+
+                if (spot != null && spot.isMovableContainer)
+                {
+                    mult *= hidingMoveMultiplier;
+                }
+            }
+
             foreach (var kv in speedModifiers)
                 mult *= Mathf.Clamp(kv.Value, 0.01f, 10f);
 
@@ -177,15 +195,13 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         playerInput.actions["Move"].performed -= OnMovePerformed;
         playerInput.actions["Move"].canceled -= OnMoveCanceled;
         playerInput.actions["Interact"].performed -= OnInteractPerformed;
-
     }
 
-    // ---------- Update ----------
     private void Update()
     {
         UpdateTemperature();
 
-        if (isFrozen)
+        if (isFrozen || IsPhoneOut || isControlLocked || Time.time < controlUnlockTime)
         {
             StopMovement(true);
             return;
@@ -250,7 +266,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
-    // ---------- Animations ----------
+    // ---------- Animation ----------
     private void UpdateAnimation()
     {
         if (anim == null) return;
@@ -259,26 +275,34 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         {
             anim.SetBool("IsIdle", false);
             anim.SetBool("IsWalking", false);
-            anim.SetBool("IsOpenBook", false);
-            anim.SetBool("IsSpelling", false);
+            anim.SetBool("IsPickupPhone", false);
+            anim.SetBool("IsHacking", false);
             return;
         }
 
-        if (IsPhoneOut)
+        if (IsPhoneOut && !anim.GetBool("IsHacking"))
         {
-            anim.SetBool("IsOpenBook", true);
+            anim.SetBool("IsPickupPhone", true);
             anim.SetBool("IsIdle", false);
             anim.SetBool("IsWalking", false);
             return;
         }
 
-        anim.SetBool("IsOpenBook", false);
-        anim.SetBool("IsSpelling", false);
+        if (anim.GetBool("IsHacking"))
+        {
+            anim.SetBool("IsPickupPhone", false);
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
+            return;
+        }
+
+        anim.SetBool("IsPickupPhone", false);
+        anim.SetBool("IsHacking", false);
         anim.SetBool("IsIdle", IsIdle);
         anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.0001f);
     }
 
-    // ---------- Interactions / Sleep ----------
+    // ---------- Interact & Sleep ----------
     private void HandleIdleSleepSystem()
     {
         if (isSleeping || isWaking)
@@ -304,8 +328,6 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             }
         }
     }
-
-    private void Interact() => currentInteractable?.Interact();
 
     private void UpdateInteractPrompt()
     {
@@ -368,6 +390,19 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
+    public void SetControlLocked(bool locked)
+    {
+        isControlLocked = locked;
+
+        if (!locked)
+        {
+            controlUnlockTime = Time.time + unlockMoveDelay;
+            ClearInputAndVelocity();
+        }
+    }
+
+    public bool IsControlLocked => isControlLocked;
+
     public void SetPhoneOut(bool isOut) => IsPhoneOut = isOut;
 
     public void ClearInputAndVelocity()
@@ -376,49 +411,26 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         if (rb != null) rb.linearVelocity = Vector2.zero;
     }
 
+    public void TriggerMoveDelay(float delay)
+    {
+        controlUnlockTime = Time.time + delay;
+        ClearInputAndVelocity();
+    }
+
+    // ---------- Input ----------
     private void OnMovePerformed(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
     private void OnMoveCanceled(InputAction.CallbackContext ctx) => moveInput = Vector2.zero;
-    private void OnInteractPerformed(InputAction.CallbackContext ctx) => Interact();
-
-    // ---------- Spell Animation Control ----------
-    public void PlayOpenBook()
-    {
-        anim.SetBool("IsOpenBook", true);
-        anim.SetBool("IsSpelling", false);
-        anim.ResetTrigger("SpellFinish");
-        SetPhoneOut(true);
-    }
-
-    public void PlayStartSpell()
-    {
-        anim.SetBool("IsSpelling", true);
-        anim.ResetTrigger("SpellFinish");
-    }
-
-    public void PlaySpellFinish()
-    {
-        anim.SetTrigger("SpellFinish");
-        anim.SetBool("IsSpelling", false);
-    }
-
-    public void PlayCloseBook()
-    {
-        anim.SetBool("IsOpenBook", false);
-        anim.SetBool("IsSpelling", false);
-        anim.ResetTrigger("SpellFinish");
-        SetPhoneOut(false);
-    }
-
+    private void OnInteractPerformed(InputAction.CallbackContext ctx) => currentInteractable?.Interact();
 
     // ---------- Damage ----------
     public void TakeDamage(int amount) => PlayerHealth.TryDamagePlayer(amount, transform.position);
-
     public void SetSpeedModifier(object key, float multiplier) => speedModifiers[key] = multiplier;
     public void RemoveSpeedModifier(object key)
     {
         if (speedModifiers.ContainsKey(key)) speedModifiers.Remove(key);
     }
 
+    public Vector2 GetMoveInput() => moveInput;
     void IDamageable.TakeDamage(int amount) => TakeDamage(amount);
     void IHeatable.ApplyHeat(float amt) => ApplyHeat(amt);
     void IHeatable.CoolDown(float amt) => CoolDown(amt);

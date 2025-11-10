@@ -20,13 +20,10 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
     [Header("Animator Params")]
     [SerializeField] private Animator animator;
     [SerializeField] private string meltParam = "IsMelt";
-    [SerializeField] private string openParam = "IsOpen";
-    [SerializeField] private string closeParam = "IsClose";
 
     [Header("Audio Keys")]
     [SerializeField] private string sfxMeltKey = "SFX_ChocolateDoor_Break";
     [SerializeField] private string sfxOpenKey = "SFX_DoorSugarOpening";
-    [SerializeField] private string sfxCloseKey = "SFX_DoorSugarClosing";
 
     [Header("Behaviour")]
     [SerializeField] private bool startLocked = true;
@@ -40,33 +37,28 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
     private float temperature = 0f;
     private bool isLocked = true;
     private bool canUseDoor = true;
+    private bool hasMelted = false;
     private GameObject playerGO;
     private Collider2D triggerCol;
     private Transform promptPoint;
 
-    private void Reset()
-    {
-        animator = GetComponent<Animator>();
-        triggerCol = GetComponent<Collider2D>();
-        if (triggerCol) triggerCol.isTrigger = true;
-    }
-
     private void Awake()
     {
-        if (!animator) animator = GetComponent<Animator>();
-        if (!triggerCol) triggerCol = GetComponent<Collider2D>();
+        animator ??= GetComponent<Animator>();
+        triggerCol ??= GetComponent<Collider2D>();
         if (triggerCol) triggerCol.isTrigger = true;
     }
 
     private void Start()
     {
+        temperature = 0f;
         isLocked = startLocked;
         ApplyLockState(isLocked);
     }
 
     private void Update()
     {
-        if (temperature >= meltThreshold && isLocked)
+        if (!hasMelted && isLocked && temperature >= meltThreshold)
         {
             MeltDoor();
         }
@@ -82,7 +74,9 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
 
     private void MeltDoor()
     {
+        hasMelted = true;
         isLocked = false;
+
         ApplyLockState(false);
 
         if (!string.IsNullOrEmpty(sfxMeltKey))
@@ -92,7 +86,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
     private void ApplyLockState(bool locked)
     {
         if (!animator) return;
-        animator.SetBool(meltParam, !locked);
+        animator.SetBool(meltParam, !locked); // Idle = false, Melt = true
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -100,39 +94,15 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
         if (!other.CompareTag("Player")) return;
         playerGO = other.gameObject;
 
-        if (isLocked)
-        {
-            animator?.SetBool(closeParam, true);
-            UIManager.Instance?.HideInteractPrompt(this);
-            return;
-        }
+        if (isLocked) return;
 
         UIManager.Instance?.ShowInteractPrompt(this);
-        animator?.SetBool(closeParam, false);
-        animator?.SetBool(openParam, true);
-
-        if (!string.IsNullOrEmpty(sfxOpenKey))
-            AudioManager.Instance?.PlaySFX(sfxOpenKey);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-
-        if (!isLocked)
-        {
-            UIManager.Instance?.HideInteractPrompt(this);
-            animator?.SetBool(openParam, false);
-            animator?.SetBool(closeParam, true);
-
-            if (!string.IsNullOrEmpty(sfxCloseKey))
-                AudioManager.Instance?.PlaySFX(sfxCloseKey);
-        }
-        else
-        {
-            animator?.SetBool(closeParam, true);
-        }
-
+        UIManager.Instance?.HideInteractPrompt(this);
         playerGO = null;
     }
 
@@ -147,7 +117,6 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
         if (isLocked || !canUseDoor || playerGO == null) yield break;
         canUseDoor = false;
 
-        animator?.SetBool(openParam, true);
         yield return new WaitForSeconds(openToTeleportDelay);
 
         var fader = UIManager.Instance?.screenFader;

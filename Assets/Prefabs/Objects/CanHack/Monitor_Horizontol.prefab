@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6696699845232335426}
   m_Layer: 0
   m_Name: Monitor_Horizontol
-  m_TagString: CanCast
+  m_TagString: CanHack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -174,13 +174,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AlarmMonitor
   triggerType: 0
-  defaultSpellOption: {fileID: 0}
-  useSpellOptions: 0
-  spellOptions: []
-  useSpellTimer: 0
-  spellTimeLimit: 5
-  allowRepeatCast: 0
-  completeMissionOnCast: 0
+  defaultHackOption: {fileID: 11400000, guid: c32fdfcc28f0b534795ca44f5827cf41, type: 2}
+  useHackOptions: 0
+  hackOptions: []
+  useHackTimer: 0
+  hackTimeLimit: 5
+  allowRepeatHack: 1
+  completeMissionOnHack: 0
   missionId: hackmonitor
   detectionRadius: 6
   enemyLayer:
@@ -193,7 +193,4 @@ MonoBehaviour:
   paramIsOn: isOn
   paramIsOff: isOff
   alarmSoundKey: SFX_Alarm
-  uiAnchor: 0
-  uiYOffset: 0
-  uiXOffset: 0
   spellCooldown: 2

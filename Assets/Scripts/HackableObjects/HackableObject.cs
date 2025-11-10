@@ -38,13 +38,6 @@ public class HackableObject : MonoBehaviour
 
     public virtual void OnEnterHackingMode()
     {
-        if (UIManager.Instance.IsHacking && UIManager.Instance.hackingUI != null &&
-            UIManager.Instance.hackingUI.IsSameTarget(transform))
-        {
-            HideHackingUI();
-            return;
-        }
-
         if ((!allowRepeatHack && isHacked) || UIManager.Instance == null || UIManager.Instance.IsHacking)
             return;
 

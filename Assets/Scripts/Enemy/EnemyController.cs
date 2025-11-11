@@ -36,7 +36,7 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     private Coroutine alarmSeekRoutine;
 
     [Header("Vision")]
-    [SerializeField] private LayerMask playerLayer;
+    [SerializeField] protected LayerMask playerLayer;
     [SerializeField] private bool useLineOfSight = true;
     [SerializeField] private LayerMask obstacleLayers;
     [SerializeField] private Collider2D visionTrigger;
@@ -47,7 +47,7 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     [SerializeField] private bool visionIsChildTransform = true;
 
     [Header("Contact Damage")]
-    [SerializeField] private bool dealContactDamage = true;
+    [SerializeField] protected bool dealContactDamage = true;
     [SerializeField] private int contactDamage = 1;
     [SerializeField] private float perTargetCooldown = 0.5f;
     [SerializeField] private bool knockbackOnHit = true;
@@ -68,12 +68,12 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     private bool colorCached = false;
 
     private int currentHealth;
-    private bool isDead;
+    protected bool isDead;
 
     private float lockedY;
     private Rigidbody2D rb;
     private Transform player;
-    private bool chasing;
+    protected bool chasing;
     private Coroutine patrolRoutine;
 
     private readonly Dictionary<int, float> lastHitTimeByTarget = new();
@@ -395,7 +395,7 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     public void Damage_OnTriggerEnter2D(Collider2D other) => TryDamagePlayerOnContact(other);
     public void Damage_OnTriggerStay2D(Collider2D other) => TryDamagePlayerOnContact(other);
 
-    private void TryDamagePlayerOnContact(Collider2D other)
+    protected virtual void TryDamagePlayerOnContact(Collider2D other)
     {
         if (isDead || !dealContactDamage) return;
         if ((playerLayer.value & (1 << other.gameObject.layer)) == 0) return;
@@ -427,7 +427,7 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     }
 
     // ---------- Helpers ----------
-    private void StopPatrol()
+    protected void StopPatrol()
     {
         if (patrolRoutine != null)
         {

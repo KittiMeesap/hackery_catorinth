@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
+public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
 {
     public enum OpenMode { Warp, LoadScene }
 
@@ -194,4 +194,52 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable
         }
         return promptPoint;
     }
+
+    public bool CanOpenFor(GameObject entity)
+    {
+        if (isLocked || !canUseDoor || hasMelted == false)
+            return false;
+        return connectedDoor != null && exitPoint != null;
+    }
+
+    public void OpenForEntity(GameObject entity)
+    {
+        if (!CanOpenFor(entity)) return;
+        StartCoroutine(OpenForEntityRoutine(entity));
+    }
+
+    private IEnumerator OpenForEntityRoutine(GameObject entity)
+    {
+        canUseDoor = false;
+        yield return new WaitForSeconds(openToTeleportDelay);
+
+        if (openMode == OpenMode.Warp)
+            DoWarpForEntity(entity);
+        else
+            Debug.LogWarning("[ChocolateDoor] NPC cannot trigger scene load.");
+
+        yield return new WaitForSeconds(reuseCooldown);
+        canUseDoor = true;
+    }
+
+    private void DoWarpForEntity(GameObject entity)
+    {
+        if (entity == null || connectedDoor == null) return;
+
+        var nextDoor = connectedDoor.GetComponent<ChocolateDoor>();
+        Transform targetExit = nextDoor ? nextDoor.exitPoint : null;
+        if (targetExit == null) return;
+
+        Vector3 oldPos = entity.transform.position;
+        Vector3 targetPos = targetExit.position;
+        Vector3 delta = targetPos - oldPos;
+
+        entity.transform.position = targetPos;
+
+        var vcam = FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
+        if (vcam != null) vcam.OnTargetObjectWarped(entity.transform, delta);
+
+        if (nextDoor) nextDoor.DisableInteractionTemporarily(reuseCooldown);
+    }
+
 }

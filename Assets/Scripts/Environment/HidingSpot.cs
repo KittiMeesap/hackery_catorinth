@@ -6,13 +6,16 @@ public class HidingSpot : MonoBehaviour
     public bool isMovableContainer = false;
 
     [Header("Cooldown Settings")]
+    [SerializeField]
     private float exitCooldown = 0.3f;
+
+    [System.NonSerialized]
+    protected float lastHideTime;
 
     protected bool isPlayerInside = false;
     protected PlayerHiding player;
     protected Vector2 playerOriginalPosition;
-
-    private float lastHideTime;
+    private float lastHideStartTime;
 
     public bool IsPlayerInside => isPlayerInside;
 
@@ -23,7 +26,7 @@ public class HidingSpot : MonoBehaviour
 
         this.player = player;
         playerOriginalPosition = player.transform.position;
-        lastHideTime = Time.time;
+        lastHideStartTime = Time.time;
 
         player.EnterHiding(this);
         PlayHidingAnimation(true);
@@ -33,7 +36,9 @@ public class HidingSpot : MonoBehaviour
     {
         if (player == null) return;
         if (!isPlayerInside) return;
-        if (Time.time < lastHideTime + exitCooldown) return;
+
+        if (Time.time < lastHideStartTime + exitCooldown)
+            return;
 
         isPlayerInside = false;
         this.player = null;

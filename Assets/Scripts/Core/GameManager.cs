@@ -11,28 +11,15 @@ public class GameManager : MonoBehaviour
     public bool IsInHackingMode { get; private set; } = false;
     public float time = 0;
 
-    [Header("Mission")]
+    [Header("Mission Settings")]
     public MissionSetSO missionSetForScene;
 
-    [Header("Countdown Settings")]
-    public float countdownTime = 180f;
+    [Header("UI References")]
+    public TextMeshProUGUI missionText;
 
-    public Color warningColor = Color.red;
+    [Header("External References")]
+    public CountdownTimer countdownManager;
 
-    public float warningThreshold = 10f;
-
-    [Header("UI Reference")]
-    public TextMeshProUGUI countdownText;
-
-    [Header("Enemy Spawn Settings")]
-    public GameObject sweeperPrefab;
-
-    public Transform sweeperSpawnPoint;
-
-    public Transform[] sweeperDoorTargets;
-
-    private bool timerRunning = false;
-    private bool sweeperSpawned = false;
     private PlayerInput playerInput;
     private InputAction exitAction;
 
@@ -41,6 +28,11 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
         }
 
         playerInput = GetComponent<PlayerInput>();
@@ -54,9 +46,6 @@ public class GameManager : MonoBehaviour
     {
         if (exitAction != null)
             exitAction.performed += OnExitPressed;
-
-        ResetCountdown();
-        StartCountdown();
     }
 
     private void OnDisable()
@@ -68,64 +57,17 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         time += Time.deltaTime;
-
-        if (timerRunning && countdownTime > 0)
-        {
-            countdownTime -= Time.deltaTime;
-            UpdateCountdownUI();
-
-            if (countdownTime <= 0 && !sweeperSpawned)
-            {
-                countdownTime = 0;
-                timerRunning = false;
-                SpawnSweeper();
-            }
-        }
     }
 
-    private void UpdateCountdownUI()
+    public void StartCountdown()
     {
-        if (!countdownText) return;
-
-        int minutes = Mathf.FloorToInt(countdownTime / 60);
-        int seconds = Mathf.FloorToInt(countdownTime % 60);
-        countdownText.text = $"{minutes:00}:{seconds:00}";
-
-        if (countdownTime <= warningThreshold)
-            countdownText.color = warningColor;
-        else
-            countdownText.color = Color.white;
+        countdownManager?.StartCountdown();
     }
 
-    private void SpawnSweeper()
+    public void StopCountdown()
     {
-        if (!sweeperPrefab || !sweeperSpawnPoint)
-        {
-            Debug.LogWarning("[GameManager] Missing Sweeper Prefab or Spawn Point.");
-            return;
-        }
-
-        GameObject sweeperObj = Instantiate(sweeperPrefab, sweeperSpawnPoint.position, Quaternion.identity);
-        EnemySweeper sweeper = sweeperObj.GetComponent<EnemySweeper>();
-
-        if (sweeper != null && sweeperDoorTargets != null && sweeperDoorTargets.Length > 0)
-        {
-            sweeper.doorTargets = sweeperDoorTargets;
-        }
-
-        sweeperSpawned = true;
-
-        AudioManager.Instance?.PlaySFX("SFX_Sweeper_Spawn");
+        countdownManager?.StopCountdown();
     }
-
-    public void ResetCountdown()
-    {
-        sweeperSpawned = false;
-        timerRunning = false;
-    }
-
-    public void StartCountdown() => timerRunning = true;
-    public void StopCountdown() => timerRunning = false;
 
     private void OnExitPressed(InputAction.CallbackContext context)
     {
@@ -141,6 +83,13 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
-    public void SetPhoneOut(bool isOut) => IsPhoneOut = isOut;
-    public void ToggleHackingMode(bool isActive) => IsInHackingMode = isActive;
+    public void SetPhoneOut(bool isOut)
+    {
+        IsPhoneOut = isOut;
+    }
+
+    public void ToggleHackingMode(bool isActive)
+    {
+        IsInHackingMode = isActive;
+    }
 }

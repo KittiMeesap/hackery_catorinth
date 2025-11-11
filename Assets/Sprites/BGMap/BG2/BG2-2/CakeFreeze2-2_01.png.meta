@@ -108,7 +108,7 @@ TextureImporter:
         width: 35
         height: 46
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -121,11 +121,33 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: CakeFreeze2-2_01_1
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 31
+        width: 28
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 016143ecf87ea624b9ff8f163cb73e24
+      internalID: 1827717867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 71ebe9d7ed6062c41b19acaf5cddd951
     internalID: 0
     vertices: []
     indices: 
@@ -136,6 +158,7 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       CakeFreeze2-2_01_0: -3588850728898748176
+      CakeFreeze2-2_01_1: 1827717867
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

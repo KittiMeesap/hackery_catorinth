@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class BoxHide : HidingSpot, IInteractable
@@ -49,6 +50,9 @@ public class BoxHide : HidingSpot, IInteractable
     private PlayerState currentState = PlayerState.Idle;
     private SpriteRenderer sr;
 
+    private CinemachineCamera cam;
+    private Transform originalFollowTarget;
+
     private void Awake()
     {
         isMovableContainer = true;
@@ -66,6 +70,8 @@ public class BoxHide : HidingSpot, IInteractable
         if (highlightSprite) highlightSprite.enabled = false;
         EnsurePromptPoint();
         if (autoPlacePromptAbove) UpdatePromptPointPosition();
+
+        cam = FindFirstObjectByType<CinemachineCamera>();
     }
 
     private void Update()
@@ -153,6 +159,12 @@ public class BoxHide : HidingSpot, IInteractable
         currentPlayer.EnterHiding(this);
         playerController = currentPlayer.GetComponent<PlayerController>();
 
+        if (cam != null)
+        {
+            originalFollowTarget = cam.Follow;
+            cam.Follow = this.transform;
+        }
+
         yield return new WaitForSeconds(enterAnimTime);
 
         isBusy = false;
@@ -172,6 +184,11 @@ public class BoxHide : HidingSpot, IInteractable
         playerController = null;
         isInside = false;
         isBusy = false;
+
+        if (cam != null && originalFollowTarget != null)
+        {
+            cam.Follow = originalFollowTarget;
+        }
 
         isPlayerNear = true;
         UIManager.Instance?.ShowInteractPrompt(this);

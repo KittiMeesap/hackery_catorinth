@@ -24,7 +24,8 @@ public class PlayerHiding : MonoBehaviour
     public void SetHidingSpot(HidingSpot spot) => currentSpot = spot;
     public void ClearHidingSpot(HidingSpot spot)
     {
-        if (currentSpot == spot) currentSpot = null;
+        if (currentSpot == spot)
+            currentSpot = null;
     }
 
     public void EnterHiding(HidingSpot spot)
@@ -38,14 +39,21 @@ public class PlayerHiding : MonoBehaviour
         if (playerController)
         {
             if (spot.isMovableContainer)
+            {
                 playerController.SetFrozen(false);
+            }
             else
+            {
                 playerController.SetFrozen(true);
+            }
 
             playerController.SetPhoneOut(false);
+            playerController.ClearInputAndVelocity();
         }
 
         transform.position = spot.GetHidingPosition();
+        transform.SetParent(spot.transform);
+
         currentSpot = spot;
 
         GetComponent<PlayerHacking>()?.SetHackingDisabled(true);
@@ -64,11 +72,12 @@ public class PlayerHiding : MonoBehaviour
         if (playerController)
         {
             playerController.ClearInputAndVelocity();
-
-            playerController.TriggerMoveDelay(0.2f);
+            playerController.SetFrozen(false);
         }
 
+        transform.SetParent(null);
         transform.position = spot.GetExitPosition();
+
         currentSpot = null;
 
         GetComponent<PlayerHacking>()?.SetHackingDisabled(false);

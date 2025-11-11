@@ -114,11 +114,11 @@ public class BoxHide : HidingSpot, IInteractable
         }
     }
 
-    // INTERACT
+    // MAIN INTERACT
     public void Interact()
     {
         if (isBusy) return;
-        if (Time.time < lastHideTime + hideCooldown) return;
+        if (!isInside && Time.time < lastHideTime + hideCooldown) return;
         if (currentPlayer == null) return;
 
         if (!isInside)
@@ -206,7 +206,7 @@ public class BoxHide : HidingSpot, IInteractable
     }
 
     // EXIT POSITION OVERRIDE
-    public override Vector2 GetExitPosition() => transform.position;
+    public override Vector2 GetExitPosition() => transform.position + Vector3.up * 0.2f;
 
     // VISUAL
     private void RefreshHighlight()

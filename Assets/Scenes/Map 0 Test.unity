@@ -26996,8 +26996,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.5
-  m_fontSizeBase: 0.5
+  m_fontSize: 0.6
+  m_fontSizeBase: 0.6
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -40565,14 +40565,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1279904418540852580, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1279904418540852580, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.3
-      objectReference: {fileID: 0}
     - target: {fileID: 2493410306410398488, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_Name
       value: Player
@@ -40616,14 +40608,6 @@ PrefabInstance:
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4328089191415325518, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
-      propertyPath: spellCombatPanel
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4328089191415325518, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
-      propertyPath: spellCombatShootPosition
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4713810023253218573, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: worldSpaceCamera

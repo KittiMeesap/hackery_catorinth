@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable
+public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
 {
     public enum OpenMode { Warp, LoadScene }
 
@@ -226,5 +226,53 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable
             promptPoint = offsetGO.transform;
         }
         return promptPoint;
+    }
+
+    public bool CanOpenFor(GameObject entity)
+    {
+        if (isFrozen) return false;
+        if (!canUseDoor) return false;
+        if (entity == null) return false;
+        return connectedDoor != null && exitPoint != null;
+    }
+
+    public void OpenForEntity(GameObject entity)
+    {
+        if (!CanOpenFor(entity)) return;
+        StartCoroutine(OpenForEntityRoutine(entity));
+    }
+
+    private IEnumerator OpenForEntityRoutine(GameObject entity)
+    {
+        canUseDoor = false;
+        animator?.SetBool(openParam, true);
+        yield return new WaitForSeconds(openToTeleportDelay);
+
+        if (openMode == OpenMode.Warp)
+            DoWarpForEntity(entity);
+        else
+            Debug.LogWarning("[FrozenDoor] NPC cannot trigger scene load.");
+
+        yield return new WaitForSeconds(reuseCooldown);
+        canUseDoor = true;
+    }
+
+    private void DoWarpForEntity(GameObject entity)
+    {
+        if (entity == null || connectedDoor == null) return;
+        var nextDoor = connectedDoor.GetComponent<FrozenDoor>();
+        Transform targetExit = nextDoor ? nextDoor.exitPoint : null;
+        if (targetExit == null) return;
+
+        Vector3 oldPos = entity.transform.position;
+        Vector3 targetPos = targetExit.position;
+        Vector3 delta = targetPos - oldPos;
+
+        entity.transform.position = targetPos;
+
+        var vcam = FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
+        if (vcam != null) vcam.OnTargetObjectWarped(entity.transform, delta);
+
+        if (nextDoor) nextDoor.DisableInteractionTemporarily(reuseCooldown);
     }
 }

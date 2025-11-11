@@ -39,7 +39,6 @@ public class BoxHide : HidingSpot, IInteractable
     private bool isPlayerNear;
     private bool isInside;
     private bool isBusy;
-    private float lastHideTime;
 
     private PlayerHiding currentPlayer;
     private PlayerController playerController;
@@ -207,10 +206,7 @@ public class BoxHide : HidingSpot, IInteractable
     }
 
     // EXIT POSITION OVERRIDE
-    public override Vector2 GetExitPosition()
-    {
-        return transform.position;
-    }
+    public override Vector2 GetExitPosition() => transform.position;
 
     // VISUAL
     private void RefreshHighlight()

@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor; // ✅ ต้องมีเพื่อใช้ PrefabUtility
+using UnityEditor;
 #endif
 
 public class Locker : HidingSpot, IInteractable
@@ -33,7 +33,6 @@ public class Locker : HidingSpot, IInteractable
 
     [Header("Cooldown")]
     [SerializeField] private float hideCooldown = 0.75f;
-    private float lastHideTime = -999f;
 
     private static int HashGetIn;
     private static int HashGetOut;
@@ -62,7 +61,6 @@ public class Locker : HidingSpot, IInteractable
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // ❌ ห้ามแก้ prefab asset โดยตรง
         if (PrefabUtility.IsPartOfPrefabAsset(gameObject))
             return;
 
@@ -79,12 +77,10 @@ public class Locker : HidingSpot, IInteractable
 
     private void EnsurePromptPoint()
     {
-        // ✅ ป้องกันการสร้างหรือเปลี่ยน parent ตอนอยู่ใน prefab asset
 #if UNITY_EDITOR
         if (PrefabUtility.IsPartOfPrefabAsset(gameObject))
             return;
 #endif
-
         if (promptPoint == null)
         {
             var go = new GameObject("PromptPoint");

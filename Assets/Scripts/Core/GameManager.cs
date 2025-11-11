@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,8 +11,14 @@ public class GameManager : MonoBehaviour
     public bool IsInHackingMode { get; private set; } = false;
     public float time = 0;
 
-    [Header("Mission")]
+    [Header("Mission Settings")]
     public MissionSetSO missionSetForScene;
+
+    [Header("UI References")]
+    public TextMeshProUGUI missionText;
+
+    [Header("External References")]
+    public CountdownTimer countdownManager;
 
     private PlayerInput playerInput;
     private InputAction exitAction;
@@ -21,6 +28,11 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
         }
 
         playerInput = GetComponent<PlayerInput>();
@@ -45,6 +57,16 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         time += Time.deltaTime;
+    }
+
+    public void StartCountdown()
+    {
+        countdownManager?.StartCountdown();
+    }
+
+    public void StopCountdown()
+    {
+        countdownManager?.StopCountdown();
     }
 
     private void OnExitPressed(InputAction.CallbackContext context)

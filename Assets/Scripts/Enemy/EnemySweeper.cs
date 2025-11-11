@@ -1,36 +1,42 @@
 using System.Collections;
 using UnityEngine;
 
-public class EnemySweeper : EnemyController
+[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
+public class EnemySweeper : MonoBehaviour
 {
-    [Header("Sweep Settings")]
+    [Header("Movement Settings")]
+    public float moveSpeed = 2f;
     public Transform[] doorTargets;
-
     public float stopDistanceToDoor = 0.4f;
 
+    [Header("Behaviour Settings")]
     public bool destroyOnFinish = true;
 
+    [Header("Damage Settings")]
+    public LayerMask playerLayer;
+    public int instantKillDamage = 9999;
+
     private int currentIndex = 0;
-    private Coroutine sweepRoutine;
+    private Rigidbody2D rb;
+    private bool isMoving = false;
+    private bool isDead = false;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        rb.gravityScale = 0;
+        rb.freezeRotation = true;
+    }
 
     private void OnEnable()
     {
-        StopPatrol();
-        chasing = false;
-
-        sweepRoutine = StartCoroutine(SweepLoop());
+        StartCoroutine(SweepRoutine());
     }
 
-    private void OnDisable()
+    private IEnumerator SweepRoutine()
     {
-        if (sweepRoutine != null)
-            StopCoroutine(sweepRoutine);
+        yield return new WaitForSeconds(0.2f);
 
-        ResumePatrol();
-    }
-
-    private IEnumerator SweepLoop()
-    {
         while (currentIndex < doorTargets.Length && !isDead)
         {
             Transform target = doorTargets[currentIndex];
@@ -40,11 +46,14 @@ public class EnemySweeper : EnemyController
                 continue;
             }
 
-            bool reached = false;
-            GoToTarget(target, stopDistanceToDoor, (e) => reached = true);
-
-            while (!reached && !isDead)
+            while (Vector2.Distance(transform.position, target.position) > stopDistanceToDoor && !isDead)
+            {
+                Vector2 dir = (target.position - transform.position).normalized;
+                rb.linearVelocity = dir * moveSpeed;
                 yield return null;
+            }
+
+            rb.linearVelocity = Vector2.zero;
 
             IOpenableDoor door = target.GetComponentInParent<IOpenableDoor>();
             if (door != null && door.CanOpenFor(gameObject))
@@ -54,23 +63,22 @@ public class EnemySweeper : EnemyController
             }
 
             currentIndex++;
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.2f);
         }
+
+        rb.linearVelocity = Vector2.zero;
 
         if (destroyOnFinish)
             Destroy(gameObject);
-        else
-            ResumePatrol();
     }
 
-    protected override void TryDamagePlayerOnContact(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (isDead || !dealContactDamage) return;
-        if ((playerLayer.value & (1 << other.gameObject.layer)) == 0) return;
-
-        var damageable = other.GetComponentInParent<IDamageable>();
-        if (damageable == null) return;
-
-        damageable.TakeDamage(9999);
+        if ((playerLayer.value & (1 << other.gameObject.layer)) != 0)
+        {
+            var dmg = other.GetComponentInParent<IDamageable>();
+            if (dmg != null)
+                dmg.TakeDamage(instantKillDamage);
+        }
     }
 }

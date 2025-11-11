@@ -179,7 +179,8 @@ public class HackingUI : MonoBehaviour
         while (time > 0f)
         {
             time -= Time.deltaTime;
-            hackTimerSlider.value = time;
+            if (hackTimerSlider != null)
+                hackTimerSlider.value = time;
             yield return null;
         }
 
@@ -211,14 +212,7 @@ public class HackingUI : MonoBehaviour
             hackTimerSlider.gameObject.SetActive(false);
     }
 
-    public void ShowSingleOptionSequence(
-    List<ArrowUI.Direction> sequence,
-    Transform worldTarget,
-    Sprite icon,
-    System.Action onComplete,
-    System.Action onFail,
-    bool useTimer,
-    float timerDuration)
+    public void ShowSingleOptionSequence(List<ArrowUI.Direction> sequence, Transform worldTarget, Sprite icon, System.Action onComplete, System.Action onFail, bool useTimer, float timerDuration)
     {
         HackOptionSO fakeOption = ScriptableObject.CreateInstance<HackOptionSO>();
         fakeOption.icon = icon;
@@ -253,18 +247,35 @@ public class HackingUI : MonoBehaviour
 
     private IEnumerator PulseArrow(HackOptionUI option, int index)
     {
+        if (option == null || option.arrowUIs == null) yield break;
         if (index < 0 || index >= option.arrowUIs.Count) yield break;
-        Transform arrow = option.arrowUIs[index].transform;
-        Vector3 baseScale = arrow.localScale;
+
+        var arrowUI = option.arrowUIs[index];
+        if (arrowUI == null || arrowUI.transform == null) yield break;
+
+        Transform arrow = arrowUI.transform;
+        Vector3 baseScale = Vector3.one;
+        try { baseScale = arrow.localScale; } catch { yield break; }
+
         float t = 0f;
+
         while (t < 1f)
         {
+            if (arrow == null || arrow.Equals(null)) yield break;
+
             t += Time.deltaTime * 6f;
             float s = 1f + Mathf.Sin(t * Mathf.PI) * (arrowPulseScale - 1f);
-            arrow.localScale = baseScale * s;
+
+            try { arrow.localScale = baseScale * s; }
+            catch { yield break; }
+
             yield return null;
         }
-        arrow.localScale = baseScale;
+
+        if (arrow != null && !arrow.Equals(null))
+        {
+            try { arrow.localScale = baseScale; } catch { }
+        }
     }
 
     private IEnumerator ShakePanelRoutine()
@@ -276,16 +287,22 @@ public class HackingUI : MonoBehaviour
 
         while (elapsed < shakeDuration)
         {
+            if (hackPanel == null) yield break;
+
             elapsed += Time.deltaTime;
             float fade = 1f - (elapsed / shakeDuration);
             hackPanel.transform.localPosition = originalPos + (Vector3)Random.insideUnitCircle * magnitude * fade;
             yield return null;
         }
-        hackPanel.transform.localPosition = originalPos;
+
+        if (hackPanel != null)
+            hackPanel.transform.localPosition = originalPos;
     }
 
     private IEnumerator SuccessFlash()
     {
+        if (hackPanel == null) yield break;
+
         CanvasGroup cg = hackPanel.GetComponent<CanvasGroup>();
         if (cg == null)
         {
@@ -296,6 +313,7 @@ public class HackingUI : MonoBehaviour
         float t = 0f;
         while (t < 0.3f)
         {
+            if (cg == null) yield break;
             t += Time.deltaTime * 3f;
             cg.alpha = 1f + Mathf.Sin(t * Mathf.PI) * 0.25f;
             yield return null;
@@ -321,6 +339,8 @@ public class HackingUI : MonoBehaviour
 
     public void HideHackingUI()
     {
+        StopAllCoroutines();
+
         if (hackPanel != null)
             hackPanel.SetActive(false);
 
@@ -332,6 +352,14 @@ public class HackingUI : MonoBehaviour
         PlayerController.Instance?.SetFrozen(false);
         PlayerController.Instance?.SetPhoneOut(false);
         HackableObject.ActiveProximityHackable = null;
+
+        StartCoroutine(WaitEndFrameCleanup());
+    }
+
+    private IEnumerator WaitEndFrameCleanup()
+    {
+        yield return new WaitForEndOfFrame();
+        Resources.UnloadUnusedAssets();
     }
 
     private void ClearMultiOptions()
@@ -351,16 +379,19 @@ public class HackingUI : MonoBehaviour
 
         foreach (var arrow in allArrows)
         {
+            if (arrow == null) continue;
             float elapsed = 0f;
             float duration = 0.15f;
             while (elapsed < duration)
             {
+                if (arrow == null) yield break;
                 elapsed += Time.deltaTime;
                 float scale = Mathf.Lerp(0f, arrowPopScale, elapsed / duration);
                 arrow.transform.localScale = Vector3.one * scale;
                 yield return null;
             }
-            arrow.transform.localScale = Vector3.one;
+            if (arrow != null)
+                arrow.transform.localScale = Vector3.one;
             yield return new WaitForSeconds(arrowPopDelay);
         }
         isShowingSequence = false;

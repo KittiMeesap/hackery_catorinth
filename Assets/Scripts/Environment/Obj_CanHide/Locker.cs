@@ -147,6 +147,7 @@ public class Locker : HidingSpot, IInteractable
         RefreshHighlight();
     }
 
+    // ENTER
     private IEnumerator EnterRoutine(PlayerHiding p)
     {
         isBusy = true;
@@ -154,6 +155,10 @@ public class Locker : HidingSpot, IInteractable
         OnEnterHiding(p);
         currentPlayer = p;
         cachedPlayerPosition = p.transform.position;
+
+        var controller = p.GetComponent<PlayerController>();
+        if (controller != null)
+            controller.SetFrozen(true);
 
         p.EnterHiding(this);
         UIManager.Instance?.HideInteractPrompt(this);
@@ -168,9 +173,14 @@ public class Locker : HidingSpot, IInteractable
             AudioManager.Instance.PlaySFX(sfxOpenKey);
 
         yield return new WaitForSeconds(enterAnimTime);
+
+        if (controller != null)
+            controller.SetFrozen(false);
+
         isBusy = false;
     }
 
+    // EXIT
     private IEnumerator ExitRoutine(PlayerHiding p)
     {
         isBusy = true;
@@ -189,14 +199,23 @@ public class Locker : HidingSpot, IInteractable
         p.transform.position = cachedPlayerPosition;
         p.ExitHiding(this);
 
+        var controller = p.GetComponent<PlayerController>();
+        if (controller != null)
+        {
+            controller.SetFrozen(false);
+            controller.TriggerMoveDelay(0.05f);
+        }
+
         OnExitHiding(p);
         currentPlayer = p;
 
-        if (isPlayerNear) UIManager.Instance?.ShowInteractPrompt(this);
+        if (isPlayerNear)
+            UIManager.Instance?.ShowInteractPrompt(this);
 
         isBusy = false;
     }
 
+    // POSITION OVERRIDES
     public override Vector2 GetHidingPosition()
     {
         return currentPlayer != null ? (Vector2)currentPlayer.transform.position : (Vector2)transform.position;

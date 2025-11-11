@@ -1,13 +1,13 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class HidingSpot : MonoBehaviour
 {
     [Header("Hiding Properties")]
     public bool isMovableContainer = false;
 
     [Header("Cooldown Settings")]
-    [SerializeField]
-    private float exitCooldown = 0.3f;
+    [SerializeField] private float exitCooldown = 0.3f;
 
     [System.NonSerialized]
     protected float lastHideTime;
@@ -47,8 +47,15 @@ public class HidingSpot : MonoBehaviour
         PlayHidingAnimation(false);
     }
 
-    public virtual Vector2 GetHidingPosition() => transform.position;
-    public virtual Vector2 GetExitPosition() => playerOriginalPosition;
+    public virtual Vector2 GetHidingPosition()
+    {
+        return transform.position;
+    }
+
+    public virtual Vector2 GetExitPosition()
+    {
+        return (Vector2)transform.position + Vector2.up * 0.15f;
+    }
 
     protected virtual void PlayHidingAnimation(bool isHiding) { }
 

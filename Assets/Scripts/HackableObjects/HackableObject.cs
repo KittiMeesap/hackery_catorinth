@@ -109,15 +109,17 @@ public class HackableObject : MonoBehaviour
 
         PlayerController.Instance?.ClearInputAndVelocity();
 
-        StartCoroutine(UnfreezeNextFrame());
+        StartCoroutine(UnfreezeAfterDelay(0.2f));
     }
 
-    private IEnumerator UnfreezeNextFrame()
+    private IEnumerator UnfreezeAfterDelay(float delay)
     {
-        yield return null;
+        yield return new WaitForSeconds(delay);
         PlayerController.Instance?.SetFrozen(false);
         PlayerController.Instance?.SetPhoneOut(false);
+        PlayerController.Instance?.ClearInputAndVelocity();
     }
+
 
     public virtual void OnHackFailed()
     {

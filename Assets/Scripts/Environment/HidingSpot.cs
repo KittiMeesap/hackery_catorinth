@@ -5,25 +5,39 @@ public class HidingSpot : MonoBehaviour
     [Header("Hiding Properties")]
     public bool isMovableContainer = false;
 
+    [Header("Cooldown Settings")]
+    private float exitCooldown = 0.3f;
+
     protected bool isPlayerInside = false;
     protected PlayerHiding player;
     protected Vector2 playerOriginalPosition;
+
+    private float lastHideTime;
 
     public bool IsPlayerInside => isPlayerInside;
 
     public virtual void OnEnterHiding(PlayerHiding player)
     {
+        if (isPlayerInside) return;
         isPlayerInside = true;
+
         this.player = player;
         playerOriginalPosition = player.transform.position;
+        lastHideTime = Time.time;
+
         player.EnterHiding(this);
         PlayHidingAnimation(true);
     }
 
     public virtual void OnExitHiding(PlayerHiding player)
     {
+        if (player == null) return;
+        if (!isPlayerInside) return;
+        if (Time.time < lastHideTime + exitCooldown) return;
+
         isPlayerInside = false;
         this.player = null;
+
         player.ExitHiding(this);
         PlayHidingAnimation(false);
     }
@@ -44,4 +58,14 @@ public class HidingSpot : MonoBehaviour
         if (other.CompareTag("Player"))
             other.GetComponent<PlayerHiding>()?.ClearHidingSpot(this);
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(GetHidingPosition(), 0.1f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(GetExitPosition(), 0.1f);
+    }
+#endif
 }

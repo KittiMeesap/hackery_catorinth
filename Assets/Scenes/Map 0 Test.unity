@@ -415,7 +415,7 @@ RectTransform:
   m_GameObject: {fileID: 3290366}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 156364800}
@@ -3407,29 +3407,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 261096842793109056, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
-      propertyPath: moveSpeed
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 261096842793109056, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
-      propertyPath: exitOffset
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 261096842793109056, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
-      propertyPath: isMovableContainer
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5313338234478560124, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
       propertyPath: m_Name
       value: Box
-      objectReference: {fileID: 0}
-    - target: {fileID: 5576222159225290152, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5576222159225290152, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: 8095352114229112524, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3470,14 +3450,6 @@ PrefabInstance:
     - target: {fileID: 8095352114229112524, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8350222037464325328, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
-      propertyPath: m_SortingLayer
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 8350222037464325328, guid: 32d068c24acee90489eca4d7b8e2b9c1, type: 3}
-      propertyPath: m_SortingLayerID
-      value: -1334594335
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8027,7 +7999,7 @@ RectTransform:
   m_GameObject: {fileID: 436649197}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 96.07678, y: 96.07678, z: 1.2009598}
+  m_LocalScale: {x: 100, y: 100, z: 1.2009598}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1036731094}
@@ -11613,7 +11585,6 @@ GameObject:
   - component: {fileID: 584441212}
   - component: {fileID: 584441211}
   - component: {fileID: 584441210}
-  - component: {fileID: 584441215}
   m_Layer: 5
   m_Name: CanvasUIWorld
   m_TagString: Untagged
@@ -11633,7 +11604,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc3d333c1fec78448b66cfdd72a169aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hackingUI: {fileID: 584441215}
+  hackingUI: {fileID: 0}
   screenFader: {fileID: 717555286}
   promptUI: {fileID: 527719520}
   missionText: {fileID: 1417628164}
@@ -11721,34 +11692,6 @@ RectTransform:
   m_AnchoredPosition: {x: -0.14, y: 0.27}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &584441215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 584441209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4be7b3c54065806479e97e1a3ee8242e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hackPanel: {fileID: 992392961}
-  multiOptionParent: {fileID: 436649198}
-  hackOptionUIPrefab: {fileID: 4317529843521161674, guid: 8e3039a882a45834a802e7a75e8bfa42, type: 3}
-  hackTimerSlider: {fileID: 1468896327}
-  arrowUpPrefab: {fileID: 4062521740420822897, guid: 01b875468bda4e54ab94872290c2917c, type: 3}
-  arrowDownPrefab: {fileID: 4062521740420822897, guid: b36fa2e61ce4f7140a0f2ad69e53ecd3, type: 3}
-  arrowLeftPrefab: {fileID: 4062521740420822897, guid: 4a849feff68e7e941af910a41a84368e, type: 3}
-  arrowRightPrefab: {fileID: 4062521740420822897, guid: c495d0cd780214643a593ef86b9f4ce9, type: 3}
-  panelPopDuration: 0.4
-  arrowPopDelay: 0.08
-  arrowPopScale: 1.15
-  shakeIntensity: 2
-  shakeDuration: 0.3
-  hackingSoundKey: SFX_HackInput
-  failSoundKey: SFX_HackFail
-  popupSoundKey: SFX_HackPopup
 --- !u!1 &585665282
 GameObject:
   m_ObjectHideFlags: 0
@@ -20322,9 +20265,7 @@ MonoBehaviour:
   arrowPopScale: 1.15
   shakeIntensity: 2
   shakeDuration: 0.3
-  hackingSoundKey: SFX_HackInput
-  failSoundKey: SFX_HackFail
-  popupSoundKey: SFX_HackPopup
+  arrowPulseScale: 1.25
 --- !u!21 &1038598863
 Material:
   serializedVersion: 8
@@ -40547,7 +40488,7 @@ PrefabInstance:
     - target: {fileID: 1461756644998122572, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: hackingUI
       value: 
-      objectReference: {fileID: 584441215}
+      objectReference: {fileID: 0}
     - target: {fileID: 3106019404702404283, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: m_Camera
       value: 

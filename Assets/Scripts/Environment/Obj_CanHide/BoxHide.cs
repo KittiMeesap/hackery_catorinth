@@ -7,7 +7,6 @@ public class BoxHide : HidingSpot, IInteractable
 
     [Header("Animator & States")]
     [SerializeField] private Animator anim;
-    [SerializeField] private string normalStateName = "Box_Normal";
     [SerializeField] private string idleStateName = "Box_PlayerIdle";
     [SerializeField] private string walkStateName = "Box_PlayerWalk";
     [SerializeField] private string getInTriggerParam = "GetIn";

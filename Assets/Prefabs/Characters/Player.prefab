@@ -407,6 +407,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 2
+  hidingMoveMultiplier: 0.5
   footstepKey: SFX_Footstep
   footstepInterval: 0.4
   maxHeat: 5
@@ -419,6 +420,7 @@ MonoBehaviour:
   coldDamage: 0
   damageColdThreshold: 0.9
   coldSlowThreshold: -1.5
+  unlockMoveDelay: 0.3
   afkDelay: 10
 --- !u!114 &5066567172949322409
 MonoBehaviour:

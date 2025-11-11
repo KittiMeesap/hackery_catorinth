@@ -18,10 +18,7 @@ public class PlayerHacking : MonoBehaviour
 
     public void SetHackingDisabled(bool disabled) => hackingDisabled = disabled;
 
-    private void Awake()
-    {
-        playerInput = GetComponent<PlayerInput>();
-    }
+    private void Awake() => playerInput = GetComponent<PlayerInput>();
 
     private void Update()
     {
@@ -31,6 +28,7 @@ public class PlayerHacking : MonoBehaviour
 
         isUsingController = playerInput.currentControlScheme == "Gamepad";
 
+        // Detect target only if not in hacking mode
         if (!GameManager.Instance.IsInHackingMode)
         {
             if (isUsingController)
@@ -42,9 +40,7 @@ public class PlayerHacking : MonoBehaviour
         HandleArrowInput();
     }
 
-    // ==============================
     // Mouse Detection
-    // ==============================
     private void DetectHoverHackable_Mouse()
     {
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
@@ -55,8 +51,7 @@ public class PlayerHacking : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (!hit.CompareTag("CanHack"))
-                continue;
+            if (!hit.CompareTag("CanHack")) continue;
 
             HackableObject hackable = hit.GetComponentInParent<HackableObject>();
             if (hackable != null && hackable.triggerType == HackableObject.HackTriggerType.MouseHover)
@@ -68,8 +63,10 @@ public class PlayerHacking : MonoBehaviour
 
         if (hovered == null) return;
 
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current.leftButton.wasPressedThisFrame && !isClickLocked)
         {
+            StartCoroutine(ClickCooldownRoutine());
+
             if (!UIManager.Instance.IsHacking)
             {
                 PlayerController.Instance.SetFrozen(true);
@@ -79,16 +76,12 @@ public class PlayerHacking : MonoBehaviour
             else if (currentHackedObject != null)
             {
                 currentHackedObject.HideHackingUI();
-                PlayerController.Instance.TriggerMoveDelay(0.3f);
-                PlayerController.Instance.SetFrozen(false);
                 currentHackedObject = null;
             }
         }
     }
 
-    // ==============================
     // Gamepad Detection
-    // ==============================
     private void DetectHackableNearby_Gamepad()
     {
         Vector2 pos = PlayerController.Instance.transform.position;
@@ -131,8 +124,6 @@ public class PlayerHacking : MonoBehaviour
             else if (currentHackedObject != null)
             {
                 currentHackedObject.HideHackingUI();
-                PlayerController.Instance.TriggerMoveDelay(0.3f);
-                PlayerController.Instance.SetFrozen(false);
                 currentHackedObject = null;
             }
         }
@@ -144,6 +135,7 @@ public class PlayerHacking : MonoBehaviour
     private void HandleArrowInput()
     {
         if (!GameManager.Instance.IsInHackingMode) return;
+        if (UIManager.Instance == null || !UIManager.Instance.IsHacking) return;
 
         ArrowUI.Direction? input = null;
 
@@ -176,8 +168,5 @@ public class PlayerHacking : MonoBehaviour
         isClickLocked = false;
     }
 
-    public void SetCurrentHackedObject(HackableObject obj)
-    {
-        currentHackedObject = obj;
-    }
+    public void SetCurrentHackedObject(HackableObject obj) => currentHackedObject = obj;
 }

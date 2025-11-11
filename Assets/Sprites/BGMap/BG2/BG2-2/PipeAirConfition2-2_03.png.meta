@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: bad312ba1d38ec34ab81964efb3d462a
+guid: 9de16ad2ccabbd94fbffdc57201be5b3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4613436476700068364
-    second: CakeShelf2-1_02_0
+      213: 927481436023467452
+    second: PipeAirConfition2-2_03_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 64
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,45 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CakeShelf2-1_02_0
+      name: PipeAirConfition2-2_03_0
       rect:
         serializedVersion: 2
-        x: 82
-        y: 2
-        width: 37
-        height: 50
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c0a89835808360040800000000000000
-      internalID: 4613436476700068364
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CakeShelf2-1_02_1
-      rect:
-        serializedVersion: 2
-        x: 85
-        y: 20
-        width: 30
-        height: 31
+        x: 0
+        y: 56
+        width: 128
+        height: 6
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c27b68a71088af44abd226167ca87213
-      internalID: 208351360
+      spriteID: cbda2f9b3731fdc00800000000000000
+      internalID: 927481436023467452
       vertices: []
       indices: 
       edges: []
@@ -147,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 1685d84d2cc2d6843826b1006e42ea1e
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -157,8 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      CakeShelf2-1_02_0: 4613436476700068364
-      CakeShelf2-1_02_1: 208351360
+      PipeAirConfition2-2_03_0: 927481436023467452
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

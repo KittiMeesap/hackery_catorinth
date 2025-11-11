@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class SugarSlow : MonoBehaviour, IHeatable, IFreezable
@@ -6,154 +5,139 @@ public class SugarSlow : MonoBehaviour, IHeatable, IFreezable
     [Header("Animation")]
     [SerializeField] private Animator animator;
 
+    [Header("Visual State")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Color meltedColor = new Color(1f, 0.7f, 0.7f);
+    [SerializeField] private Color frozenColor = new Color(0.8f, 0.9f, 1f);
+
+    [Header("Slow Effect")]
+    [SerializeField, Range(0f, 1f)] private float slowMultiplier = 0.4f;
+
+    [Header("Heat & Cold Thresholds")]
+    [SerializeField] private float freezeColdThreshold = -1f;
+    [SerializeField] private float meltHeatThreshold = 0.5f;
+
+    [Header("Transition Settings")]
+    [SerializeField] private float heatDecayRate = 1f;
+    [SerializeField] private float coldDecayRate = 1f;
+
     [Header("Layer Settings")]
-    [SerializeField] private int frozenLayer = 14;
-    [SerializeField] private int normalLayer = 0;
+    [SerializeField] private int meltedLayer = 7;
+    [SerializeField] private int frozenLayer = 6;
 
-    [Header("Slow Settings")]
-    [SerializeField] private float slowMultiplier = 0.4f;
-
-    [Header("Temperature Reaction")]
-    [SerializeField] private float heatThreshold = 2f;
-
-    [SerializeField] private float coldThreshold = -2f;
-
-    [SerializeField] private float meltDelay = 1.5f;
-
-    private float temperature = 0f;
     private bool isFrozen = false;
-    private bool isMelting = false;
-
+    private bool isMelted = true;
+    private float heatLevel = 1f;
     private PlayerController affectedPlayer;
 
-    private void Awake()
+    private void Start()
     {
-        if (animator == null)
-            animator = GetComponent<Animator>();
+        SetMelted(true);
     }
 
     private void Update()
     {
-        if (isFrozen && temperature >= heatThreshold && !isMelting)
-        {
-            StartCoroutine(MeltRoutine());
-        }
+        if (Mathf.Abs(heatLevel) > 0.01f)
+            heatLevel = Mathf.MoveTowards(
+                heatLevel,
+                0f,
+                Time.deltaTime * (heatLevel > 0 ? heatDecayRate : coldDecayRate)
+            );
 
-        if (!isFrozen && temperature <= coldThreshold)
+        ApplyStateByTemperature();
+        UpdatePlayerSlowEffect();
+    }
+
+    private void ApplyStateByTemperature()
+    {
+        if (heatLevel <= freezeColdThreshold && !isFrozen)
         {
             SetFrozen(true);
         }
-
-        if (Mathf.Abs(temperature) > 0.01f)
+        else if (heatLevel >= meltHeatThreshold && !isMelted)
         {
-            temperature = Mathf.MoveTowards(temperature, 0, Time.deltaTime * 0.5f);
+            SetMelted(true);
         }
     }
 
-    // Interface Implementations
-    public void ApplyHeat(float amount)
+    private void UpdatePlayerSlowEffect()
     {
-        temperature += amount;
+        if (affectedPlayer == null) return;
 
-        if (temperature >= heatThreshold && isFrozen && !isMelting)
-        {
-            StartCoroutine(MeltRoutine());
-        }
+        if (isMelted)
+            affectedPlayer.SetSpeedModifier(this, slowMultiplier);
+        else
+            affectedPlayer.RemoveSpeedModifier(this);
     }
 
-    public void ApplyCold(float amount)
+    private void SetMelted(bool melted)
     {
-        temperature -= amount;
+        isMelted = melted;
+        isFrozen = !melted;
 
-        if (temperature <= coldThreshold && !isFrozen)
-        {
-            SetFrozen(true);
-        }
+        if (animator) animator.SetBool("IsMelted", melted);
+        if (spriteRenderer) spriteRenderer.color = melted ? meltedColor : frozenColor;
+
+        int targetLayer = melted ? meltedLayer : frozenLayer;
+        SetLayerRecursively(gameObject, targetLayer);
     }
 
-    public void CoolDown(float amount)
-    {
-        temperature = Mathf.MoveTowards(temperature, 0, amount);
-    }
-
-    // Freeze / Melt Logic
-    public void SetFrozen(bool frozen)
+    private void SetFrozen(bool frozen)
     {
         isFrozen = frozen;
-        isMelting = false;
+        isMelted = !frozen;
 
-        if (animator != null)
-        {
-            animator.SetBool("IsFrozen", isFrozen);
-        }
+        if (animator) animator.SetBool("IsFrozen", frozen);
+        if (spriteRenderer) spriteRenderer.color = frozen ? frozenColor : meltedColor;
 
-        int targetLayer = isFrozen ? frozenLayer : normalLayer;
+        int targetLayer = frozen ? frozenLayer : meltedLayer;
         SetLayerRecursively(gameObject, targetLayer);
+    }
 
-        if (affectedPlayer != null)
+    private void SetLayerRecursively(GameObject obj, int layer)
+    {
+        if (obj == null) return;
+        int safeLayer = Mathf.Clamp(layer, 0, 31);
+        obj.layer = safeLayer;
+
+        foreach (Transform child in obj.transform)
         {
-            if (isFrozen)
-                affectedPlayer.SetSpeedModifier(this, slowMultiplier);
-            else
-                affectedPlayer.RemoveSpeedModifier(this);
+            if (child != null)
+                SetLayerRecursively(child.gameObject, safeLayer);
         }
     }
 
-    private IEnumerator MeltRoutine()
+    public void ApplyHeat(float delta)
     {
-        isMelting = true;
-
-        if (animator != null)
-            animator.SetTrigger("Melt");
-
-        yield return new WaitForSeconds(meltDelay);
-
-        SetFrozen(false);
-        isMelting = false;
+        heatLevel += delta;
     }
 
-    // Player Slow Trigger
+    public void ApplyCold(float delta)
+    {
+        heatLevel -= delta;
+    }
+
+    public void CoolDown(float delta)
+    {
+        heatLevel = Mathf.MoveTowards(heatLevel, 0f, delta);
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
-        affectedPlayer = other.GetComponent<PlayerController>();
-
-        if (affectedPlayer != null && isFrozen)
-            affectedPlayer.SetSpeedModifier(this, slowMultiplier);
+        if (other.CompareTag("Player"))
+        {
+            affectedPlayer = other.GetComponent<PlayerController>();
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
-
-        var controller = other.GetComponent<PlayerController>();
-        if (controller != null)
-            controller.RemoveSpeedModifier(this);
-
-        affectedPlayer = null;
-    }
-
-    private void OnDisable()
-    {
-        if (affectedPlayer != null)
+        if (other.CompareTag("Player"))
         {
-            affectedPlayer.RemoveSpeedModifier(this);
+            if (affectedPlayer != null)
+                affectedPlayer.RemoveSpeedModifier(this);
+
             affectedPlayer = null;
-        }
-    }
-
-    // Utility
-    private void SetLayerRecursively(GameObject obj, int layer)
-    {
-        if (obj == null) return;
-
-        if (obj.layer != layer)
-            obj.layer = layer;
-
-        foreach (Transform child in obj.transform)
-        {
-            if (child != null && child.gameObject.layer != layer)
-                SetLayerRecursively(child.gameObject, layer);
         }
     }
 }

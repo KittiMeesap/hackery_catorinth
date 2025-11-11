@@ -55,7 +55,6 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     private Vector2 moveInput;
     private bool isFrozen = false;
-    private bool isControlLocked = false;
     private Vector3 defaultScale;
 
     private float lastFootstepTime;
@@ -201,7 +200,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     {
         UpdateTemperature();
 
-        if (isFrozen || IsPhoneOut || isControlLocked || Time.time < controlUnlockTime)
+        if (isFrozen || IsPhoneOut || Time.time < controlUnlockTime)
         {
             StopMovement(true);
             return;
@@ -390,19 +389,6 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
-    public void SetControlLocked(bool locked)
-    {
-        isControlLocked = locked;
-
-        if (!locked)
-        {
-            controlUnlockTime = Time.time + unlockMoveDelay;
-            ClearInputAndVelocity();
-        }
-    }
-
-    public bool IsControlLocked => isControlLocked;
-
     public void SetPhoneOut(bool isOut) => IsPhoneOut = isOut;
 
     public void ClearInputAndVelocity()
@@ -415,6 +401,25 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     {
         controlUnlockTime = Time.time + delay;
         ClearInputAndVelocity();
+    }
+
+    public void DisableMoveInputTemporarily(float duration = 0.2f)
+    {
+        StartCoroutine(DisableMoveInputRoutine(duration));
+    }
+
+    private IEnumerator DisableMoveInputRoutine(float duration)
+    {
+        playerInput.actions["Move"].performed -= OnMovePerformed;
+        playerInput.actions["Move"].canceled -= OnMoveCanceled;
+
+        moveInput = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
+
+        yield return new WaitForSeconds(duration);
+
+        playerInput.actions["Move"].performed += OnMovePerformed;
+        playerInput.actions["Move"].canceled += OnMoveCanceled;
     }
 
     // ---------- Input ----------

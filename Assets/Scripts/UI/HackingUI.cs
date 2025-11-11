@@ -23,12 +23,8 @@ public class HackingUI : MonoBehaviour
     [SerializeField] private float arrowPopDelay = 0.08f;
     [SerializeField] private float arrowPopScale = 1.15f;
     [SerializeField] private float shakeIntensity = 2f;
-    [SerializeField] private float shakeDuration = 0.3f;
-
-    [Header("Audio Keys (from SoundLibrary)")]
-    [SerializeField] private string hackingSoundKey = "SFX_HackInput";
-    [SerializeField] private string failSoundKey = "SFX_HackFail";
-    [SerializeField] private string popupSoundKey = "SFX_HackPopup";
+    [SerializeField] private float shakeDuration = 0.25f;
+    [SerializeField] private float arrowPulseScale = 1.25f;
 
     private Dictionary<ArrowUI.Direction, GameObject> arrowPrefabs;
     private List<HackOptionUI> activeOptions = new();
@@ -58,6 +54,7 @@ public class HackingUI : MonoBehaviour
             hackTimerSlider.gameObject.SetActive(false);
     }
 
+    // DISPLAY
     public void ShowMultiOptionUI(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onSuccess)
     {
         ClearMultiOptions();
@@ -100,7 +97,7 @@ public class HackingUI : MonoBehaviour
         }
 
         StartCoroutine(AnimateArrowsRoutine());
-        UpdateTimerPosition(); // ensure timer placed correctly if visible
+        UpdateTimerPosition();
     }
 
     public void ShowMultiOptionUI(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onSuccess, bool useTimer, float timerDuration)
@@ -112,6 +109,7 @@ public class HackingUI : MonoBehaviour
             StopHackTimer();
     }
 
+    // INPUT
     public void SubmitInput(ArrowUI.Direction input)
     {
         if (isShowingSequence) return;
@@ -120,15 +118,14 @@ public class HackingUI : MonoBehaviour
         HackOptionUI fullMatch = null;
         bool matchedPrefix = false;
 
-        if (!string.IsNullOrEmpty(hackingSoundKey))
-            AudioManager.Instance?.PlaySFX(hackingSoundKey);
-
         foreach (var option in activeOptions)
         {
             if (IsPrefixMatch(option.sequence, currentInput))
             {
                 matchedPrefix = true;
                 option.Highlight(currentInput.Count - 1);
+
+                StartCoroutine(PulseArrow(option, currentInput.Count - 1));
 
                 if (currentInput.Count == option.sequence.Count)
                     fullMatch = option;
@@ -137,6 +134,7 @@ public class HackingUI : MonoBehaviour
 
         if (fullMatch != null)
         {
+            StartCoroutine(SuccessFlash());
             onOptionSelected?.Invoke(fullMatch.optionData);
             HideHackingUI();
             return;
@@ -144,11 +142,8 @@ public class HackingUI : MonoBehaviour
 
         if (!matchedPrefix)
         {
-            StartCoroutine(ShakeArrowsRoutine());
+            StartCoroutine(ShakePanelRoutine());
             FlashIncorrectAll();
-
-            if (!string.IsNullOrEmpty(failSoundKey))
-                AudioManager.Instance?.PlaySFX(failSoundKey);
         }
     }
 
@@ -162,38 +157,7 @@ public class HackingUI : MonoBehaviour
         return true;
     }
 
-    private void FlashIncorrectAll()
-    {
-        foreach (var option in activeOptions)
-            option.SetIncorrect();
-
-        currentInput.Clear();
-        Invoke(nameof(CloseAfterIncorrect), 0.45f);
-    }
-
-    private void CloseAfterIncorrect()
-    {
-        HideHackingUI();
-        GameManager.Instance?.ToggleHackingMode(false);
-        StartCoroutine(DelayedFailUnfreeze());
-    }
-
-    private IEnumerator DelayedFailUnfreeze()
-    {
-        yield return new WaitForSeconds(0.05f);
-
-        if (HackableObject.ActiveProximityHackable != null)
-        {
-            Debug.Log("[HackingUI] Wrong input — calling OnHackFailed()");
-            HackableObject.ActiveProximityHackable.OnHackFailed();
-        }
-        else
-        {
-            PlayerController.Instance?.SetFrozen(false);
-            PlayerController.Instance?.SetPhoneOut(false);
-        }
-    }
-
+    // TIMER
     public void StartHackTimer(float duration, System.Action onFail)
     {
         if (hackTimerSlider == null) return;
@@ -227,7 +191,6 @@ public class HackingUI : MonoBehaviour
     {
         if (hackTimerSlider == null || !hackTimerSlider.gameObject.activeSelf) return;
 
-        // วางให้ Timer อยู่ใต้ panel เสมอ
         RectTransform timerRect = hackTimerSlider.transform as RectTransform;
         RectTransform panelRect = hackPanel.transform as RectTransform;
 
@@ -248,7 +211,14 @@ public class HackingUI : MonoBehaviour
             hackTimerSlider.gameObject.SetActive(false);
     }
 
-    public void ShowSingleOptionSequence(List<ArrowUI.Direction> sequence, Transform worldTarget, Sprite icon, System.Action onComplete, System.Action onFail, bool useTimer, float timerDuration)
+    public void ShowSingleOptionSequence(
+    List<ArrowUI.Direction> sequence,
+    Transform worldTarget,
+    Sprite icon,
+    System.Action onComplete,
+    System.Action onFail,
+    bool useTimer,
+    float timerDuration)
     {
         HackOptionSO fakeOption = ScriptableObject.CreateInstance<HackOptionSO>();
         fakeOption.icon = icon;
@@ -260,6 +230,93 @@ public class HackingUI : MonoBehaviour
             StartHackTimer(timerDuration, onFail);
         else
             StopHackTimer();
+    }
+
+    // EFFECTS
+    private IEnumerator PopInPanelRoutine()
+    {
+        hackPanel.transform.localScale = Vector3.zero;
+        float elapsed = 0f;
+
+        while (elapsed < panelPopDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / panelPopDuration;
+            float ease = Mathf.Sin(t * Mathf.PI * 0.5f);
+            float overshoot = 1.05f + Mathf.Sin(t * Mathf.PI) * 0.05f;
+            hackPanel.transform.localScale = Vector3.one * ease * overshoot;
+            yield return null;
+        }
+
+        hackPanel.transform.localScale = Vector3.one;
+    }
+
+    private IEnumerator PulseArrow(HackOptionUI option, int index)
+    {
+        if (index < 0 || index >= option.arrowUIs.Count) yield break;
+        Transform arrow = option.arrowUIs[index].transform;
+        Vector3 baseScale = arrow.localScale;
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 6f;
+            float s = 1f + Mathf.Sin(t * Mathf.PI) * (arrowPulseScale - 1f);
+            arrow.localScale = baseScale * s;
+            yield return null;
+        }
+        arrow.localScale = baseScale;
+    }
+
+    private IEnumerator ShakePanelRoutine()
+    {
+        if (hackPanel == null) yield break;
+        Vector3 originalPos = hackPanel.transform.localPosition;
+        float elapsed = 0f;
+        float magnitude = shakeIntensity * 3f;
+
+        while (elapsed < shakeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float fade = 1f - (elapsed / shakeDuration);
+            hackPanel.transform.localPosition = originalPos + (Vector3)Random.insideUnitCircle * magnitude * fade;
+            yield return null;
+        }
+        hackPanel.transform.localPosition = originalPos;
+    }
+
+    private IEnumerator SuccessFlash()
+    {
+        CanvasGroup cg = hackPanel.GetComponent<CanvasGroup>();
+        if (cg == null)
+        {
+            cg = hackPanel.AddComponent<CanvasGroup>();
+            cg.alpha = 1f;
+        }
+
+        float t = 0f;
+        while (t < 0.3f)
+        {
+            t += Time.deltaTime * 3f;
+            cg.alpha = 1f + Mathf.Sin(t * Mathf.PI) * 0.25f;
+            yield return null;
+        }
+        cg.alpha = 1f;
+    }
+
+    // CLEANUP
+    private void FlashIncorrectAll()
+    {
+        foreach (var option in activeOptions)
+            option.SetIncorrect();
+
+        currentInput.Clear();
+        Invoke(nameof(CloseAfterIncorrect), 0.4f);
+    }
+
+    private void CloseAfterIncorrect()
+    {
+        HideHackingUI();
+        GameManager.Instance?.ToggleHackingMode(false);
     }
 
     public void HideHackingUI()
@@ -280,36 +337,14 @@ public class HackingUI : MonoBehaviour
     private void ClearMultiOptions()
     {
         if (multiOptionParent == null) return;
-
         for (int i = multiOptionParent.childCount - 1; i >= 0; i--)
             Destroy(multiOptionParent.GetChild(i).gameObject);
-
         activeOptions.Clear();
-    }
-
-    private IEnumerator PopInPanelRoutine()
-    {
-        if (!string.IsNullOrEmpty(popupSoundKey))
-            AudioManager.Instance?.PlaySFX(popupSoundKey);
-
-        hackPanel.transform.localScale = Vector3.zero;
-        float elapsed = 0f;
-        while (elapsed < panelPopDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / panelPopDuration);
-            hackPanel.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one * 0.8f, Mathf.SmoothStep(0f, 1f, t));
-            yield return null;
-        }
     }
 
     private IEnumerator AnimateArrowsRoutine()
     {
         isShowingSequence = true;
-
-        PlayerHacking playerHack = FindFirstObjectByType<PlayerHacking>();
-        if (playerHack != null) playerHack.SetHackingDisabled(true);
-
         List<ArrowUI> allArrows = new();
         foreach (var opt in activeOptions)
             allArrows.AddRange(opt.arrowUIs);
@@ -325,52 +360,9 @@ public class HackingUI : MonoBehaviour
                 arrow.transform.localScale = Vector3.one * scale;
                 yield return null;
             }
-
             arrow.transform.localScale = Vector3.one;
             yield return new WaitForSeconds(arrowPopDelay);
         }
-
-        if (playerHack != null) playerHack.SetHackingDisabled(false);
         isShowingSequence = false;
-    }
-
-    private IEnumerator ShakeArrowsRoutine()
-    {
-        float elapsed = 0f;
-        float amplitude = shakeIntensity * 0.3f;
-        float frequency = 30f;
-
-        Dictionary<ArrowUI, Vector3> originalPositions = new();
-        foreach (var opt in activeOptions)
-            foreach (var arrow in opt.arrowUIs)
-                originalPositions[arrow] = arrow.transform.localPosition;
-
-        while (elapsed < shakeDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / shakeDuration;
-            float fade = 1f - t;
-
-            foreach (var opt in activeOptions)
-            {
-                foreach (var arrow in opt.arrowUIs)
-                {
-                    if (!originalPositions.ContainsKey(arrow)) continue;
-
-                    Vector3 basePos = originalPositions[arrow];
-                    float offsetX = Mathf.Sin(Time.time * frequency) * amplitude * fade;
-                    float offsetY = Mathf.Cos(Time.time * frequency * 0.8f) * amplitude * 0.5f * fade;
-
-                    arrow.transform.localPosition = basePos + new Vector3(offsetX, offsetY, 0f);
-                }
-            }
-
-            yield return null;
-        }
-
-        foreach (var opt in activeOptions)
-            foreach (var arrow in opt.arrowUIs)
-                if (originalPositions.ContainsKey(arrow))
-                    arrow.transform.localPosition = originalPositions[arrow];
     }
 }

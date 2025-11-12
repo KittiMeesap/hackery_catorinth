@@ -1,27 +1,21 @@
 using System.Collections;
-using Unity.Cinemachine;
 using UnityEngine;
+using Unity.Cinemachine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class EnemySweeper : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 2f;
-    public Transform[] doorTargets;
-    public float stopDistanceToDoor = 0.4f;
-
-    [Header("Behaviour Settings")]
-    public bool destroyOnFinish = true;
+    public bool faceLeft = false;
 
     [Header("Damage Settings")]
     public LayerMask playerLayer;
     public int instantKillDamage = 9999;
 
-    private int currentIndex = 0;
     private Rigidbody2D rb;
-    private bool canMove = false;
-    private bool isDead = false;
     private SpriteRenderer sprite;
+    private bool isDead = false;
 
     private void Awake()
     {
@@ -34,68 +28,24 @@ public class EnemySweeper : MonoBehaviour
 
     private void OnEnable()
     {
-        StartCoroutine(SweepRoutine());
+        StartCoroutine(MoveRoutine());
     }
 
-    public void StartSweeping()
+    private IEnumerator MoveRoutine()
     {
-        canMove = true;
-    }
+        yield return null; // give one frame
 
-    private IEnumerator SweepRoutine()
-    {
-        yield return new WaitForSeconds(0.2f);
-
-        while (!canMove)
-            yield return null;
-
-        while (currentIndex < doorTargets.Length && !isDead)
+        while (!isDead)
         {
-            Transform doorPoint = doorTargets[currentIndex];
+            Vector2 dir = faceLeft ? Vector2.left : Vector2.right;
 
-            while (Vector2.Distance(transform.position, doorPoint.position) > stopDistanceToDoor && !isDead)
-            {
-                Vector2 dir = (doorPoint.position - transform.position);
-                dir.y = 0;
-                dir = dir.normalized;
-                rb.linearVelocity = dir * moveSpeed;
+            rb.linearVelocity = dir * moveSpeed;
 
-                if (sprite != null)
-                    sprite.flipX = dir.x < 0;
+            if (sprite != null)
+                sprite.flipX = (dir.x < 0);
 
-                yield return null;
-            }
-
-            rb.linearVelocity = Vector2.zero;
-
-            IOpenableDoor door = doorPoint.GetComponentInParent<IOpenableDoor>();
-            if (door != null && door.CanOpenFor(gameObject))
-            {
-                door.OpenForEntity(gameObject);
-            }
-
-            SweeperDoorWarp warp = doorPoint.GetComponent<SweeperDoorWarp>();
-            if (warp != null && warp.warpExitPoint != null)
-            {
-                if (sprite != null) sprite.enabled = false;
-
-                yield return new WaitForSeconds(warp.appearDelay);
-
-                transform.position = warp.warpExitPoint.position;
-
-                if (sprite != null) sprite.enabled = true;
-
-                yield return new WaitForSeconds(0.15f);
-            }
-
-            currentIndex++;
-            yield return new WaitForSeconds(0.2f);
+            yield return null;
         }
-
-        rb.linearVelocity = Vector2.zero;
-
-        if (destroyOnFinish)
-            Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -105,6 +55,12 @@ public class EnemySweeper : MonoBehaviour
             var dmg = other.GetComponentInParent<IDamageable>();
             if (dmg != null)
                 dmg.TakeDamage(instantKillDamage);
+            return;
+        }
+
+        if (other.CompareTag("Transition"))
+        {
+            return;
         }
     }
 
@@ -114,7 +70,6 @@ public class EnemySweeper : MonoBehaviour
         if (impulse != null)
         {
             impulse.GenerateImpulse();
-            Debug.Log("[EnemySweeper] ShakeCamera triggered.");
         }
     }
 }

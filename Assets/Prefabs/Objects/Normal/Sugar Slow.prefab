@@ -173,17 +173,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 671f303a7650f03409cc401632e76c49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  slowMultiplier: 0.1
-  startFrozen: 0
   animator: {fileID: 9068990733790744905}
-  trigFreeze: Freeze
-  trigMelt: Melt
-  sfxFreezeKey: SFX_SugarFreeze
-  sfxMeltKey: SFX_SugarMelt
-  loopAudio: {fileID: 0}
-  meltThreshold: 2
-  freezeThreshold: -2
-  physicsLayerWhenMelt: ObjectHack
-  physicsLayerWhenFreeze: Pillars
-  sortingLayerWhenMelt: HackObj
-  sortingLayerWhenFreeze: Pillars
+  spriteRenderer: {fileID: 201289475679685809}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  meltedColor: {r: 1, g: 0.7, b: 0.7, a: 1}
+  frozenColor: {r: 0.8, g: 0.9, b: 1, a: 1}
+  slowMultiplier: 0.1
+  meltHeatThreshold: 2
+  freezeColdThreshold: -1
+  heatDecayRate: 1
+  coldDecayRate: 1
+  normalLayer: 0
+  frozenLayer: 6
+  meltedLayer: 7

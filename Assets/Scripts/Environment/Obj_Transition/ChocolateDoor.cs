@@ -64,11 +64,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         }
     }
 
-    public void ApplyHeat(float delta)
-    {
-        temperature += delta;
-    }
-
+    public void ApplyHeat(float delta) { temperature += delta; }
     public void ApplyCold(float delta) { }
     public void CoolDown(float delta) { }
 
@@ -86,17 +82,28 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
     private void ApplyLockState(bool locked)
     {
         if (!animator) return;
-        animator.SetBool(meltParam, !locked); // Idle = false, Melt = true
+        animator.SetBool(meltParam, !locked);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
-        playerGO = other.gameObject;
+        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+            return;
 
-        if (isLocked) return;
+        // PLAYER USE
+        if (other.CompareTag("Player"))
+        {
+            playerGO = other.gameObject;
 
-        UIManager.Instance?.ShowInteractPrompt(this);
+            if (isLocked) return;
+            UIManager.Instance?.ShowInteractPrompt(this);
+        }
+
+        // ENEMY AUTO USE
+        if (other.CompareTag("Enemy") && !isLocked && canUseDoor)
+        {
+            OpenForEntity(other.gameObject);
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -195,6 +202,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         return promptPoint;
     }
 
+    // === For AI / Enemy ===
     public bool CanOpenFor(GameObject entity)
     {
         if (isLocked || !canUseDoor || hasMelted == false)
@@ -215,8 +223,6 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
         if (openMode == OpenMode.Warp)
             DoWarpForEntity(entity);
-        else
-            Debug.LogWarning("[ChocolateDoor] NPC cannot trigger scene load.");
 
         yield return new WaitForSeconds(reuseCooldown);
         canUseDoor = true;
@@ -241,5 +247,4 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
         if (nextDoor) nextDoor.DisableInteractionTemporarily(reuseCooldown);
     }
-
 }

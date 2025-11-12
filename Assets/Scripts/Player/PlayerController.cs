@@ -205,17 +205,16 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             return;
         }
 
-        if (isSleeping && moveInput.sqrMagnitude > 0.0001f && !isWaking)
+        if (isSleeping || isWaking)
         {
-            anim.SetTrigger("Wake");
-            StartCoroutine(RestoreIdleAfterWake());
             StopMovement(true);
             return;
         }
 
-        if (isWaking)
+        if (isSleeping && moveInput.sqrMagnitude > 0.0001f && !isWaking)
         {
-            StopMovement(true);
+            anim.SetTrigger("Wake");
+            StartCoroutine(RestoreIdleAfterWake());
             return;
         }
 

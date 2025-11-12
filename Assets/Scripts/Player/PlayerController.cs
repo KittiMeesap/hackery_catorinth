@@ -35,7 +35,6 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     [SerializeField] private float coldSlowThreshold = -1.5f;
 
     [Header("Control Delay Settings")]
-    [SerializeField] private float unlockMoveDelay = 0.3f;
     private float controlUnlockTime = 0f;
 
     [Header("Idle to Sleep Settings")]

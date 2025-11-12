@@ -190,7 +190,7 @@ MonoBehaviour:
   heatRadius: 2.5
   heatLayer:
     serializedVersion: 2
-    m_Bits: 1344
+    m_Bits: 3392
   heatPower: 5
   heatDecayRate: 0.5
   checkInterval: 0.2

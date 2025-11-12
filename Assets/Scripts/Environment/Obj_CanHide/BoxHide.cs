@@ -17,7 +17,6 @@ public class BoxHide : HidingSpot, IInteractable
     [Header("Timings")]
     [SerializeField] private float enterAnimTime = 0.35f;
     [SerializeField] private float exitAnimTime = 0.35f;
-    [SerializeField] private float enterMoveDuration = 0.2f;
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 2f;
@@ -43,6 +42,8 @@ public class BoxHide : HidingSpot, IInteractable
 
     private PlayerHiding currentPlayer;
     private PlayerController playerController;
+    private SpriteRenderer[] playerSprites;
+
     private Vector3 defaultScale;
     private float lastFacingDir = 1f;
 
@@ -52,11 +53,13 @@ public class BoxHide : HidingSpot, IInteractable
 
     private CinemachineCamera cam;
     private Transform originalFollowTarget;
+    private Rigidbody2D rb;
 
     private void Awake()
     {
         isMovableContainer = true;
         defaultScale = transform.localScale;
+        rb = GetComponent<Rigidbody2D>();
 
         if (anim == null) anim = GetComponent<Animator>();
         sr = GetComponentInChildren<SpriteRenderer>();
@@ -90,7 +93,13 @@ public class BoxHide : HidingSpot, IInteractable
         Vector2 input = playerController.GetMoveInput();
         if (input.sqrMagnitude > 0.01f)
         {
-            transform.Translate(input.normalized * moveSpeed * Time.deltaTime);
+            Vector3 delta = input.normalized * moveSpeed * Time.deltaTime;
+
+            if (rb != null)
+                rb.MovePosition(rb.position + (Vector2)delta);
+            else
+                transform.Translate(delta);
+
             SetPlayerState(PlayerState.Walk);
             lastFacingDir = Mathf.Sign(input.x);
         }
@@ -106,26 +115,20 @@ public class BoxHide : HidingSpot, IInteractable
     {
         if (anim == null || currentState == newState) return;
         currentState = newState;
-
-        switch (newState)
-        {
-            case PlayerState.Idle:
-                anim.CrossFade(hashIdle, 0.1f);
-                anim.SetBool(hashIsWalking, false);
-                break;
-            case PlayerState.Walk:
-                anim.CrossFade(hashWalk, 0.1f);
-                anim.SetBool(hashIsWalking, true);
-                break;
-        }
+        anim.CrossFade(newState == PlayerState.Idle ? hashIdle : hashWalk, 0.1f);
+        anim.SetBool(hashIsWalking, newState == PlayerState.Walk);
     }
 
-    // MAIN INTERACT
+    // ======================= INTERACT =======================
     public void Interact()
     {
         if (isBusy) return;
-        if (!isInside && Time.time < lastHideTime + hideCooldown) return;
+
+        if (currentPlayer == null)
+            currentPlayer = PlayerHiding.Instance;
         if (currentPlayer == null) return;
+
+        if (!isInside && Time.time < lastHideTime + hideCooldown) return;
 
         if (!isInside)
             StartCoroutine(EnterRoutine());
@@ -140,24 +143,18 @@ public class BoxHide : HidingSpot, IInteractable
         isBusy = true;
         isInside = true;
 
-        if (AudioManager.Instance) AudioManager.Instance.PlaySFX(sfxOpenKey);
-        if (anim) anim.SetTrigger(hashGetIn);
-
-        if (highlightSprite) highlightSprite.enabled = false;
+        AudioManager.Instance?.PlaySFX(sfxOpenKey);
+        anim?.SetTrigger(hashGetIn);
+        highlightSprite?.gameObject.SetActive(false);
         UIManager.Instance?.HideInteractPrompt(this);
 
-        Vector3 startPos = currentPlayer.transform.position;
-        Vector3 targetPos = transform.position;
-        float t = 0f;
-        while (t < 1f)
-        {
-            t += Time.deltaTime / enterMoveDuration;
-            currentPlayer.transform.position = Vector3.Lerp(startPos, targetPos, t);
-            yield return null;
-        }
+        playerController = PlayerController.Instance;
+
+        playerSprites = playerController.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var s in playerSprites) s.enabled = false;
 
         currentPlayer.EnterHiding(this);
-        playerController = currentPlayer.GetComponent<PlayerController>();
+        playerController.SetFrozen(false);
 
         if (cam != null)
         {
@@ -174,21 +171,26 @@ public class BoxHide : HidingSpot, IInteractable
     private IEnumerator ExitRoutine()
     {
         isBusy = true;
-
-        if (AudioManager.Instance) AudioManager.Instance.PlaySFX(sfxCloseKey);
-        if (anim) anim.SetTrigger(hashGetOut);
+        AudioManager.Instance?.PlaySFX(sfxCloseKey);
+        anim?.SetTrigger(hashGetOut);
 
         yield return new WaitForSeconds(exitAnimTime);
 
+        if (playerSprites != null)
+        {
+            foreach (var s in playerSprites)
+                if (s != null) s.enabled = true;
+        }
+
         currentPlayer.ExitHiding(this);
+        playerController.transform.position = transform.position + Vector3.up * 0.2f;
+
         playerController = null;
         isInside = false;
         isBusy = false;
 
         if (cam != null && originalFollowTarget != null)
-        {
             cam.Follow = originalFollowTarget;
-        }
 
         isPlayerNear = true;
         UIManager.Instance?.ShowInteractPrompt(this);
@@ -196,43 +198,36 @@ public class BoxHide : HidingSpot, IInteractable
         RefreshHighlight();
     }
 
-    // TRIGGERS
+    // ======================= TRIGGER =======================
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
         currentPlayer = other.GetComponent<PlayerHiding>();
         isPlayerNear = true;
         RefreshHighlight();
-
-        if (!isInside)
-            UIManager.Instance?.ShowInteractPrompt(this);
+        if (!isInside) UIManager.Instance?.ShowInteractPrompt(this);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-
         if (!isInside)
         {
             isPlayerNear = false;
             currentPlayer = null;
             UIManager.Instance?.HideInteractPrompt(this);
         }
-
         RefreshHighlight();
     }
 
-    // EXIT POSITION OVERRIDE
     public override Vector2 GetExitPosition() => transform.position + Vector3.up * 0.2f;
 
-    // VISUAL
     private void RefreshHighlight()
     {
         if (highlightSprite)
             highlightSprite.enabled = isPlayerNear && !isInside;
     }
 
-    // PROMPT POINT
     public Transform GetPromptPoint()
     {
         if (autoPlacePromptAbove) UpdatePromptPointPosition();
@@ -243,7 +238,7 @@ public class BoxHide : HidingSpot, IInteractable
     {
         if (promptPoint == null)
         {
-            GameObject go = new GameObject("PromptPoint");
+            var go = new GameObject("PromptPoint");
             go.transform.SetParent(transform);
             promptPoint = go.transform;
         }
@@ -252,39 +247,8 @@ public class BoxHide : HidingSpot, IInteractable
     private void UpdatePromptPointPosition()
     {
         if (promptPoint == null) return;
-
-        Bounds b = default;
-        bool hasBounds = false;
-
-        if (sr != null && sr.sprite != null)
-        {
-            b = sr.bounds;
-            hasBounds = true;
-        }
-        else
-        {
-            var col = GetComponent<Collider2D>();
-            if (col != null)
-            {
-                b = col.bounds;
-                hasBounds = true;
-            }
-        }
-
-        if (!hasBounds)
-        {
-            promptPoint.position = transform.position + new Vector3(0, 1f + promptMarginY, 0);
-            return;
-        }
-
-        Vector3 topCenter = new Vector3(b.center.x, b.max.y + promptMarginY, transform.position.z);
+        Bounds b = sr != null && sr.sprite != null ? sr.bounds : GetComponent<Collider2D>()?.bounds ?? new Bounds(transform.position, Vector3.one);
+        Vector3 topCenter = new(b.center.x, b.max.y + promptMarginY, transform.position.z);
         promptPoint.position = topCenter;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (promptPoint == null) return;
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(promptPoint.position, 0.05f);
     }
 }

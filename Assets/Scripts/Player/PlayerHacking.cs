@@ -24,11 +24,26 @@ public class PlayerHacking : MonoBehaviour
     {
         if (GameManager.Instance == null || UIManager.Instance == null) return;
         if (hackingDisabled) return;
+
+        if (PlayerController.Instance != null)
+        {
+            var player = PlayerController.Instance;
+            var anim = player.GetComponent<Animator>();
+
+            if (anim != null && (anim.GetBool("IsAFK") || anim.GetBool("IsSleeping")))
+                return;
+
+            var sleepingField = typeof(PlayerController)
+                .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (sleepingField != null && (bool)sleepingField.GetValue(player))
+                return;
+        }
+
         if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer) return;
 
         isUsingController = playerInput.currentControlScheme == "Gamepad";
 
-        // Detect target only if not in hacking mode
         if (!GameManager.Instance.IsInHackingMode)
         {
             if (isUsingController)
@@ -43,6 +58,15 @@ public class PlayerHacking : MonoBehaviour
     // Mouse Detection
     private void DetectHoverHackable_Mouse()
     {
+        if (PlayerController.Instance != null)
+        {
+            var sleepingField = typeof(PlayerController)
+                .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (sleepingField != null && (bool)sleepingField.GetValue(PlayerController.Instance))
+                return;
+        }
+
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         mouseWorldPos.z = 0f;
 
@@ -84,6 +108,15 @@ public class PlayerHacking : MonoBehaviour
     // Gamepad Detection
     private void DetectHackableNearby_Gamepad()
     {
+        if (PlayerController.Instance != null)
+        {
+            var sleepingField = typeof(PlayerController)
+                .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (sleepingField != null && (bool)sleepingField.GetValue(PlayerController.Instance))
+                return;
+        }
+
         Vector2 pos = PlayerController.Instance.transform.position;
         Collider2D[] hits = Physics2D.OverlapCircleAll(pos, gamepadDetectionRadius);
 
@@ -129,9 +162,7 @@ public class PlayerHacking : MonoBehaviour
         }
     }
 
-    // ==============================
-    // Handle Arrow Inputs (WASD / D-Pad)
-    // ==============================
+    // Arrow Input for Hacking
     private void HandleArrowInput()
     {
         if (!GameManager.Instance.IsInHackingMode) return;
@@ -139,7 +170,6 @@ public class PlayerHacking : MonoBehaviour
 
         ArrowUI.Direction? input = null;
 
-        // Keyboard input
         if (Keyboard.current != null)
         {
             if (Keyboard.current.wKey.wasPressedThisFrame) input = ArrowUI.Direction.Up;
@@ -148,7 +178,6 @@ public class PlayerHacking : MonoBehaviour
             else if (Keyboard.current.dKey.wasPressedThisFrame) input = ArrowUI.Direction.Right;
         }
 
-        // Gamepad input
         if (Gamepad.current != null)
         {
             if (Gamepad.current.dpad.up.wasPressedThisFrame) input = ArrowUI.Direction.Up;

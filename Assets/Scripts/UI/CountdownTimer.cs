@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.Playables;
 
 public class CountdownTimer : MonoBehaviour
 {
@@ -11,31 +12,22 @@ public class CountdownTimer : MonoBehaviour
 
     [Header("Color Settings")]
     public Color normalColor = Color.white;
-
     public Color warningColor = Color.red;
-
     public float warningThreshold = 10f;
 
     [Header("Blink Effect")]
     public float blinkSpeed = 5f;
-
     public float blinkScale = 1.2f;
 
     [Header("Audio Settings")]
     public string warningSFXKey = "SFX_TimerWarning";
-
     public string timeOverSFXKey = "SFX_TimerEnd";
 
-    [Header("Enemy Spawn Settings")]
-    public GameObject sweeperPrefab;
-
-    public Transform sweeperSpawnPoint;
-
-    public Transform[] sweeperDoorTargets;
+    [Header("Cinematic Settings")]
+    public PlayableDirector sweeperIntroDirector;
 
     private float currentTime;
     private bool isRunning = false;
-    private bool spawned = false;
     private bool warned = false;
     private Vector3 defaultScale;
 
@@ -58,11 +50,13 @@ public class CountdownTimer : MonoBehaviour
             if (currentTime < 0) currentTime = 0;
             UpdateTimerUI();
         }
-        else if (!spawned)
+        else
         {
-            isRunning = false;
-            spawned = true;
-            OnTimeOver();
+            if (isRunning)
+            {
+                isRunning = false;
+                OnTimeOver();
+            }
         }
     }
 
@@ -117,28 +111,20 @@ public class CountdownTimer : MonoBehaviour
         CancelInvoke(nameof(PlayWarningBeep));
         AudioManager.Instance?.PlaySFX(timeOverSFXKey);
 
-        Debug.Log("[CountdownTimer] Time's up!");
-
-        if (sweeperPrefab && sweeperSpawnPoint)
+        if (sweeperIntroDirector)
         {
-            GameObject obj = Instantiate(sweeperPrefab, sweeperSpawnPoint.position, Quaternion.identity);
-            var sweeper = obj.GetComponent<EnemySweeper>();
-
-            if (sweeper != null && sweeperDoorTargets != null && sweeperDoorTargets.Length > 0)
-                sweeper.doorTargets = sweeperDoorTargets;
-
-            Debug.Log("[CountdownTimer] EnemySweeper spawned at " + sweeperSpawnPoint.name);
+            sweeperIntroDirector.Play();
+            Debug.Log("[CountdownTimer] Time's up — Playing Sweeper Intro Timeline.");
         }
         else
         {
-            Debug.LogWarning("[CountdownTimer] SweeperPrefab or SpawnPoint not assigned.");
+            Debug.LogWarning("[CountdownTimer] No Timeline assigned. Nothing will happen.");
         }
     }
 
     public void ResetTimer()
     {
         currentTime = startTime;
-        spawned = false;
         warned = false;
         UpdateTimerUI();
     }

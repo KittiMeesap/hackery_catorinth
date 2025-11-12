@@ -57,7 +57,10 @@ public class EnemySweeper : MonoBehaviour
 
             while (Vector2.Distance(transform.position, target.position) > stopDistanceToDoor && !isDead)
             {
-                Vector2 dir = (target.position - transform.position).normalized;
+                Vector2 dir = (target.position - transform.position);
+                dir.y = 0f;
+                dir = dir.normalized;
+
                 rb.linearVelocity = dir * moveSpeed;
                 yield return null;
             }

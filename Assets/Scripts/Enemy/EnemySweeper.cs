@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Cinemachine;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
@@ -18,7 +19,7 @@ public class EnemySweeper : MonoBehaviour
 
     private int currentIndex = 0;
     private Rigidbody2D rb;
-    private bool isMoving = false;
+    private bool canMove = false;
     private bool isDead = false;
 
     private void Awake()
@@ -33,9 +34,17 @@ public class EnemySweeper : MonoBehaviour
         StartCoroutine(SweepRoutine());
     }
 
+    public void StartSweeping()
+    {
+        canMove = true;
+    }
+
     private IEnumerator SweepRoutine()
     {
         yield return new WaitForSeconds(0.2f);
+
+        while (!canMove)
+            yield return null;
 
         while (currentIndex < doorTargets.Length && !isDead)
         {
@@ -79,6 +88,16 @@ public class EnemySweeper : MonoBehaviour
             var dmg = other.GetComponentInParent<IDamageable>();
             if (dmg != null)
                 dmg.TakeDamage(instantKillDamage);
+        }
+    }
+
+    public void ShakeCamera()
+    {
+        var impulse = GetComponent<CinemachineImpulseSource>();
+        if (impulse != null)
+        {
+            impulse.GenerateImpulse();
+            Debug.Log("[EnemySweeper] ShakeCamera triggered.");
         }
     }
 }

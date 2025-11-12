@@ -297,6 +297,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   isMovableContainer: 1
+  exitCooldown: 0.3
   anim: {fileID: 1289790854788181516}
   idleStateName: Box_PlayerIdle
   walkStateName: Box_PlayerWalk
@@ -305,7 +306,6 @@ MonoBehaviour:
   isWalkingBoolParam: IsWalking
   enterAnimTime: 0.35
   exitAnimTime: 0.35
-  enterMoveDuration: 0.2
   moveSpeed: 0.5
   promptPoint: {fileID: 5576222159225290152}
   autoPlacePromptAbove: 1

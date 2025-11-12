@@ -190,7 +190,7 @@ MonoBehaviour:
   coldRadius: 2.5
   coldLayer:
     serializedVersion: 2
-    m_Bits: 320
+    m_Bits: 3392
   coldPower: 5
   coldDecayRate: 0.5
   checkInterval: 0.5
@@ -203,7 +203,7 @@ MonoBehaviour:
   sfxOffKey: SFX_FridgeOff
   sfxLoopKey: 
   ambientSoundGate: {fileID: 1844864913675655203}
-  startOn: 1
+  startOn: 0
   spellCooldown: 2
 --- !u!82 &2580325946624666942
 AudioSource:

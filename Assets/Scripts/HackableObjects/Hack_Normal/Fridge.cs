@@ -83,7 +83,7 @@ public class Fridge : HackableObject
         {
             if (col.TryGetComponent<IFreezable>(out var fz))
             {
-                fz.ApplyCold(coldPower * dt);
+                fz.ApplyCold(coldPower * dt * 2f);
                 current.Add(fz);
             }
 
@@ -207,7 +207,7 @@ public class Fridge : HackableObject
     protected override void HandleHackOptionComplete(HackOptionSO option)
     {
         if (isOnCooldown) return;
-        StartCoroutine(SpellCooldownTimer());
+        StartCoroutine(HackCooldownTimer());
 
         if (option == null) return;
 
@@ -225,7 +225,7 @@ public class Fridge : HackableObject
         }
     }
 
-    private IEnumerator SpellCooldownTimer()
+    private IEnumerator HackCooldownTimer()
     {
         isOnCooldown = true;
         yield return new WaitForSeconds(spellCooldown);

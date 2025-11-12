@@ -51,14 +51,11 @@ public class SugarSlow : MonoBehaviour, IHeatable, IFreezable
     private void ApplyStateByTemperature()
     {
         if (heatLevel <= freezeColdThreshold && !isFrozen)
-        {
             SetFrozen(true);
-        }
         else if (heatLevel >= meltHeatThreshold && !isMelted)
-        {
             SetMelted(true);
-        }
     }
+
 
     private void UpdatePlayerSlowEffect()
     {

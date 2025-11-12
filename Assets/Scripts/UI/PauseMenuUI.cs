@@ -64,9 +64,6 @@ public class PauseMenuUI : MonoBehaviour
 
         playerInput.SwitchCurrentActionMap(uiMap);
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-
         StartCoroutine(SetDefaultButtonNextFrame());
     }
 
@@ -88,8 +85,6 @@ public class PauseMenuUI : MonoBehaviour
 
         playerInput.SwitchCurrentActionMap(gameplayMap);
 
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void ResetGame()

@@ -5,17 +5,22 @@ using Unity.Cinemachine;
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class EnemySweeper : MonoBehaviour
 {
-    [Header("Movement Settings")]
     public float moveSpeed = 2f;
-    public bool faceLeft = false;
+    public Transform[] doorTargets;
+    public float stopDistanceToDoor = 0.4f;
 
-    [Header("Damage Settings")]
+    public bool destroyOnFinish = true;
+
     public LayerMask playerLayer;
     public int instantKillDamage = 9999;
 
+    private int currentIndex = 0;
     private Rigidbody2D rb;
     private SpriteRenderer sprite;
+    private bool canMove = false;
     private bool isDead = false;
+
+    private IOpenableDoor lastDoorUsed = null;
 
     private void Awake()
     {
@@ -28,24 +33,71 @@ public class EnemySweeper : MonoBehaviour
 
     private void OnEnable()
     {
-        StartCoroutine(MoveRoutine());
+        StartCoroutine(SweepRoutine());
     }
 
-    private IEnumerator MoveRoutine()
+    public void StartSweeping()
     {
-        yield return null; // give one frame
+        canMove = true;
+    }
 
-        while (!isDead)
-        {
-            Vector2 dir = faceLeft ? Vector2.left : Vector2.right;
+    private IEnumerator SweepRoutine()
+    {
+        yield return new WaitForSeconds(0.2f);
 
-            rb.linearVelocity = dir * moveSpeed;
-
-            if (sprite != null)
-                sprite.flipX = (dir.x < 0);
-
+        while (!canMove)
             yield return null;
+
+        while (currentIndex < doorTargets.Length && !isDead)
+        {
+            Transform target = doorTargets[currentIndex];
+            if (target == null)
+            {
+                currentIndex++;
+                continue;
+            }
+
+            while (Vector2.Distance(transform.position, target.position) > stopDistanceToDoor && !isDead)
+            {
+                Vector2 dir = (target.position - transform.position).normalized;
+                rb.linearVelocity = dir * moveSpeed;
+
+                if (sprite != null)
+                    sprite.flipX = dir.x < 0;
+
+                yield return null;
+            }
+
+            rb.linearVelocity = Vector2.zero;
+
+            var heatObj = target.GetComponentInParent<IHeatable>();
+            if (heatObj != null)
+            {
+                heatObj.ApplyHeat(999f);
+            }
+
+            var door = target.GetComponent<IOpenableDoor>();
+            if (door == null)
+                door = target.GetComponentInParent<IOpenableDoor>();
+
+            if (door != null && door.CanOpenFor(gameObject))
+            {
+                if (door != lastDoorUsed)
+                {
+                    door.OpenForEntity(gameObject);
+                    lastDoorUsed = door;
+                    yield return new WaitForSeconds(0.25f);
+                }
+            }
+
+            currentIndex++;
+            yield return new WaitForSeconds(0.2f);
         }
+
+        rb.linearVelocity = Vector2.zero;
+
+        if (destroyOnFinish)
+            Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -58,10 +110,21 @@ public class EnemySweeper : MonoBehaviour
             return;
         }
 
-        if (other.CompareTag("Transition"))
+        var door = other.GetComponentInParent<ChocolateDoor>();
+        if (door != null && door.CanOpenFor(gameObject))
         {
+            door.WarpEntity(gameObject);
             return;
         }
+
+        var heat = other.GetComponentInParent<IHeatable>();
+        if (heat != null)
+        {
+            heat.ApplyHeat(999f);
+        }
+
+        if (other.CompareTag("Transition"))
+            return;
     }
 
     public void ShakeCamera()

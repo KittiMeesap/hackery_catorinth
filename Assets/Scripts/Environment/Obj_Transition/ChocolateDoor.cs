@@ -72,9 +72,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
     {
         hasMelted = true;
         isLocked = false;
-
         ApplyLockState(false);
-
         if (!string.IsNullOrEmpty(sfxMeltKey))
             AudioManager.Instance?.PlaySFX(sfxMeltKey);
     }
@@ -90,19 +88,16 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
-        // PLAYER USE
         if (other.CompareTag("Player"))
         {
             playerGO = other.gameObject;
-
             if (isLocked) return;
             UIManager.Instance?.ShowInteractPrompt(this);
         }
 
-        // ENEMY AUTO USE
-        if (other.CompareTag("Enemy") && !isLocked && canUseDoor)
+        if (other.CompareTag("Enemy") && CanOpenFor(other.gameObject))
         {
-            OpenForEntity(other.gameObject);
+            WarpEntity(other.gameObject);
         }
     }
 
@@ -131,7 +126,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
         if (openMode == OpenMode.Warp)
         {
-            DoWarp();
+            WarpEntity(playerGO);
             if (fader != null) yield return fader.FadeIn();
         }
         else
@@ -144,24 +139,26 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         canUseDoor = true;
     }
 
-    private void DoWarp()
+    public void WarpEntity(GameObject entity)
     {
-        if (playerGO == null || connectedDoor == null) return;
+        if (entity == null || connectedDoor == null) return;
 
         var nextDoor = connectedDoor.GetComponent<ChocolateDoor>();
         Transform targetExit = nextDoor ? nextDoor.exitPoint : null;
         if (targetExit == null) return;
 
-        Vector3 oldPos = playerGO.transform.position;
+        Vector3 oldPos = entity.transform.position;
         Vector3 targetPos = targetExit.position;
         Vector3 delta = targetPos - oldPos;
 
-        playerGO.transform.position = targetPos;
+        entity.transform.position = targetPos;
 
         var vcam = FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
-        if (vcam != null) vcam.OnTargetObjectWarped(playerGO.transform, delta);
+        if (vcam != null)
+            vcam.OnTargetObjectWarped(entity.transform, delta);
 
-        if (nextDoor) nextDoor.DisableInteractionTemporarily(reuseCooldown);
+        if (nextDoor)
+            nextDoor.DisableInteractionTemporarily(reuseCooldown);
     }
 
     private IEnumerator DoLoadScene()
@@ -202,49 +199,19 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         return promptPoint;
     }
 
-    // === For AI / Enemy ===
     public bool CanOpenFor(GameObject entity)
     {
-        if (isLocked || !canUseDoor || hasMelted == false)
+        if (isLocked || !canUseDoor)
             return false;
+
+        if (startLocked && hasMelted == false)
+            return false;
+
         return connectedDoor != null && exitPoint != null;
     }
 
     public void OpenForEntity(GameObject entity)
     {
-        if (!CanOpenFor(entity)) return;
-        StartCoroutine(OpenForEntityRoutine(entity));
-    }
-
-    private IEnumerator OpenForEntityRoutine(GameObject entity)
-    {
-        canUseDoor = false;
-        yield return new WaitForSeconds(openToTeleportDelay);
-
-        if (openMode == OpenMode.Warp)
-            DoWarpForEntity(entity);
-
-        yield return new WaitForSeconds(reuseCooldown);
-        canUseDoor = true;
-    }
-
-    private void DoWarpForEntity(GameObject entity)
-    {
-        if (entity == null || connectedDoor == null) return;
-
-        var nextDoor = connectedDoor.GetComponent<ChocolateDoor>();
-        Transform targetExit = nextDoor ? nextDoor.exitPoint : null;
-        if (targetExit == null) return;
-
-        Vector3 oldPos = entity.transform.position;
-        Vector3 targetPos = targetExit.position;
-        Vector3 delta = targetPos - oldPos;
-
-        entity.transform.position = targetPos;
-
-        var vcam = FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
-        if (vcam != null) vcam.OnTargetObjectWarped(entity.transform, delta);
-
-        if (nextDoor) nextDoor.DisableInteractionTemporarily(reuseCooldown);
+        WarpEntity(entity);
     }
 }

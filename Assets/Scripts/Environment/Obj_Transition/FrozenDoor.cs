@@ -45,17 +45,10 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
     private Collider2D triggerCol;
     private Transform promptPoint;
 
-    private void Reset()
-    {
-        animator = GetComponent<Animator>();
-        triggerCol = GetComponent<Collider2D>();
-        if (triggerCol) triggerCol.isTrigger = true;
-    }
-
     private void Awake()
     {
-        if (!animator) animator = GetComponent<Animator>();
-        if (!triggerCol) triggerCol = GetComponent<Collider2D>();
+        animator ??= GetComponent<Animator>();
+        triggerCol ??= GetComponent<Collider2D>();
         if (triggerCol) triggerCol.isTrigger = true;
     }
 
@@ -73,11 +66,7 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         }
     }
 
-    public void ApplyHeat(float delta)
-    {
-        temperature += delta;
-    }
-
+    public void ApplyHeat(float delta) { temperature += delta; }
     public void ApplyCold(float delta) { }
     public void CoolDown(float delta) { }
 
@@ -86,35 +75,39 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         isFrozen = false;
         ApplyFrozenState(false);
 
-        if (!string.IsNullOrEmpty(sfxMeltKey))
-            AudioManager.Instance?.PlaySFX(sfxMeltKey);
+        AudioManager.Instance?.PlaySFX(sfxMeltKey);
     }
 
     private void ApplyFrozenState(bool frozen)
     {
-        if (!animator) return;
-        animator.SetBool(freezeParam, frozen);
-        animator.SetBool(unfreezeParam, !frozen);
+        animator?.SetBool(freezeParam, frozen);
+        animator?.SetBool(unfreezeParam, !frozen);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
-        playerGO = other.gameObject;
-
-        if (isFrozen)
-        {
-            animator?.SetBool(freezeParam, true);
-            UIManager.Instance?.HideInteractPrompt(this);
+        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
+
+        // PLAYER
+        if (other.CompareTag("Player"))
+        {
+            playerGO = other.gameObject;
+
+            if (!isFrozen)
+            {
+                UIManager.Instance?.ShowInteractPrompt(this);
+                animator?.SetBool(closeParam, false);
+                animator?.SetBool(openParam, true);
+                AudioManager.Instance?.PlaySFX(sfxOpenKey);
+            }
         }
 
-        UIManager.Instance?.ShowInteractPrompt(this);
-        animator?.SetBool(closeParam, false);
-        animator?.SetBool(openParam, true);
-
-        if (!string.IsNullOrEmpty(sfxOpenKey))
-            AudioManager.Instance?.PlaySFX(sfxOpenKey);
+        // ENEMY AUTO USE
+        if (other.CompareTag("Enemy") && !isFrozen && canUseDoor)
+        {
+            OpenForEntity(other.gameObject);
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -126,13 +119,7 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
             UIManager.Instance?.HideInteractPrompt(this);
             animator?.SetBool(openParam, false);
             animator?.SetBool(closeParam, true);
-
-            if (!string.IsNullOrEmpty(sfxCloseKey))
-                AudioManager.Instance?.PlaySFX(sfxCloseKey);
-        }
-        else
-        {
-            animator?.SetBool(freezeParam, true);
+            AudioManager.Instance?.PlaySFX(sfxCloseKey);
         }
 
         playerGO = null;
@@ -147,6 +134,7 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
     private IEnumerator OpenAndGo()
     {
         if (isFrozen || !canUseDoor || playerGO == null) yield break;
+
         canUseDoor = false;
 
         animator?.SetBool(openParam, true);
@@ -187,17 +175,11 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         var vcam = FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
         if (vcam != null) vcam.OnTargetObjectWarped(playerGO.transform, delta);
 
-        if (nextDoor) nextDoor.DisableInteractionTemporarily(reuseCooldown);
+        nextDoor?.DisableInteractionTemporarily(reuseCooldown);
     }
 
     private IEnumerator DoLoadScene()
     {
-        if (string.IsNullOrEmpty(targetSceneName))
-        {
-            Debug.LogWarning("[FrozenDoor] targetSceneName is empty.");
-            yield break;
-        }
-
         AsyncOperation op = SceneManager.LoadSceneAsync(targetSceneName);
         if (!waitForSceneLoaded) yield break;
         while (!op.isDone) yield return null;
@@ -228,6 +210,7 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         return promptPoint;
     }
 
+    // === AI / Enemy ===
     public bool CanOpenFor(GameObject entity)
     {
         if (isFrozen) return false;
@@ -245,13 +228,12 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
     private IEnumerator OpenForEntityRoutine(GameObject entity)
     {
         canUseDoor = false;
+
         animator?.SetBool(openParam, true);
         yield return new WaitForSeconds(openToTeleportDelay);
 
         if (openMode == OpenMode.Warp)
             DoWarpForEntity(entity);
-        else
-            Debug.LogWarning("[FrozenDoor] NPC cannot trigger scene load.");
 
         yield return new WaitForSeconds(reuseCooldown);
         canUseDoor = true;
@@ -260,6 +242,7 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
     private void DoWarpForEntity(GameObject entity)
     {
         if (entity == null || connectedDoor == null) return;
+
         var nextDoor = connectedDoor.GetComponent<FrozenDoor>();
         Transform targetExit = nextDoor ? nextDoor.exitPoint : null;
         if (targetExit == null) return;
@@ -273,6 +256,6 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         var vcam = FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
         if (vcam != null) vcam.OnTargetObjectWarped(entity.transform, delta);
 
-        if (nextDoor) nextDoor.DisableInteractionTemporarily(reuseCooldown);
+        nextDoor?.DisableInteractionTemporarily(reuseCooldown);
     }
 }

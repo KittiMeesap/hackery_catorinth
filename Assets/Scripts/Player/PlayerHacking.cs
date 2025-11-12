@@ -28,17 +28,20 @@ public class PlayerHacking : MonoBehaviour
         if (PlayerController.Instance != null)
         {
             var player = PlayerController.Instance;
-            var anim = player.GetComponent<Animator>();
-
-            if (anim != null && (anim.GetBool("IsAFK") || anim.GetBool("IsSleeping")))
-                return;
 
             var sleepingField = typeof(PlayerController)
                 .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (sleepingField != null && (bool)sleepingField.GetValue(player))
+            var afkField = typeof(PlayerController)
+                .GetField("isAFKTriggered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            bool isSleeping = sleepingField != null && (bool)sleepingField.GetValue(player);
+            bool isAFK = afkField != null && (bool)afkField.GetValue(player);
+
+            if (isSleeping || isAFK)
                 return;
         }
+
 
         if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer) return;
 

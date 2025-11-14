@@ -23,7 +23,6 @@ public class HackableObject : MonoBehaviour
     public bool completeMissionOnHack = false;
     public string missionId;
 
-
     protected bool isHacked = false;
     public static HackableObject ActiveProximityHackable;
     protected HackingUI currentUI;
@@ -34,7 +33,6 @@ public class HackableObject : MonoBehaviour
     {
         isHacked = false;
     }
-
 
     public virtual void OnEnterHackingMode()
     {
@@ -56,7 +54,13 @@ public class HackableObject : MonoBehaviour
 
         if (useHackOptions && hackOptions != null && hackOptions.Count > 1)
         {
-            UIManager.Instance.StartMultiOptionHack(hackOptions, transform, HandleHackOptionComplete, useHackTimer, hackTimeLimit);
+            UIManager.Instance.StartMultiOptionHack(
+                hackOptions,
+                transform,
+                HandleHackOptionComplete,
+                useHackTimer,
+                hackTimeLimit
+            );
         }
         else
         {
@@ -67,22 +71,22 @@ public class HackableObject : MonoBehaviour
 
     protected virtual void OnOptionSelected(HackOptionSO selectedOption)
     {
-        if (selectedOption == null) return;
-
         var sequence = selectedOption.isRandom
             ? GenerateRandomSequence(selectedOption.randomLength)
             : new List<ArrowUI.Direction>(selectedOption.sequence);
 
         if (!selectedOption.isRandom && (sequence == null || sequence.Count == 0))
-        {
             return;
-        }
 
-        currentUI.ShowSingleOptionSequence(sequence, transform, selectedOption.icon,
+        currentUI.ShowSingleOptionSequence(
+            sequence,
+            transform,
+            selectedOption.icon,
             () => HandleHackOptionComplete(selectedOption),
             OnHackFailed,
             useHackTimer,
-            hackTimeLimit);
+            hackTimeLimit
+        );
     }
 
     protected virtual void HandleHackOptionComplete(HackOptionSO option)
@@ -109,17 +113,20 @@ public class HackableObject : MonoBehaviour
 
         PlayerController.Instance?.ClearInputAndVelocity();
 
-        StartCoroutine(UnfreezeAfterDelay(0.2f));
+        StartCoroutine(UnfreezeAfterDelay(0.4f));
     }
 
     private IEnumerator UnfreezeAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
+
         PlayerController.Instance?.SetFrozen(false);
+
+        yield return new WaitForSeconds(0.15f);
+
         PlayerController.Instance?.SetPhoneOut(false);
         PlayerController.Instance?.ClearInputAndVelocity();
     }
-
 
     public virtual void OnHackFailed()
     {

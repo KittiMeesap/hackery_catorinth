@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1987378428808253193}
   - component: {fileID: 8235077537379642231}
   - component: {fileID: 3374738593763550090}
-  - component: {fileID: 5157898433451710106}
   m_Layer: 0
   m_Name: FireBall
   m_TagString: Untagged
@@ -179,23 +178,3 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &5157898433451710106
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7617842307031080833}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 605c1db2c26d22c40a1bc71e14d2b2e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FireballProjectile
-  chargeTime: 0.5
-  speed: 8
-  lifeTime: 3
-  damage: 2
-  heatAmount: 3
-  spellPrefab: {fileID: 7617842307031080833}
-  shootSFX: SFX_Fireball_Shoot
-  hitSFX: SFX_Fireball_Hit

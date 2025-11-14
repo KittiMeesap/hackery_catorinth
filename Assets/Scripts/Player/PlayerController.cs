@@ -199,7 +199,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     {
         UpdateTemperature();
 
-        if (isFrozen || IsPhoneOut || Time.time < controlUnlockTime)
+        if (isFrozen || Time.time < controlUnlockTime)
         {
             StopMovement(true);
             return;
@@ -268,6 +268,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     {
         if (anim == null) return;
 
+        // --- Sleep / Wake ---
         if (isSleeping || isWaking)
         {
             anim.SetBool("IsIdle", false);
@@ -277,27 +278,38 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             return;
         }
 
-        if (IsPhoneOut && !anim.GetBool("IsHacking"))
+        // --- PICK UP PHONE ---
+        if (IsPhoneOut && !UIManager.Instance.IsHacking)
         {
             anim.SetBool("IsPickupPhone", true);
+            anim.SetBool("IsHacking", false);
             anim.SetBool("IsIdle", false);
             anim.SetBool("IsWalking", false);
             return;
         }
 
-        if (anim.GetBool("IsHacking"))
+        // --- HACKING ---
+        if (UIManager.Instance.IsHacking)
+        {
+            anim.SetBool("IsPickupPhone", true);
+            anim.SetBool("IsHacking", true);
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
+            return;
+        }
+
+        // --- PUT PHONE AWAY (after hacking) ---
+        if (!IsPhoneOut)
         {
             anim.SetBool("IsPickupPhone", false);
-            anim.SetBool("IsIdle", false);
-            anim.SetBool("IsWalking", false);
-            return;
+            anim.SetBool("IsHacking", false);
         }
 
-        anim.SetBool("IsPickupPhone", false);
-        anim.SetBool("IsHacking", false);
+
         anim.SetBool("IsIdle", IsIdle);
-        anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.0001f);
+        anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.001f);
     }
+
 
     // ---------- Interact & Sleep ----------
     private void HandleIdleSleepSystem()

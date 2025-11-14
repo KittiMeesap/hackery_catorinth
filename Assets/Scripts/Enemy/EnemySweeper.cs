@@ -1,16 +1,19 @@
 using System.Collections;
-using UnityEngine;
 using Unity.Cinemachine;
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class EnemySweeper : MonoBehaviour
 {
+    [Header("Movement Settings")]
     public float moveSpeed = 2f;
     public Transform[] doorTargets;
     public float stopDistanceToDoor = 0.4f;
 
+    [Header("Behaviour Settings")]
     public bool destroyOnFinish = true;
 
+    [Header("Damage Settings")]
     public LayerMask playerLayer;
     public int instantKillDamage = 9999;
 
@@ -25,7 +28,7 @@ public class EnemySweeper : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0;
+        rb.gravityScale = 0f;
         rb.freezeRotation = true;
 
         sprite = GetComponentInChildren<SpriteRenderer>();
@@ -35,7 +38,6 @@ public class EnemySweeper : MonoBehaviour
     {
         StartCoroutine(SweepRoutine());
     }
-
     public void StartSweeping()
     {
         canMove = true;
@@ -57,9 +59,19 @@ public class EnemySweeper : MonoBehaviour
                 continue;
             }
 
-            while (Vector2.Distance(transform.position, target.position) > stopDistanceToDoor && !isDead)
+            float laneY = transform.position.y;
+
+            while (Vector2.Distance(new Vector2(transform.position.x, laneY),
+                                    new Vector2(target.position.x, laneY)) > stopDistanceToDoor
+                   && !isDead)
             {
-                Vector2 dir = (target.position - transform.position).normalized;
+                Vector3 pos = transform.position;
+                pos.y = laneY;
+                transform.position = pos;
+
+                float dx = target.position.x - transform.position.x;
+                Vector2 dir = new Vector2(Mathf.Sign(dx), 0f);
+
                 rb.linearVelocity = dir * moveSpeed;
 
                 if (sprite != null)
@@ -107,13 +119,6 @@ public class EnemySweeper : MonoBehaviour
             var dmg = other.GetComponentInParent<IDamageable>();
             if (dmg != null)
                 dmg.TakeDamage(instantKillDamage);
-            return;
-        }
-
-        var door = other.GetComponentInParent<ChocolateDoor>();
-        if (door != null && door.CanOpenFor(gameObject))
-        {
-            door.WarpEntity(gameObject);
             return;
         }
 

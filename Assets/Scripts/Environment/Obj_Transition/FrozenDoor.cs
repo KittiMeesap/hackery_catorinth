@@ -89,9 +89,6 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
                 AudioManager.Instance?.PlaySFX(sfxOpenKey);
             }
         }
-
-        if (other.CompareTag("Enemy") && CanOpenFor(other.gameObject))
-            WarpEntity(other.gameObject);
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -193,8 +190,13 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
 
     public bool CanOpenFor(GameObject entity)
     {
-        if (isFrozen) return false;
         if (!canUseDoor) return false;
+        if (entity != null && entity.CompareTag("Enemy"))
+        {
+            return connectedDoor != null && exitPoint != null;
+        }
+
+        if (isFrozen) return false;
         return connectedDoor != null && exitPoint != null;
     }
 

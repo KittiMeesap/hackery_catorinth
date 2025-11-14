@@ -94,11 +94,6 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
             if (isLocked) return;
             UIManager.Instance?.ShowInteractPrompt(this);
         }
-
-        if (other.CompareTag("Enemy") && CanOpenFor(other.gameObject))
-        {
-            WarpEntity(other.gameObject);
-        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -201,7 +196,15 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
     public bool CanOpenFor(GameObject entity)
     {
-        if (isLocked || !canUseDoor)
+        if (!canUseDoor)
+            return false;
+
+        if (entity != null && entity.CompareTag("Enemy"))
+        {
+            return connectedDoor != null && exitPoint != null;
+        }
+
+        if (isLocked)
             return false;
 
         if (startLocked && hasMelted == false)
@@ -212,6 +215,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
     public void OpenForEntity(GameObject entity)
     {
+        if (!CanOpenFor(entity)) return;
         WarpEntity(entity);
     }
 }

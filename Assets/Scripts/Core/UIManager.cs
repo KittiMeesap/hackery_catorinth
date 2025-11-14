@@ -19,18 +19,13 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI missionText;
 
     private IInteractable currentPromptTarget;
-    private Transform promptFollowTarget;
 
     private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-        }
         else
-        {
             Destroy(gameObject);
-        }
     }
 
     public void ShowInteractPrompt(IInteractable target)
@@ -50,19 +45,13 @@ public class UIManager : MonoBehaviour
 
     public void HideInteractPrompt(IInteractable target)
     {
-        if (currentPromptTarget == target && promptUI != null)
-        {
+        if (promptUI != null)
             promptUI.SetActive(false);
-            currentPromptTarget = null;
-        }
+
+        currentPromptTarget = null;
     }
 
-
-
-    public void ShowLockedMessage()
-    {
-        Debug.Log("Object is locked.");
-    }
+    public void ShowLockedMessage() { }
 
     public void StartMultiOptionHack(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onOptionSelected)
     {

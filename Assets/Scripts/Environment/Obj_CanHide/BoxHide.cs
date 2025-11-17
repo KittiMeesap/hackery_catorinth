@@ -51,18 +51,21 @@ public class BoxHide : HidingSpot, IInteractable
     private PlayerState currentState = PlayerState.Idle;
     private SpriteRenderer sr;
 
-    private CinemachineCamera cam;
-    private Transform originalFollowTarget;
     private Rigidbody2D rb;
+    private CinemachineCamera cam;
 
     private void Awake()
     {
         isMovableContainer = true;
         defaultScale = transform.localScale;
-        rb = GetComponent<Rigidbody2D>();
 
-        if (anim == null) anim = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        rb.gravityScale = 0;
+        rb.freezeRotation = true;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+
         sr = GetComponentInChildren<SpriteRenderer>();
+        if (anim == null) anim = GetComponent<Animator>();
 
         hashIdle = Animator.StringToHash(idleStateName);
         hashWalk = Animator.StringToHash(walkStateName);
@@ -71,34 +74,41 @@ public class BoxHide : HidingSpot, IInteractable
         hashIsWalking = Animator.StringToHash(isWalkingBoolParam);
 
         if (highlightSprite) highlightSprite.enabled = false;
+
         EnsurePromptPoint();
         if (autoPlacePromptAbove) UpdatePromptPointPosition();
 
         cam = FindFirstObjectByType<CinemachineCamera>();
     }
 
+    //UPDATE
     private void Update()
     {
-        if (isInside && !isBusy)
-            HandleBoxMovement();
-
         if (autoPlacePromptAbove)
             UpdatePromptPointPosition();
     }
 
-    private void HandleBoxMovement()
+    private void FixedUpdate()
+    {
+        if (isInside && !isBusy)
+            HandleMovementFixed();
+
+        if (isInside && playerController != null)
+        {
+            playerController.transform.position = transform.position;
+        }
+    }
+
+    private void HandleMovementFixed()
     {
         if (playerController == null) return;
 
         Vector2 input = playerController.GetMoveInput();
+
         if (input.sqrMagnitude > 0.01f)
         {
-            Vector3 delta = input.normalized * moveSpeed * Time.deltaTime;
-
-            if (rb != null)
-                rb.MovePosition(rb.position + (Vector2)delta);
-            else
-                transform.Translate(delta);
+            Vector2 delta = input.normalized * moveSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(rb.position + delta);
 
             SetPlayerState(PlayerState.Walk);
             lastFacingDir = Mathf.Sign(input.x);
@@ -113,13 +123,14 @@ public class BoxHide : HidingSpot, IInteractable
 
     private void SetPlayerState(PlayerState newState)
     {
-        if (anim == null || currentState == newState) return;
+        if (currentState == newState) return;
+
         currentState = newState;
         anim.CrossFade(newState == PlayerState.Idle ? hashIdle : hashWalk, 0.1f);
         anim.SetBool(hashIsWalking, newState == PlayerState.Walk);
     }
 
-    // ======================= INTERACT =======================
+    //INTERACT
     public void Interact()
     {
         if (isBusy) return;
@@ -144,9 +155,10 @@ public class BoxHide : HidingSpot, IInteractable
         isInside = true;
 
         AudioManager.Instance?.PlaySFX(sfxOpenKey);
-        anim?.SetTrigger(hashGetIn);
-        highlightSprite?.gameObject.SetActive(false);
+        anim.SetTrigger(hashGetIn);
+
         UIManager.Instance?.HideInteractPrompt(this);
+        if (highlightSprite) highlightSprite.enabled = false;
 
         playerController = PlayerController.Instance;
 
@@ -154,13 +166,6 @@ public class BoxHide : HidingSpot, IInteractable
         foreach (var s in playerSprites) s.enabled = false;
 
         currentPlayer.EnterHiding(this);
-        playerController.SetFrozen(false);
-
-        if (cam != null)
-        {
-            originalFollowTarget = cam.Follow;
-            cam.Follow = this.transform;
-        }
 
         yield return new WaitForSeconds(enterAnimTime);
 
@@ -172,55 +177,57 @@ public class BoxHide : HidingSpot, IInteractable
     {
         isBusy = true;
         AudioManager.Instance?.PlaySFX(sfxCloseKey);
-        anim?.SetTrigger(hashGetOut);
+        anim.SetTrigger(hashGetOut);
 
         yield return new WaitForSeconds(exitAnimTime);
 
-        if (playerSprites != null)
-        {
-            foreach (var s in playerSprites)
-                if (s != null) s.enabled = true;
-        }
+        foreach (var s in playerSprites)
+            if (s != null) s.enabled = true;
 
         currentPlayer.ExitHiding(this);
-        playerController.transform.position = transform.position + Vector3.up * 0.2f;
 
         playerController = null;
+
         isInside = false;
         isBusy = false;
-
-        if (cam != null && originalFollowTarget != null)
-            cam.Follow = originalFollowTarget;
-
         isPlayerNear = true;
-        UIManager.Instance?.ShowInteractPrompt(this);
 
+        UIManager.Instance?.ShowInteractPrompt(this);
         RefreshHighlight();
     }
 
-    // ======================= TRIGGER =======================
+    //TRIGGERS
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
+
         currentPlayer = other.GetComponent<PlayerHiding>();
         isPlayerNear = true;
+
+        if (!isInside)
+            UIManager.Instance?.ShowInteractPrompt(this);
+
         RefreshHighlight();
-        if (!isInside) UIManager.Instance?.ShowInteractPrompt(this);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-        if (!isInside)
-        {
-            isPlayerNear = false;
-            currentPlayer = null;
-            UIManager.Instance?.HideInteractPrompt(this);
-        }
+
+        if (isInside) return;
+
+        isPlayerNear = false;
+        currentPlayer = null;
+
+        UIManager.Instance?.HideInteractPrompt(this);
         RefreshHighlight();
     }
 
-    public override Vector2 GetExitPosition() => transform.position + Vector3.up * 0.2f;
+    //HELPERS
+    public override Vector2 GetExitPosition()
+    {
+        return transform.position + Vector3.up * 0.2f;
+    }
 
     private void RefreshHighlight()
     {
@@ -231,7 +238,7 @@ public class BoxHide : HidingSpot, IInteractable
     public Transform GetPromptPoint()
     {
         if (autoPlacePromptAbove) UpdatePromptPointPosition();
-        return promptPoint != null ? promptPoint : transform;
+        return promptPoint;
     }
 
     private void EnsurePromptPoint()
@@ -247,8 +254,12 @@ public class BoxHide : HidingSpot, IInteractable
     private void UpdatePromptPointPosition()
     {
         if (promptPoint == null) return;
-        Bounds b = sr != null && sr.sprite != null ? sr.bounds : GetComponent<Collider2D>()?.bounds ?? new Bounds(transform.position, Vector3.one);
-        Vector3 topCenter = new(b.center.x, b.max.y + promptMarginY, transform.position.z);
-        promptPoint.position = topCenter;
+
+        Bounds b = sr != null && sr.sprite != null
+            ? sr.bounds
+            : GetComponent<Collider2D>().bounds;
+
+        Vector3 top = new(b.center.x, b.max.y + promptMarginY, transform.position.z);
+        promptPoint.position = top;
     }
 }

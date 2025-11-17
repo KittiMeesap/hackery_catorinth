@@ -71,7 +71,8 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     private readonly Dictionary<object, float> speedModifiers = new();
 
-    // ---------- Temperature ----------
+
+    // --------------------- Temperature ---------------------
     public void ApplyHeat(float amt) => temperature = Mathf.Clamp(temperature + amt, -maxCold, maxHeat);
     public void ApplyCold(float amt) => temperature = Mathf.Clamp(temperature - amt, -maxCold, maxHeat);
 
@@ -135,6 +136,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
+
     private float CurrentSpeed
     {
         get
@@ -154,9 +156,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
                     .GetValue(PlayerHiding.Instance) as HidingSpot;
 
                 if (spot != null && spot.isMovableContainer)
-                {
                     mult *= hidingMoveMultiplier;
-                }
             }
 
             foreach (var kv in speedModifiers)
@@ -166,6 +166,8 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
+
+    // --------------------- Unity Lifecycle ---------------------
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -195,6 +197,8 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         playerInput.actions["Interact"].performed -= OnInteractPerformed;
     }
 
+
+    // --------------------- Update Loop ---------------------
     private void Update()
     {
         UpdateTemperature();
@@ -211,13 +215,6 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             return;
         }
 
-        if (isSleeping && moveInput.sqrMagnitude > 0.0001f && !isWaking)
-        {
-            anim.SetTrigger("Wake");
-            StartCoroutine(RestoreIdleAfterWake());
-            return;
-        }
-
         if (moveInput.sqrMagnitude > 0.0001f)
             MoveCharacter();
         else
@@ -230,7 +227,80 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     private void LateUpdate() => UpdateAnimation();
 
-    // ---------- Movement ----------
+
+    // --------------------- Animation ---------------------
+    private void UpdateAnimation()
+    {
+        if (anim == null) return;
+
+        if (isSleeping || isWaking)
+        {
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
+            anim.SetBool("IsPickupPhone", false);
+            anim.SetBool("IsHacking", false);
+            return;
+        }
+
+        if (IsPhoneOut && !UIManager.Instance.IsHacking)
+        {
+            anim.SetBool("IsPickupPhone", true);
+            anim.SetBool("IsHacking", false);
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
+            return;
+        }
+
+        if (UIManager.Instance.IsHacking)
+        {
+            anim.SetBool("IsPickupPhone", true);
+            anim.SetBool("IsHacking", true);
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
+            return;
+        }
+
+        if (!IsPhoneOut)
+        {
+            anim.SetBool("IsPickupPhone", false);
+            anim.SetBool("IsHacking", false);
+        }
+
+        anim.SetBool("IsIdle", IsIdle);
+        anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.001f);
+    }
+
+
+    // --------------------- Wake System ---------------------
+    private void WakeUp()
+    {
+        if (!isSleeping || isWaking) return;
+
+        anim.SetTrigger("Wake");
+        StartCoroutine(RestoreIdleAfterWake());
+    }
+
+    private IEnumerator RestoreIdleAfterWake()
+    {
+        isWaking = true;
+        isSleeping = false;
+
+        rb.linearVelocity = Vector2.zero;
+        moveInput = Vector2.zero;
+
+        yield return new WaitForSeconds(1.2f);
+
+        isWaking = false;
+        idleTimer = 0f;
+        isAFKTriggered = false;
+
+        anim.ResetTrigger("AFK");
+        anim.ResetTrigger("Wake");
+        anim.SetBool("IsIdle", true);
+    }
+
+
+    // --------------------- Movement ---------------------
     private void MoveCharacter()
     {
         Vector2 targetVel = moveInput.normalized * CurrentSpeed;
@@ -263,55 +333,38 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
-    // ---------- Animation ----------
-    private void UpdateAnimation()
-    {
-        if (anim == null) return;
 
-        // --- Sleep / Wake ---
+    // --------------------- Input ---------------------
+    private void OnMovePerformed(InputAction.CallbackContext ctx)
+    {
+        Vector2 input = ctx.ReadValue<Vector2>();
+
+        if (isSleeping && !isWaking)
+        {
+            WakeUp();
+            return;
+        }
+
         if (isSleeping || isWaking)
         {
-            anim.SetBool("IsIdle", false);
-            anim.SetBool("IsWalking", false);
-            anim.SetBool("IsPickupPhone", false);
-            anim.SetBool("IsHacking", false);
+            moveInput = Vector2.zero;
             return;
         }
 
-        // --- PICK UP PHONE ---
-        if (IsPhoneOut && !UIManager.Instance.IsHacking)
-        {
-            anim.SetBool("IsPickupPhone", true);
-            anim.SetBool("IsHacking", false);
-            anim.SetBool("IsIdle", false);
-            anim.SetBool("IsWalking", false);
-            return;
-        }
-
-        // --- HACKING ---
-        if (UIManager.Instance.IsHacking)
-        {
-            anim.SetBool("IsPickupPhone", true);
-            anim.SetBool("IsHacking", true);
-            anim.SetBool("IsIdle", false);
-            anim.SetBool("IsWalking", false);
-            return;
-        }
-
-        // --- PUT PHONE AWAY (after hacking) ---
-        if (!IsPhoneOut)
-        {
-            anim.SetBool("IsPickupPhone", false);
-            anim.SetBool("IsHacking", false);
-        }
-
-
-        anim.SetBool("IsIdle", IsIdle);
-        anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.001f);
+        moveInput = input;
     }
 
+    private void OnMoveCanceled(InputAction.CallbackContext ctx)
+    {
+        if (!isSleeping && !isWaking)
+            moveInput = Vector2.zero;
+    }
 
-    // ---------- Interact & Sleep ----------
+    private void OnInteractPerformed(InputAction.CallbackContext ctx)
+        => currentInteractable?.Interact();
+
+
+    // --------------------- Sleep / AFK ---------------------
     private void HandleIdleSleepSystem()
     {
         if (isSleeping || isWaking)
@@ -320,6 +373,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         if (IsIdle)
         {
             idleTimer += Time.deltaTime;
+
             if (!isAFKTriggered && idleTimer >= afkDelay)
             {
                 anim.SetTrigger("AFK");
@@ -330,6 +384,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         else
         {
             idleTimer = 0f;
+
             if (isAFKTriggered)
             {
                 anim.SetTrigger("Wake");
@@ -338,6 +393,8 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
+
+    // --------------------- Interactable ---------------------
     private void UpdateInteractPrompt()
     {
         if (isFrozen)
@@ -368,30 +425,12 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
-    private IEnumerator RestoreIdleAfterWake()
-    {
-        if (!isSleeping) yield break;
-        isWaking = true;
-        isSleeping = false;
 
-        yield return new WaitForSeconds(1.2f);
-
-        isWaking = false;
-        isAFKTriggered = false;
-        idleTimer = 0f;
-
-        moveInput = Vector2.zero;
-        rb.linearVelocity = Vector2.zero;
-
-        anim.ResetTrigger("AFK");
-        anim.ResetTrigger("Wake");
-        anim.SetBool("IsIdle", true);
-    }
-
-    // ---------- State ----------
+    // --------------------- State (Frozen / Phone / Delay) ---------------------
     public void SetFrozen(bool frozen)
     {
         isFrozen = frozen;
+
         if (frozen)
         {
             rb.linearVelocity = Vector2.zero;
@@ -432,20 +471,19 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         playerInput.actions["Move"].canceled += OnMoveCanceled;
     }
 
-    // ---------- Input ----------
-    private void OnMovePerformed(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
-    private void OnMoveCanceled(InputAction.CallbackContext ctx) => moveInput = Vector2.zero;
-    private void OnInteractPerformed(InputAction.CallbackContext ctx) => currentInteractable?.Interact();
 
-    // ---------- Damage ----------
+    // --------------------- Damage & Utility ---------------------
     public void TakeDamage(int amount) => PlayerHealth.TryDamagePlayer(amount, transform.position);
+
     public void SetSpeedModifier(object key, float multiplier) => speedModifiers[key] = multiplier;
+
     public void RemoveSpeedModifier(object key)
     {
         if (speedModifiers.ContainsKey(key)) speedModifiers.Remove(key);
     }
 
     public Vector2 GetMoveInput() => moveInput;
+
     void IDamageable.TakeDamage(int amount) => TakeDamage(amount);
     void IHeatable.ApplyHeat(float amt) => ApplyHeat(amt);
     void IHeatable.CoolDown(float amt) => CoolDown(amt);

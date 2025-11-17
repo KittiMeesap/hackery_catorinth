@@ -22,6 +22,7 @@ public class PlayerHiding : MonoBehaviour
     }
 
     public void SetHidingSpot(HidingSpot spot) => currentSpot = spot;
+
     public void ClearHidingSpot(HidingSpot spot)
     {
         if (currentSpot == spot)
@@ -38,21 +39,14 @@ public class PlayerHiding : MonoBehaviour
 
         if (playerController)
         {
-            if (spot.isMovableContainer)
-            {
-                playerController.SetFrozen(false);
-            }
-            else
-            {
-                playerController.SetFrozen(true);
-            }
-
+            playerController.SetFrozen(false);
             playerController.SetPhoneOut(false);
             playerController.ClearInputAndVelocity();
         }
 
+        transform.SetParent(null);
+
         transform.position = spot.GetHidingPosition();
-        transform.SetParent(spot.transform);
 
         currentSpot = spot;
 

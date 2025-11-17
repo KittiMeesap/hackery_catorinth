@@ -105,7 +105,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         if (rb != null)
         {
-            Vector2 knockDir = ((Vector2)transform.position - damageSource).normalized;
+            Vector2 knockDir = ((Vector2)transform.position - damageSource);
+            knockDir.y = 0;
+            knockDir = knockDir.normalized;
+
             rb.AddForce(knockDir * knockbackForce, ForceMode2D.Impulse);
         }
 
@@ -114,6 +117,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         StartCoroutine(InvincibilityRoutine());
     }
+
 
     private IEnumerator InvincibilityRoutine()
     {

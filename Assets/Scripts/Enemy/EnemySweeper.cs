@@ -25,6 +25,8 @@ public class EnemySweeper : MonoBehaviour
 
     private IOpenableDoor lastDoorUsed = null;
 
+    private float laneY;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -36,8 +38,11 @@ public class EnemySweeper : MonoBehaviour
 
     private void OnEnable()
     {
+        laneY = transform.position.y;
+
         StartCoroutine(SweepRoutine());
     }
+
     public void StartSweeping()
     {
         canMove = true;
@@ -58,8 +63,6 @@ public class EnemySweeper : MonoBehaviour
                 currentIndex++;
                 continue;
             }
-
-            float laneY = transform.position.y;
 
             while (Vector2.Distance(new Vector2(transform.position.x, laneY),
                                     new Vector2(target.position.x, laneY)) > stopDistanceToDoor
@@ -82,12 +85,12 @@ public class EnemySweeper : MonoBehaviour
 
             rb.linearVelocity = Vector2.zero;
 
+            // Trigger melting on door
             var heatObj = target.GetComponentInParent<IHeatable>();
             if (heatObj != null)
-            {
                 heatObj.ApplyHeat(999f);
-            }
 
+            // Check if door can open
             var door = target.GetComponent<IOpenableDoor>();
             if (door == null)
                 door = target.GetComponentInParent<IOpenableDoor>();
@@ -97,6 +100,9 @@ public class EnemySweeper : MonoBehaviour
                 if (door != lastDoorUsed)
                 {
                     door.OpenForEntity(gameObject);
+
+                    laneY = transform.position.y;
+
                     lastDoorUsed = door;
                     yield return new WaitForSeconds(0.25f);
                 }
@@ -124,9 +130,7 @@ public class EnemySweeper : MonoBehaviour
 
         var heat = other.GetComponentInParent<IHeatable>();
         if (heat != null)
-        {
             heat.ApplyHeat(999f);
-        }
 
         if (other.CompareTag("Transition"))
             return;
@@ -136,8 +140,6 @@ public class EnemySweeper : MonoBehaviour
     {
         var impulse = GetComponent<CinemachineImpulseSource>();
         if (impulse != null)
-        {
             impulse.GenerateImpulse();
-        }
     }
 }

@@ -233,12 +233,19 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     {
         if (anim == null) return;
 
-        if (isSleeping || isWaking)
+        if (isSleeping)
         {
             anim.SetBool("IsIdle", false);
             anim.SetBool("IsWalking", false);
             anim.SetBool("IsPickupPhone", false);
             anim.SetBool("IsHacking", false);
+            return;
+        }
+
+        if (isWaking)
+        {
+            anim.SetBool("IsIdle", false);
+            anim.SetBool("IsWalking", false);
             return;
         }
 
@@ -260,6 +267,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             return;
         }
 
+        // Default
         if (!IsPhoneOut)
         {
             anim.SetBool("IsPickupPhone", false);
@@ -270,11 +278,13 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.001f);
     }
 
-
     // --------------------- Wake System ---------------------
     private void WakeUp()
     {
         if (!isSleeping || isWaking) return;
+
+        isSleeping = false;
+        isWaking = true;
 
         anim.SetTrigger("Wake");
         StartCoroutine(RestoreIdleAfterWake());
@@ -282,23 +292,20 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     private IEnumerator RestoreIdleAfterWake()
     {
-        isWaking = true;
-        isSleeping = false;
-
         rb.linearVelocity = Vector2.zero;
         moveInput = Vector2.zero;
 
         yield return new WaitForSeconds(1.2f);
 
         isWaking = false;
-        idleTimer = 0f;
         isAFKTriggered = false;
+        idleTimer = 0f;
 
         anim.ResetTrigger("AFK");
         anim.ResetTrigger("Wake");
         anim.SetBool("IsIdle", true);
+        anim.SetBool("IsWalking", false);
     }
-
 
     // --------------------- Movement ---------------------
     private void MoveCharacter()
@@ -341,7 +348,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
         if (isSleeping && !isWaking)
         {
-            WakeUp();
+            WakeUp();         // ⭐ ปลุก
             return;
         }
 

@@ -11,6 +11,7 @@ public class HackableObject : MonoBehaviour
     public HackOptionSO defaultHackOption;
     public bool useHackOptions = false;
     public List<HackOptionSO> hackOptions;
+    public float reduceTimeOnFail = 3f;
 
     [Header("Timer Settings")]
     public bool useHackTimer = false;
@@ -134,6 +135,9 @@ public class HackableObject : MonoBehaviour
 
         if (triggerType == HackTriggerType.ProximityInteract && ActiveProximityHackable == this)
             ActiveProximityHackable = null;
+
+        var timer = FindFirstObjectByType<CountdownTimer>();
+        timer?.ReduceTime(reduceTimeOnFail);
 
         PlayerController.Instance?.ClearInputAndVelocity();
     }

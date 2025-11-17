@@ -128,6 +128,14 @@ public class CountdownTimer : MonoBehaviour
         warned = false;
         UpdateTimerUI();
     }
+    public void ReduceTime(float amount)
+    {
+        currentTime -= amount;
+        if (currentTime < 0)
+            currentTime = 0;
+
+        UpdateTimerUI();
+    }
 
     public void StartCountdown() => isRunning = true;
     public void StopCountdown() => isRunning = false;

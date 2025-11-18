@@ -68,6 +68,7 @@ public class CountdownTimer : MonoBehaviour
         int seconds = Mathf.FloorToInt(currentTime % 60);
         timerText.text = $"{minutes:00}:{seconds:00}";
 
+        // Warning mode (10 seconds left)
         if (currentTime <= warningThreshold)
         {
             timerText.color = warningColor;
@@ -122,12 +123,51 @@ public class CountdownTimer : MonoBehaviour
         }
     }
 
+    //Damage Flash
+    public void PlayDamageFlash()
+    {
+        if (timerText == null) return;
+        StartCoroutine(DamageFlashRoutine());
+    }
+
+    private System.Collections.IEnumerator DamageFlashRoutine()
+    {
+        float shakeTime = 0.25f;
+
+        Vector3 originalPos = timerText.rectTransform.localPosition;
+        Color originalColor = timerText.color;
+
+        float t = 0f;
+        while (t < shakeTime)
+        {
+            t += Time.deltaTime * 4f;
+
+            // Shake
+            float shakeStrength = 5f * (1f - (t / shakeTime));
+            timerText.rectTransform.localPosition =
+                originalPos + (Vector3)Random.insideUnitCircle * shakeStrength;
+
+            // Flash red
+            float f = Mathf.PingPong(t * 6f, 1f);
+            Color c = Color.Lerp(originalColor, Color.red, f);
+            timerText.color = c;
+
+            yield return null;
+        }
+
+        // Restore
+        timerText.rectTransform.localPosition = originalPos;
+        timerText.color = originalColor;
+    }
+
+    // TIME CONTROL
     public void ResetTimer()
     {
         currentTime = startTime;
         warned = false;
         UpdateTimerUI();
     }
+
     public void ReduceTime(float amount)
     {
         currentTime -= amount;
@@ -135,6 +175,8 @@ public class CountdownTimer : MonoBehaviour
             currentTime = 0;
 
         UpdateTimerUI();
+
+        PlayDamageFlash();
     }
 
     public void StartCountdown() => isRunning = true;

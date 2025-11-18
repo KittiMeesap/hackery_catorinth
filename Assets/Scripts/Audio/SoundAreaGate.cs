@@ -18,7 +18,7 @@ public class SoundAreaGate : MonoBehaviour
     private AudioSource source;
     private float targetVolume = 0f;
     private bool isInside = false;
-    private bool isZoneEnabled = false; // 🔹 เปลี่ยนค่าเริ่มต้นเป็น false
+    private bool isZoneEnabled = false; 
     private bool hasInitialized = false;
 
     private void Awake()
@@ -31,12 +31,12 @@ public class SoundAreaGate : MonoBehaviour
         source.loop = loopSound;
         source.spatialBlend = 0f;
         source.volume = 0f;
-        source.Stop(); // 🔹 หยุดทันที
+        source.Stop(); 
     }
 
     private void Start()
     {
-        // 🔹 ปิดเสียงทันทีตอนเริ่ม (กันเฟรมแรกที่เสียงรั่ว)
+        
         isZoneEnabled = false;
         source.Stop();
         source.volume = 0f;

@@ -69,8 +69,9 @@ public class AlarmMonitor : HackableObject
             animator.SetBool(paramIsOff, false);
         }
 
+        
         if (AudioManager.Instance != null && !string.IsNullOrEmpty(alarmSoundKey))
-            AudioManager.Instance.PlaySFX(alarmSoundKey);
+            AudioManager.Instance.PlaySFXAt(alarmSoundKey, transform.position, use3D: false);
 
         alarmRoutine = StartCoroutine(AlarmRoutine());
     }

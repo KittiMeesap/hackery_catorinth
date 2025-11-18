@@ -57,3 +57,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 9263ef99786161f4fb5cfbdb6e6506dd, type: 3}
   - key: BGM_ROOM1
     clip: {fileID: 8300000, guid: 4fb45f330b52f094d8647678614ff4e5, type: 3}
+  - key: SFX_SafeOpen
+    clip: {fileID: 0}
+  - key: SFX_PaperFly
+    clip: {fileID: 0}

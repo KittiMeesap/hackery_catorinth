@@ -9,33 +9,31 @@ public class TutorialPopup : MonoBehaviour
     public VideoPlayer videoPlayer;
     public Button closeButton;
 
-    private string prefKey;
-
     public void Initialize()
     {
-       
-        prefKey = "TutorialSeen_" + gameObject.GetInstanceID();
-
         popupPanel.SetActive(false);
         closeButton.onClick.AddListener(ClosePopup);
-    }
-
-    public bool HasSeenTutorial()
-    {
-        return PlayerPrefs.GetInt(prefKey, 0) == 1;
     }
 
     public void OpenPopup()
     {
         popupPanel.SetActive(true);
-        videoPlayer.time = 0;
+
+        
+        GameManager.Instance.FreezeGame(true);
+
+        
+        videoPlayer.playbackSpeed = 1f;
+        videoPlayer.time = 0f;
         videoPlayer.Play();
     }
 
     public void ClosePopup()
     {
+        videoPlayer.Stop();
         popupPanel.SetActive(false);
-        PlayerPrefs.SetInt(prefKey, 1);
-        PlayerPrefs.Save();
+
+        
+        GameManager.Instance.FreezeGame(false);
     }
 }

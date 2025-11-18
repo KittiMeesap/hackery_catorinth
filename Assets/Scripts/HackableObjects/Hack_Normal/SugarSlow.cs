@@ -17,6 +17,10 @@ public class SugarSlow : MonoBehaviour, IHeatable, IFreezable
     [SerializeField] private float heatDecayRate = 1f;
     [SerializeField] private float coldDecayRate = 1f;
 
+    [Header("Audio Keys (from SoundLibrary)")]
+    [SerializeField] private string freezeSFXKey = "SFX_SugarFreeze";
+    [SerializeField] private string meltSFXKey = "SFX_SugarMelt";
+
     private bool isFrozen = false;
     private bool isMelted = true;
     private float heatLevel;
@@ -56,13 +60,34 @@ public class SugarSlow : MonoBehaviour, IHeatable, IFreezable
 
     private void ApplyStateByTemperature()
     {
+        // ========== FREEZE ==========
         if (heatLevel <= freezeColdThreshold && !isFrozen)
         {
             SetFrozen(true);
+            PlayFreezeSFX();
         }
+        // ========== MELT ==========
         else if (heatLevel >= meltHeatThreshold && !isMelted)
         {
             SetMelted(true);
+            PlayMeltSFX();
+        }
+    }
+
+    private void PlayFreezeSFX()
+    {
+        if (AudioManager.Instance != null && !string.IsNullOrWhiteSpace(freezeSFXKey))
+        {
+            
+            AudioManager.Instance.PlaySFXAt(freezeSFXKey, transform.position, false);
+        }
+    }
+
+    private void PlayMeltSFX()
+    {
+        if (AudioManager.Instance != null && !string.IsNullOrWhiteSpace(meltSFXKey))
+        {
+            AudioManager.Instance.PlaySFXAt(meltSFXKey, transform.position, false);
         }
     }
 
@@ -102,7 +127,8 @@ public class SugarSlow : MonoBehaviour, IHeatable, IFreezable
 
     public void ApplyHeat(float delta) => heatLevel += delta;
     public void ApplyCold(float delta) => heatLevel -= delta;
-    public void CoolDown(float delta) => heatLevel = Mathf.MoveTowards(heatLevel, 0f, delta);
+    public void CoolDown(float delta) =>
+        heatLevel = Mathf.MoveTowards(heatLevel, 0f, delta);
 
     private void OnTriggerEnter2D(Collider2D other)
     {

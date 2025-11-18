@@ -26,9 +26,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-        }
         else
         {
             Destroy(gameObject);
@@ -37,9 +35,7 @@ public class GameManager : MonoBehaviour
 
         playerInput = GetComponent<PlayerInput>();
         if (playerInput != null)
-        {
             exitAction = playerInput.actions["ExitGame"];
-        }
     }
 
     private void OnEnable()
@@ -91,5 +87,34 @@ public class GameManager : MonoBehaviour
     public void ToggleHackingMode(bool isActive)
     {
         IsInHackingMode = isActive;
+    }
+
+    
+    public void FreezeGame(bool freeze)
+    {
+        if (freeze)
+        {
+            Time.timeScale = 0f;
+
+            
+            if (playerInput != null)
+                playerInput.enabled = false;
+
+            
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+
+            
+            if (playerInput != null)
+                playerInput.enabled = true;
+
+            
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 }

@@ -20,6 +20,9 @@ public class GameManager : MonoBehaviour
     [Header("External References")]
     public CountdownTimer countdownManager;
 
+    [Header("Screen Fade")]
+    public ScreenFader screenFader;
+
     private PlayerInput playerInput;
     private InputAction exitAction;
 
@@ -36,6 +39,12 @@ public class GameManager : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         if (playerInput != null)
             exitAction = playerInput.actions["ExitGame"];
+    }
+
+    private void Start()
+    {
+        if (screenFader != null)
+            StartCoroutine(screenFader.FadeIn());
     }
 
     private void OnEnable()
@@ -89,32 +98,21 @@ public class GameManager : MonoBehaviour
         IsInHackingMode = isActive;
     }
 
-    
     public void FreezeGame(bool freeze)
     {
         if (freeze)
         {
             Time.timeScale = 0f;
 
-            
             if (playerInput != null)
                 playerInput.enabled = false;
-
-            
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
         }
         else
         {
             Time.timeScale = 1f;
 
-            
             if (playerInput != null)
                 playerInput.enabled = true;
-
-            
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
         }
     }
 }

@@ -182,11 +182,12 @@ MonoBehaviour:
   hackOptions:
   - {fileID: 11400000, guid: 6a7741e21ee995c47a2316be5b394868, type: 2}
   - {fileID: 11400000, guid: 627f5f345af959c49bcebb9e15f3ffcd, type: 2}
-  useHackTimer: 0
-  hackTimeLimit: 5
+  reduceTimeOnFail: 3
+  useHackTimer: 1
+  hackTimeLimit: 3
   allowRepeatHack: 1
   completeMissionOnHack: 0
-  missionId: cookiedead
+  missionId: 
   heatRadius: 2.5
   heatLayer:
     serializedVersion: 2

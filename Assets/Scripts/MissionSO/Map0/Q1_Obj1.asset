@@ -16,12 +16,12 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID:d8f8f84f9b6f9da4787a129c23ded536
     m_TableEntryReference:
-      m_KeyId: 232743243776
+      m_KeyId: 24916438717566976
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  missionType: 4
+  missionType: 1
   requiredAmount: 1
   missionId: Q1_Obj1
   targetMissionId: Q1_Obj1

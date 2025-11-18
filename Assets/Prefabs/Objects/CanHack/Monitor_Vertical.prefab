@@ -177,8 +177,9 @@ MonoBehaviour:
   defaultHackOption: {fileID: 11400000, guid: c32fdfcc28f0b534795ca44f5827cf41, type: 2}
   useHackOptions: 0
   hackOptions: []
-  useHackTimer: 0
-  hackTimeLimit: 5
+  reduceTimeOnFail: 3
+  useHackTimer: 1
+  hackTimeLimit: 3
   allowRepeatHack: 1
   completeMissionOnHack: 0
   missionId: 

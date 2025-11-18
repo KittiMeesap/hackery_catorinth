@@ -66618,6 +66618,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1417628164}
     - target: {fileID: 2501551089953630458, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
+      propertyPath: screenFader
+      value: 
+      objectReference: {fileID: 717555286}
+    - target: {fileID: 2501551089953630458, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: countdownText
       value: 
       objectReference: {fileID: 1512447751}
@@ -66625,6 +66629,10 @@ PrefabInstance:
       propertyPath: countdownManager
       value: 
       objectReference: {fileID: 1036731099}
+    - target: {fileID: 2501551089953630458, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
+      propertyPath: missionSetForScene
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3336330316463316781, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -66632,10 +66640,10 @@ PrefabInstance:
     - target: {fileID: 3952603335062983750, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: missionSet
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: 3b1614ee40af7994ab4dec554e5602e2, type: 2}
     - target: {fileID: 3952603335062983750, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: initialSets.Array.size
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3952603335062983750, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: 'initialSets.Array.data[0]'

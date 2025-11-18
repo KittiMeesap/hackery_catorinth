@@ -26,6 +26,7 @@ MonoBehaviour:
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-en
+    - Preload
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f37a2c64b52b4fb459c0e8855f720c0b
     m_Address: Localization_Dialogue_Map0_en

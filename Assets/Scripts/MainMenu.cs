@@ -13,19 +13,64 @@ public class MainMenu : MonoBehaviour
     public AudioClip clickSound;
     public AudioClip hoverSound;
 
+    [Header("Fade Overlay")]
+    public Image fadeOverlay;
+    public float fadeDuration = 0.6f;
+
     [Header("First Selected")]
     public Button firstSelected;
+
+    private bool isFading = false;
 
     private void Start()
     {
         if (firstSelected != null)
             firstSelected.Select();
+
+        if (fadeOverlay != null)
+        {
+            Color c = fadeOverlay.color;
+            c.a = 0f;
+            fadeOverlay.color = c;
+
+            fadeOverlay.raycastTarget = false;
+            fadeOverlay.gameObject.SetActive(true);
+        }
     }
 
     public void PlayGame()
     {
+        if (isFading) return;
+
         PlayClickSound();
-        SceneManager.LoadScene("Map 0");
+        StartCoroutine(FadeOutAndLoad("IntroCutscene"));
+    }
+
+    private System.Collections.IEnumerator FadeOutAndLoad(string sceneName)
+    {
+        isFading = true;
+
+        if (fadeOverlay != null)
+            fadeOverlay.raycastTarget = true;
+
+        float t = 0f;
+        while (t < fadeDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float p = t / fadeDuration;
+            p = p * p * (3 - 2 * p);
+
+            if (fadeOverlay != null)
+            {
+                Color c = fadeOverlay.color;
+                c.a = Mathf.Lerp(0f, 1f, p);
+                fadeOverlay.color = c;
+            }
+
+            yield return null;
+        }
+
+        SceneManager.LoadScene(sceneName);
     }
 
     public void Setting()
@@ -72,9 +117,7 @@ public class MainMenu : MonoBehaviour
     public void ResetMainMenu()
     {
         if (audioSource == null)
-        {
             audioSource = FindFirstObjectByType<AudioSource>();
-        }
 
         if (SettingPanel != null)
             SettingPanel.SetActive(false);

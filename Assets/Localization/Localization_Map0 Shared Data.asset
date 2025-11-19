@@ -15,44 +15,8 @@ MonoBehaviour:
   m_TableCollectionName: Localization_Map0
   m_TableCollectionNameGuidString: d8f8f84f9b6f9da4787a129c23ded536
   m_Entries:
-  - m_Id: 232743243776
+  - m_Id: 25221647507394560
     m_Key: Q1_Obj1
-    m_Metadata:
-      m_Items: []
-  - m_Id: 7580847168557056
-    m_Key: Q1_Obj2
-    m_Metadata:
-      m_Items: []
-  - m_Id: 7582952520421376
-    m_Key: Q1_Obj3
-    m_Metadata:
-      m_Items: []
-  - m_Id: 7584164439396352
-    m_Key: Q2_Obj1
-    m_Metadata:
-      m_Items: []
-  - m_Id: 7584343607480320
-    m_Key: Q2_Obj2
-    m_Metadata:
-      m_Items: []
-  - m_Id: 7584743966380032
-    m_Key: Q3_Obj1
-    m_Metadata:
-      m_Items: []
-  - m_Id: 7584761146249216
-    m_Key: Q3_Obj2
-    m_Metadata:
-      m_Items: []
-  - m_Id: 7584774463164416
-    m_Key: Q4_Obj1
-    m_Metadata:
-      m_Items: []
-  - m_Id: 17683533868044288
-    m_Key: Q4_Obj2
-    m_Metadata:
-      m_Items: []
-  - m_Id: 24916438717566976
-    m_Key: Find Cookie Receipt
     m_Metadata:
       m_Items: []
   m_Metadata:

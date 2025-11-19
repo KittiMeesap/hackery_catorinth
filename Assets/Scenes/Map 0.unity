@@ -927,8 +927,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3237283654086323508, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: hackTimeLimit
+      value: 3.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3237283654086323508, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
       propertyPath: heatLayer.m_Bits
       value: 3392
+      objectReference: {fileID: 0}
+    - target: {fileID: 3237283654086323508, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: reduceTimeOnFail
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4006585904479603422, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
       propertyPath: m_Name
@@ -5786,7 +5794,7 @@ Transform:
   m_GameObject: {fileID: 249995627}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.36, y: 0.26, z: -10}
+  m_LocalPosition: {x: -0.5, y: -0.099999905, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6301,9 +6309,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
+      propertyPath: hackTimeLimit
+      value: 3.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
       propertyPath: ambientSoundGate
       value: 
       objectReference: {fileID: 2039723910}
+    - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
+      propertyPath: reduceTimeOnFail
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
       propertyPath: defaultHackOption
       value: 
@@ -15497,12 +15513,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
+      propertyPath: hackTimeLimit
+      value: 3.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
       propertyPath: ambientSoundGate
       value: 
       objectReference: {fileID: 2000549110}
     - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
       propertyPath: coldLayer.m_Bits
       value: 3392
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
+      propertyPath: reduceTimeOnFail
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
       propertyPath: defaultHackOption
@@ -18644,7 +18668,7 @@ Transform:
   m_GameObject: {fileID: 661818490}
   serializedVersion: 2
   m_LocalRotation: {x: 4.6564877e-10, y: -0.000000029343937, z: 1.3663968e-17, w: 1}
-  m_LocalPosition: {x: 0.3600006, y: 0.26000023, z: -10}
+  m_LocalPosition: {x: 0.048439026, y: -0.10000229, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25902,6 +25926,17 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &837505165 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2073717265506570534, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
+  m_PrefabInstance: {fileID: 1034855521}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1d5f29d0262c514a82d7cd90c819af0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!21 &842831731
 Material:
   serializedVersion: 8
@@ -26754,6 +26789,14 @@ PrefabInstance:
     - target: {fileID: 3237283654086323508, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
       propertyPath: missionId
       value: Q3_Obj1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3237283654086323508, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: hackTimeLimit
+      value: 3.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3237283654086323508, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: reduceTimeOnFail
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4006585904479603422, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
       propertyPath: m_Name
@@ -30014,7 +30057,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2acbb16345b084045ba3289630ad791d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CountdownTimer
-  startTime: 300
+  startTime: 210
   timerText: {fileID: 1512447751}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   warningColor: {r: 1, g: 0, b: 0, a: 1}
@@ -48979,7 +49022,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6696699845232335426, guid: cbe3135697c01e44283c37564780d089, type: 3}
       propertyPath: hackTimeLimit
-      value: 6
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6696699845232335426, guid: cbe3135697c01e44283c37564780d089, type: 3}
       propertyPath: reduceTimeOnFail
@@ -59611,9 +59654,33 @@ PrefabInstance:
       value: Q1_Obj1
       objectReference: {fileID: 0}
     - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
+      propertyPath: useHackTimer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
+      propertyPath: hackTimeLimit
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
+      propertyPath: allowRepeatHack
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
+      propertyPath: reduceTimeOnFail
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
       propertyPath: completeMissionOnHack
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
+      propertyPath: doorsToUnlock.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
+      propertyPath: 'doorsToUnlock.Array.data[0]'
+      value: 
+      objectReference: {fileID: 837505165}
     - target: {fileID: 9044876843637597652, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.0265
@@ -63541,7 +63608,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -989438933
   m_SortingLayer: 2
-  m_SortingOrder: -1
+  m_SortingOrder: 1
   m_Sprite: {fileID: 2842709589449730162, guid: 75244fa649f9fc141bff17c0efbe5cf1, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 0.254}
   m_FlipX: 0
@@ -63563,6 +63630,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 201289475679685809, guid: b55df2a9397d58d4ab053bd6ada06561, type: 3}
       propertyPath: m_SortingLayer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 201289475679685809, guid: b55df2a9397d58d4ab053bd6ada06561, type: 3}
+      propertyPath: m_SortingOrder
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 201289475679685809, guid: b55df2a9397d58d4ab053bd6ada06561, type: 3}
@@ -80386,7 +80457,7 @@ MonoBehaviour:
   m_Intensity: 3.5
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 0000000023483b332b5c06c54f638a32e1b473b09f7507c291f7a973330124a1
+  m_ApplyToSortingLayers: 0000000023483b332b5c06c54f638a329f7507c291f7a973330124a1
   m_LightCookieSprite: {fileID: 686276937799870630, guid: 90ec7681d2b7e564db3b5de4c3575bcb, type: 3}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -80825,11 +80896,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.36
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.74
+      value: -2.1
       objectReference: {fileID: 0}
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalPosition.z

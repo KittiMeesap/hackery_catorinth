@@ -37,8 +37,8 @@ public class CountdownTimer : MonoBehaviour
             defaultScale = timerText.transform.localScale;
 
         ResetTimer();
-        StartCountdown();
     }
+
 
     private void Update()
     {

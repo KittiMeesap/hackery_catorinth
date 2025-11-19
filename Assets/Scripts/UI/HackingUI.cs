@@ -33,8 +33,6 @@ public class HackingUI : MonoBehaviour
     private System.Action<HackOptionSO> onOptionSelected;
     private Coroutine timerRoutine;
     private System.Action onTimerFail;
-
-    private bool isShowingSequence = false;
     public bool IsActive => hackPanel != null && hackPanel.activeSelf;
 
     private HackableObject currentHackTarget;
@@ -168,8 +166,6 @@ public class HackingUI : MonoBehaviour
     // INPUT SYSTEM
     public void SubmitInput(ArrowUI.Direction input)
     {
-        if (isShowingSequence) return;
-
         currentInput.Add(input);
 
         bool matchedPrefix = false;
@@ -399,8 +395,6 @@ public class HackingUI : MonoBehaviour
 
     private IEnumerator AnimateArrowsRoutine()
     {
-        isShowingSequence = true;
-
         List<ArrowUI> arrows = new();
         foreach (var opt in activeOptions)
             arrows.AddRange(opt.arrowUIs);
@@ -421,7 +415,5 @@ public class HackingUI : MonoBehaviour
             arrow.transform.localScale = Vector3.one;
             yield return new WaitForSeconds(arrowPopDelay);
         }
-
-        isShowingSequence = false;
     }
 }

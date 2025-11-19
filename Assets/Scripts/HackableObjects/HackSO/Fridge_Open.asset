@@ -15,7 +15,7 @@ MonoBehaviour:
   optionName: Open_Fridge
   icon: {fileID: 6260872447668863167, guid: 439c2ee076c93a1448289ed03f7d8a22, type: 3}
   optionType: 4
-  isRandom: 0
-  randomLength: 5
-  sequence: 0000000000000000
+  isRandom: 1
+  randomLength: 7
+  sequence: 
   description: 

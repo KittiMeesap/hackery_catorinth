@@ -218,4 +218,14 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         if (!CanOpenFor(entity)) return;
         WarpEntity(entity);
     }
+
+    public void UnlockDoorFromSafe()
+    {
+        isLocked = false;
+        hasMelted = true;
+        ApplyLockState(false);
+
+        Debug.Log("[ChocolateDoor] Door unlocked by Safe.");
+    }
+
 }

@@ -20,7 +20,6 @@ public class HackingUI : MonoBehaviour
 
     [Header("Juice Settings")]
     [SerializeField] private float panelPopDuration = 0.4f;
-    [SerializeField] private float arrowPopDelay = 0.08f;
     [SerializeField] private float arrowPopScale = 1.15f;
     [SerializeField] private float shakeIntensity = 2f;
     [SerializeField] private float shakeDuration = 0.25f;
@@ -36,6 +35,7 @@ public class HackingUI : MonoBehaviour
     public bool IsActive => hackPanel != null && hackPanel.activeSelf;
 
     private HackableObject currentHackTarget;
+
     public void SetCurrentHackTarget(HackableObject target)
     {
         currentHackTarget = target;
@@ -58,7 +58,7 @@ public class HackingUI : MonoBehaviour
             hackTimerSlider.gameObject.SetActive(false);
     }
 
-    // RANDOM SEQUENCE GENERATION
+    // RANDOM GENERATOR
     private List<ArrowUI.Direction> GenerateRandomSequence(int length)
     {
         var dirs = new List<ArrowUI.Direction>
@@ -95,9 +95,8 @@ public class HackingUI : MonoBehaviour
             if (option == null) continue;
 
             List<ArrowUI.Direction> seq =
-                option.isRandom ?
-                GenerateRandomSequence(option.randomLength) :
-                option.sequence;
+                option.isRandom ? GenerateRandomSequence(option.randomLength)
+                                : option.sequence;
 
             if (seq == null || seq.Count == 0) continue;
 
@@ -112,9 +111,13 @@ public class HackingUI : MonoBehaviour
 
             foreach (var dir in seq)
             {
-                if (!arrowPrefabs.TryGetValue(dir, out var prefab) || prefab == null) continue;
+                if (!arrowPrefabs.TryGetValue(dir, out var prefab) || prefab == null)
+                    continue;
+
                 GameObject arrowGO = Instantiate(prefab, arrowGroup);
-                arrowGO.transform.localScale = Vector3.zero;
+
+                // POP INSTANTLY
+                arrowGO.transform.localScale = Vector3.one * arrowPopScale;
 
                 var arrowUI = arrowGO.GetComponent<ArrowUI>();
                 arrowUI.Initialize(dir);
@@ -124,12 +127,11 @@ public class HackingUI : MonoBehaviour
 
             optUI.optionData = option;
             optUI.sequence = seq;
-            optUI.Setup(seq, () => onSuccess?.Invoke(optUI.optionData));
+            optUI.Setup(seq, () => onSuccess?.Invoke(option));
 
             activeOptions.Add(optUI);
         }
 
-        StartCoroutine(AnimateArrowsRoutine());
         UpdateTimerPosition();
     }
 
@@ -143,7 +145,7 @@ public class HackingUI : MonoBehaviour
             StopHackTimer();
     }
 
-    public void ShowSingleOptionSequence(List<ArrowUI.Direction> sequence, Transform worldTarget, Sprite icon, System.Action onComplete, System.Action onFail, bool useTimer,float timerDuration)
+    public void ShowSingleOptionSequence(List<ArrowUI.Direction> sequence, Transform worldTarget, Sprite icon, System.Action onComplete, System.Action onFail, bool useTimer, float timerDuration)
     {
         HackOptionSO temp = ScriptableObject.CreateInstance<HackOptionSO>();
         temp.icon = icon;
@@ -158,12 +160,9 @@ public class HackingUI : MonoBehaviour
 
         if (useTimer)
             StartHackTimer(timerDuration, onFail);
-        else
-            StopHackTimer();
     }
 
-
-    // INPUT SYSTEM
+    // INPUT
     public void SubmitInput(ArrowUI.Direction input)
     {
         currentInput.Add(input);
@@ -216,11 +215,10 @@ public class HackingUI : MonoBehaviour
     // TIMER
     private void UpdateTimerPosition()
     {
-        if (hackTimerSlider == null || !hackTimerSlider.gameObject.activeSelf) return;
+        if (!hackTimerSlider || !hackTimerSlider.gameObject.activeSelf) return;
 
         RectTransform timerRect = hackTimerSlider.transform as RectTransform;
 
-        // ⭐ Fix timer position: align under all options
         float baseOffset = -40f;
         float eachHeight = 70f;
 
@@ -232,8 +230,6 @@ public class HackingUI : MonoBehaviour
 
     public void StartHackTimer(float duration, System.Action onFail)
     {
-        if (hackTimerSlider == null) return;
-
         onTimerFail = onFail;
         hackTimerSlider.gameObject.SetActive(true);
 
@@ -391,29 +387,5 @@ public class HackingUI : MonoBehaviour
             Destroy(multiOptionParent.GetChild(i).gameObject);
 
         activeOptions.Clear();
-    }
-
-    private IEnumerator AnimateArrowsRoutine()
-    {
-        List<ArrowUI> arrows = new();
-        foreach (var opt in activeOptions)
-            arrows.AddRange(opt.arrowUIs);
-
-        foreach (var arrow in arrows)
-        {
-            float t = 0f;
-            const float dur = 0.15f;
-
-            while (t < dur)
-            {
-                t += Time.deltaTime;
-                float s = Mathf.Lerp(0f, arrowPopScale, t / dur);
-                arrow.transform.localScale = Vector3.one * s;
-                yield return null;
-            }
-
-            arrow.transform.localScale = Vector3.one;
-            yield return new WaitForSeconds(arrowPopDelay);
-        }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Safe : HackableObject
@@ -19,6 +20,9 @@ public class Safe : HackableObject
     [SerializeField] private string sfxOpenKey = "SFX_SafeOpen";
     [SerializeField] private string sfxPaperKey = "SFX_PaperFly";
 
+    [Header("Unlock Doors After Hack")]
+    [SerializeField] private List<ChocolateDoor> doorsToUnlock = new();
+
     private bool isOpened = false;
     private bool isAnimating = false;
 
@@ -38,7 +42,21 @@ public class Safe : HackableObject
 
         if (isOpened || isAnimating) return;
 
+        UnlockLinkedDoors();
+
         StartCoroutine(OpenSafeSequence());
+    }
+
+    private void UnlockLinkedDoors()
+    {
+        foreach (var door in doorsToUnlock)
+        {
+            if (door != null)
+            {
+                door.UnlockDoorFromSafe();
+                Debug.Log("[Safe] Unlocked door: " + door.name);
+            }
+        }
     }
 
     private IEnumerator OpenSafeSequence()

@@ -16,6 +16,6 @@ MonoBehaviour:
   icon: {fileID: -8861325437311414838, guid: fb9fbc2e21129c44da0765906c1b631d, type: 3}
   optionType: 4
   isRandom: 1
-  randomLength: 4
+  randomLength: 6
   sequence: 
   description: 

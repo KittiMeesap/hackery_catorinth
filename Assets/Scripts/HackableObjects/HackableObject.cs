@@ -42,6 +42,8 @@ public class HackableObject : MonoBehaviour
 
         currentUI = UIManager.Instance.hackingUI;
 
+        currentUI.SetCurrentHackTarget(this);
+
         PlayerController.Instance?.SetPhoneOut(true);
         PlayerController.Instance?.SetFrozen(true);
 

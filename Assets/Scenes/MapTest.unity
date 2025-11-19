@@ -30115,7 +30115,6 @@ MonoBehaviour:
   arrowLeftPrefab: {fileID: 4062521740420822897, guid: 4a849feff68e7e941af910a41a84368e, type: 3}
   arrowRightPrefab: {fileID: 4062521740420822897, guid: c495d0cd780214643a593ef86b9f4ce9, type: 3}
   panelPopDuration: 0.4
-  arrowPopDelay: 0.08
   arrowPopScale: 1.15
   shakeIntensity: 2
   shakeDuration: 0.3
@@ -47277,7 +47276,7 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID:d8f8f84f9b6f9da4787a129c23ded536
     m_TableEntryReference:
-      m_KeyId: 232743243776
+      m_KeyId: 0
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -48944,7 +48943,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1505413464
 RectTransform:
   m_ObjectHideFlags: 0
@@ -60972,7 +60971,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3952603335062983750, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: initialSets.Array.size
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3952603335062983750, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: 'initialSets.Array.data[0]'

@@ -61,6 +61,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     private float idleTimer = 0f;
     private bool isAFKTriggered = false;
+    private bool isPreparingSleep = false;
     private bool isSleeping = false;
     private bool isWaking = false;
 
@@ -344,11 +345,16 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     // --------------------- Input ---------------------
     private void OnMovePerformed(InputAction.CallbackContext ctx)
     {
-        Vector2 input = ctx.ReadValue<Vector2>();
+        if (isPreparingSleep)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
 
         if (isSleeping && !isWaking)
         {
-            WakeUp();         // ⭐ ปลุก
+            WakeUp();
+            moveInput = Vector2.zero;
             return;
         }
 
@@ -358,8 +364,9 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             return;
         }
 
-        moveInput = input;
+        moveInput = ctx.ReadValue<Vector2>();
     }
+
 
     private void OnMoveCanceled(InputAction.CallbackContext ctx)
     {
@@ -374,7 +381,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     // --------------------- Sleep / AFK ---------------------
     private void HandleIdleSleepSystem()
     {
-        if (isSleeping || isWaking)
+        if (isSleeping || isWaking || isPreparingSleep)
             return;
 
         if (IsIdle)
@@ -383,23 +390,37 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
             if (!isAFKTriggered && idleTimer >= afkDelay)
             {
+                isPreparingSleep = true;
                 anim.SetTrigger("AFK");
                 isAFKTriggered = true;
-                isSleeping = true;
+
+                // ล๊อก input ทันที
+                rb.linearVelocity = Vector2.zero;
+                moveInput = Vector2.zero;
+
+                StartCoroutine(EnterSleepAfterDelay());
             }
         }
         else
         {
             idleTimer = 0f;
 
-            if (isAFKTriggered)
+            if (isAFKTriggered || isPreparingSleep)
             {
                 anim.SetTrigger("Wake");
                 isAFKTriggered = false;
+                isPreparingSleep = false;
             }
         }
     }
 
+    private IEnumerator EnterSleepAfterDelay()
+    {
+        yield return new WaitForSeconds(0.3f);
+
+        isSleeping = true;
+        isPreparingSleep = false;
+    }
 
     // --------------------- Interactable ---------------------
     private void UpdateInteractPrompt()

@@ -34,7 +34,10 @@ public class Safe : HackableObject
 
     protected override void HandleHackOptionComplete(HackOptionSO option)
     {
+        base.HandleHackOptionComplete(option);
+
         if (isOpened || isAnimating) return;
+
         StartCoroutine(OpenSafeSequence());
     }
 
@@ -77,8 +80,10 @@ public class Safe : HackableObject
         {
             elapsed += Time.deltaTime;
             float t = elapsed / flyDuration;
+
             paper.transform.position = Vector3.Lerp(startPos, targetPos, t);
             paper.transform.Rotate(Vector3.up * spinSpeed * Time.deltaTime);
+
             yield return null;
         }
 
@@ -89,6 +94,7 @@ public class Safe : HackableObject
         {
             float fadeTime = 0.3f;
             float fade = 1f;
+
             while (fade > 0f)
             {
                 fade -= Time.deltaTime / fadeTime;

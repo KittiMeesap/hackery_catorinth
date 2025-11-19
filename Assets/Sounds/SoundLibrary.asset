@@ -61,3 +61,11 @@ MonoBehaviour:
     clip: {fileID: 0}
   - key: SFX_PaperFly
     clip: {fileID: 0}
+  - key: Hack_Success
+    clip: {fileID: 8300000, guid: 9263ef99786161f4fb5cfbdb6e6506dd, type: 3}
+  - key: Hack_Open
+    clip: {fileID: 8300000, guid: 6791d3ffb71897e45948b131a30581e1, type: 3}
+  - key: Hack_Fail
+    clip: {fileID: 8300000, guid: f222c27289aa8fc4e8dfe91a2da3726b, type: 3}
+  - key: Hack_Input
+    clip: {fileID: 8300000, guid: 388c0763f60e34e41a87aff0119c1c0e, type: 3}

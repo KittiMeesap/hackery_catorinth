@@ -18,6 +18,13 @@ public class HackingUI : MonoBehaviour
     [SerializeField] private GameObject arrowLeftPrefab;
     [SerializeField] private GameObject arrowRightPrefab;
 
+    
+    [Header("SFX Keys (SoundLibrary keys)")]
+    [SerializeField] private string sfxOpenUI = "Hack_Open";
+    [SerializeField] private string sfxSuccess = "Hack_Success";
+    [SerializeField] private string sfxFail = "Hack_Fail";
+    [SerializeField] private string sfxInput = "Hack_Input";
+
     [Header("Juice Settings")]
     [SerializeField] private float panelPopDuration = 0.4f;
     [SerializeField] private float arrowPopScale = 1.15f;
@@ -58,7 +65,7 @@ public class HackingUI : MonoBehaviour
             hackTimerSlider.gameObject.SetActive(false);
     }
 
-    // RANDOM GENERATOR
+    
     private List<ArrowUI.Direction> GenerateRandomSequence(int length)
     {
         var dirs = new List<ArrowUI.Direction>
@@ -76,7 +83,7 @@ public class HackingUI : MonoBehaviour
         return seq;
     }
 
-    // DISPLAY
+    
     public void ShowMultiOptionUI(List<HackOptionSO> options, Transform target, System.Action<HackOptionSO> onSuccess)
     {
         ClearMultiOptions();
@@ -85,6 +92,10 @@ public class HackingUI : MonoBehaviour
         if (hackPanel != null)
         {
             hackPanel.SetActive(true);
+
+            
+            AudioManager.Instance?.PlayUI(sfxOpenUI);
+
             StartCoroutine(PopInPanelRoutine());
         }
 
@@ -115,8 +126,6 @@ public class HackingUI : MonoBehaviour
                     continue;
 
                 GameObject arrowGO = Instantiate(prefab, arrowGroup);
-
-                // POP INSTANTLY
                 arrowGO.transform.localScale = Vector3.one * arrowPopScale;
 
                 var arrowUI = arrowGO.GetComponent<ArrowUI>();
@@ -135,7 +144,13 @@ public class HackingUI : MonoBehaviour
         UpdateTimerPosition();
     }
 
-    public void ShowMultiOptionUI(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onSuccess, bool useTimer, float timerDuration)
+    
+    public void ShowMultiOptionUI(
+        List<HackOptionSO> options,
+        Transform worldTarget,
+        System.Action<HackOptionSO> onSuccess,
+        bool useTimer,
+        float timerDuration)
     {
         ShowMultiOptionUI(options, worldTarget, onSuccess);
 
@@ -145,7 +160,15 @@ public class HackingUI : MonoBehaviour
             StopHackTimer();
     }
 
-    public void ShowSingleOptionSequence(List<ArrowUI.Direction> sequence, Transform worldTarget, Sprite icon, System.Action onComplete, System.Action onFail, bool useTimer, float timerDuration)
+    
+    public void ShowSingleOptionSequence(
+        List<ArrowUI.Direction> sequence,
+        Transform worldTarget,
+        Sprite icon,
+        System.Action onComplete,
+        System.Action onFail,
+        bool useTimer,
+        float timerDuration)
     {
         HackOptionSO temp = ScriptableObject.CreateInstance<HackOptionSO>();
         temp.icon = icon;
@@ -167,6 +190,9 @@ public class HackingUI : MonoBehaviour
     {
         currentInput.Add(input);
 
+        
+        AudioManager.Instance?.PlayUI(sfxInput);
+
         bool matchedPrefix = false;
         HackOptionUI fullMatch = null;
 
@@ -185,6 +211,9 @@ public class HackingUI : MonoBehaviour
 
         if (fullMatch != null)
         {
+            
+            AudioManager.Instance?.PlayUI(sfxSuccess);
+
             StartCoroutine(SuccessFlash());
             onOptionSelected?.Invoke(fullMatch.optionData);
             HideHackingUI();
@@ -193,6 +222,9 @@ public class HackingUI : MonoBehaviour
 
         if (!matchedPrefix)
         {
+           
+            AudioManager.Instance?.PlayUI(sfxFail);
+
             StartCoroutine(ShakePanelRoutine());
             FlashIncorrectAll();
 

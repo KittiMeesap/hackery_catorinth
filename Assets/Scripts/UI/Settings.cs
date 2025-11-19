@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -16,23 +17,24 @@ public class Settings : MonoBehaviour
     [SerializeField] private Slider musicSlider;
     [SerializeField] private Slider sfxSlider;
 
-    //START
     void Start()
     {
+        StartCoroutine(DelayedInit());
+    }
+
+    IEnumerator DelayedInit()
+    {
+        yield return null; 
+
         SetupDisplayMode();
         SetupResolutionDropdown();
         SetupVolumeSliders();
     }
 
-    //DISPLAY MODE
     void SetupDisplayMode()
     {
         displayDropdown.ClearOptions();
-        displayDropdown.AddOptions(new List<string>
-        {
-            "Fullscreen",
-            "Windowed"
-        });
+        displayDropdown.AddOptions(new List<string> { "Fullscreen", "Windowed" });
 
         int savedMode = PlayerPrefs.GetInt("DisplayMode", 0);
         displayDropdown.value = savedMode;
@@ -44,68 +46,77 @@ public class Settings : MonoBehaviour
 
     void ApplyDisplayMode(int index)
     {
-        if (index == 0)
-            Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
-        else
-            Screen.fullScreenMode = FullScreenMode.Windowed;
+        Screen.fullScreenMode = index == 0
+            ? FullScreenMode.FullScreenWindow
+            : FullScreenMode.Windowed;
 
         PlayerPrefs.SetInt("DisplayMode", index);
     }
 
-    //  RESOLUTION (CUSTOM PRESET)
     void SetupResolutionDropdown()
     {
         resolutionDropdown.ClearOptions();
 
-        List<string> presetResolutions = new List<string>
+        List<string> presetRes = new()
         {
-            "1920x1080",  // Full HD
+            "1920x1080",
             "1600x900",
-            "1366x768",   // Laptop
-            "1280x720",   // HD
+            "1366x768",
+            "1280x720"
         };
 
-        resolutionDropdown.AddOptions(presetResolutions);
+        resolutionDropdown.AddOptions(presetRes);
 
         int savedIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
         resolutionDropdown.value = savedIndex;
         resolutionDropdown.RefreshShownValue();
 
         resolutionDropdown.onValueChanged.AddListener(ApplyCustomResolution);
-
         ApplyCustomResolution(savedIndex);
     }
 
     void ApplyCustomResolution(int index)
     {
         string res = resolutionDropdown.options[index].text;
-
         string[] parts = res.Split('x', 'X');
 
         if (parts.Length == 2 &&
-            int.TryParse(parts[0], out int width) &&
-            int.TryParse(parts[1], out int height))
+            int.TryParse(parts[0], out int w) &&
+            int.TryParse(parts[1], out int h))
         {
-            Screen.SetResolution(width, height, Screen.fullScreenMode);
+            Screen.SetResolution(w, h, Screen.fullScreenMode);
             PlayerPrefs.SetInt("ResolutionIndex", index);
-
-            Debug.Log($"Resolution Set: {width}x{height}");
-        }
-        else
-        {
-            Debug.LogError("Invalid resolution format: " + res);
         }
     }
 
-    //VOLUME
     void SetupVolumeSliders()
     {
-        masterSlider.value = PlayerPrefs.GetFloat("MasterVol", 1f);
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVol", 1f);
-        sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 1f);
+        
+        masterSlider.onValueChanged.RemoveAllListeners();
+        musicSlider.onValueChanged.RemoveAllListeners();
+        sfxSlider.onValueChanged.RemoveAllListeners();
 
-        masterSlider.onValueChanged.AddListener(v => AudioManager.Instance.SetMasterVolume(v));
-        musicSlider.onValueChanged.AddListener(v => AudioManager.Instance.SetMusicVolume(v));
-        sfxSlider.onValueChanged.AddListener(v => AudioManager.Instance.SetSFXVolume(v));
+        masterSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MasterVol", 1f));
+        musicSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MusicVol", 1f));
+        sfxSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("SFXVol", 1f));
+
+        
+        masterSlider.onValueChanged.AddListener(v =>
+        {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.SetMasterVolume(v);
+        });
+
+        musicSlider.onValueChanged.AddListener(v =>
+        {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.SetMusicVolume(v);
+        });
+
+        sfxSlider.onValueChanged.AddListener(v =>
+        {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.SetSFXVolume(v);
+        });
     }
 }

@@ -24,8 +24,6 @@ public class Locker : HidingSpot, IInteractable
 
     [Header("Prompt UI")]
     [SerializeField] private Transform promptPoint;
-    [SerializeField] private bool autoPlacePromptAbove = true;
-    [SerializeField] private float promptMarginY = 0.15f;
 
     [Header("Audio (key SoundLibrary)")]
     [SerializeField] private string sfxOpenKey = "SFX_LockerOpen";
@@ -52,7 +50,6 @@ public class Locker : HidingSpot, IInteractable
         HashOpen = Animator.StringToHash("Open");
 
         EnsurePromptPoint();
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
 
         if (highlightSprite != null)
             highlightSprite.enabled = false;
@@ -61,38 +58,21 @@ public class Locker : HidingSpot, IInteractable
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (PrefabUtility.IsPartOfPrefabAsset(gameObject))
-            return;
-
-        if (Application.isPlaying) return;
-        EnsurePromptPoint();
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
+        if (!Application.isPlaying)
+            EnsurePromptPoint();
     }
 #endif
-
-    private void LateUpdate()
-    {
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
-    }
 
     private void EnsurePromptPoint()
     {
-#if UNITY_EDITOR
-        if (PrefabUtility.IsPartOfPrefabAsset(gameObject))
-            return;
-#endif
         if (promptPoint == null)
         {
-            var go = new GameObject("PromptPoint");
+            GameObject go = new GameObject("InteractPosition");
             go.transform.SetParent(transform);
+            go.transform.localPosition = Vector3.zero;
+
             promptPoint = go.transform;
         }
-    }
-
-    private void UpdatePromptPointPosition()
-    {
-        if (promptPoint == null) return;
-        promptPoint.position = transform.position + new Vector3(0f, 1f + promptMarginY, 0f);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -111,7 +91,8 @@ public class Locker : HidingSpot, IInteractable
         if (!other.CompareTag("Player")) return;
 
         isPlayerNear = false;
-        if (!isInside) currentPlayer = null;
+        if (!isInside)
+            currentPlayer = null;
 
         UIManager.Instance?.HideInteractPrompt(this);
         RefreshHighlight();
@@ -147,7 +128,6 @@ public class Locker : HidingSpot, IInteractable
         RefreshHighlight();
     }
 
-    // ENTER
     private IEnumerator EnterRoutine(PlayerHiding p)
     {
         isBusy = true;
@@ -157,41 +137,38 @@ public class Locker : HidingSpot, IInteractable
         cachedPlayerPosition = p.transform.position;
 
         var controller = p.GetComponent<PlayerController>();
-        if (controller != null)
-            controller.SetFrozen(true);
+        if (controller) controller.SetFrozen(true);
 
         p.EnterHiding(this);
         UIManager.Instance?.HideInteractPrompt(this);
 
-        if (lockerAnimator != null)
+        if (lockerAnimator)
         {
             lockerAnimator.ResetTrigger(HashOpen);
-            lockerAnimator.SetTrigger(!string.IsNullOrEmpty(getInTriggerParam) ? HashGetIn : HashOpen);
+            lockerAnimator.SetTrigger(HashGetIn);
         }
 
-        if (AudioManager.Instance != null && !string.IsNullOrEmpty(sfxOpenKey))
+        if (AudioManager.Instance && !string.IsNullOrEmpty(sfxOpenKey))
             AudioManager.Instance.PlaySFX(sfxOpenKey);
 
         yield return new WaitForSeconds(enterAnimTime);
 
-        if (controller != null)
-            controller.SetFrozen(false);
+        if (controller) controller.SetFrozen(false);
 
         isBusy = false;
     }
 
-    // EXIT
     private IEnumerator ExitRoutine(PlayerHiding p)
     {
         isBusy = true;
 
-        if (lockerAnimator != null)
+        if (lockerAnimator)
         {
             lockerAnimator.ResetTrigger(HashOpen);
-            lockerAnimator.SetTrigger(!string.IsNullOrEmpty(getOutTriggerParam) ? HashGetOut : HashOpen);
+            lockerAnimator.SetTrigger(HashGetOut);
         }
 
-        if (AudioManager.Instance != null && !string.IsNullOrEmpty(sfxCloseKey))
+        if (AudioManager.Instance && !string.IsNullOrEmpty(sfxCloseKey))
             AudioManager.Instance.PlaySFX(sfxCloseKey);
 
         yield return new WaitForSeconds(exitAnimTime);
@@ -200,7 +177,7 @@ public class Locker : HidingSpot, IInteractable
         p.ExitHiding(this);
 
         var controller = p.GetComponent<PlayerController>();
-        if (controller != null)
+        if (controller)
         {
             controller.SetFrozen(false);
             controller.TriggerMoveDelay(0.05f);
@@ -215,26 +192,11 @@ public class Locker : HidingSpot, IInteractable
         isBusy = false;
     }
 
-    // POSITION OVERRIDES
-    public override Vector2 GetHidingPosition()
-    {
-        return currentPlayer != null ? (Vector2)currentPlayer.transform.position : (Vector2)transform.position;
-    }
-
+    // Required overrides
+    public override Vector2 GetHidingPosition() => currentPlayer ? currentPlayer.transform.position : transform.position;
     public override Vector2 GetExitPosition() => cachedPlayerPosition;
 
-    public Transform GetPromptPoint()
-    {
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
-        return promptPoint != null ? promptPoint : transform;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (promptPoint == null) return;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(promptPoint.position, 0.05f);
-    }
+    public Transform GetPromptPoint() => promptPoint != null ? promptPoint : transform;
 
     private void RefreshHighlight()
     {

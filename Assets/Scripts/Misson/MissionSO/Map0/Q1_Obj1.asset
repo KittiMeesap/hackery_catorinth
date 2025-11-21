@@ -12,19 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c97c06c8f2a9b8745ab92b93dbba80be, type: 3}
   m_Name: Q1_Obj1
   m_EditorClassIdentifier: 
-  description:
-    m_TableReference:
-      m_TableCollectionName: GUID:d8f8f84f9b6f9da4787a129c23ded536
-    m_TableEntryReference:
-      m_KeyId: 25221647507394560
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
+  description: Hack Safe
   missionType: 1
   requiredAmount: 1
   missionId: Q1_Obj1
   targetMissionId: Q1_Obj1
-  references:
-    version: 2
-    RefIds: []

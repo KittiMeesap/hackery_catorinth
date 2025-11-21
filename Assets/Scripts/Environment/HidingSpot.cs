@@ -3,9 +3,6 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class HidingSpot : MonoBehaviour
 {
-    [Header("Hiding Properties")]
-    public bool isMovableContainer = false;
-
     [Header("Cooldown Settings")]
     [SerializeField] private float exitCooldown = 0.3f;
 

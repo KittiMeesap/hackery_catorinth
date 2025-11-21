@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI missionText;
 
     private IInteractable currentPromptTarget;
+    private Camera mainCam;
 
     private void Awake()
     {
@@ -26,8 +27,16 @@ public class UIManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
+
+        mainCam = Camera.main;
     }
 
+    private void Update()
+    {
+        UpdatePromptFollow();
+    }
+
+    //INTERACT PROMPT
     public void ShowInteractPrompt(IInteractable target)
     {
         if (promptUI == null) return;
@@ -35,12 +44,7 @@ public class UIManager : MonoBehaviour
         currentPromptTarget = target;
         promptUI.SetActive(true);
 
-        Transform followPoint = target.GetPromptPoint();
-        if (followPoint != null)
-        {
-            promptUI.transform.position = followPoint.position + Vector3.up * 0.5f;
-            promptUI.transform.rotation = Quaternion.identity;
-        }
+        UpdatePromptFollow();
     }
 
     public void HideInteractPrompt(IInteractable target)
@@ -51,8 +55,25 @@ public class UIManager : MonoBehaviour
         currentPromptTarget = null;
     }
 
+    private void UpdatePromptFollow()
+    {
+        if (currentPromptTarget == null || promptUI == null) return;
+
+        Transform followPoint = currentPromptTarget.GetPromptPoint();
+        if (followPoint == null) return;
+
+        if (mainCam == null)
+            mainCam = Camera.main;
+
+        Vector3 screenPos = mainCam.WorldToScreenPoint(followPoint.position);
+
+        promptUI.transform.position = screenPos;
+        promptUI.transform.rotation = Quaternion.identity;
+    }
+
     public void ShowLockedMessage() { }
 
+    //HACKING UI
     public void StartMultiOptionHack(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onOptionSelected)
     {
         hackingUI?.ShowMultiOptionUI(options, worldTarget, onOptionSelected);

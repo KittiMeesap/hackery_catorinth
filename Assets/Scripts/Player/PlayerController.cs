@@ -150,16 +150,6 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
                 mult *= Mathf.Lerp(1f, 0.2f, t);
             }
 
-            if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer)
-            {
-                var spot = typeof(PlayerHiding)
-                    .GetField("currentSpot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
-                    .GetValue(PlayerHiding.Instance) as HidingSpot;
-
-                if (spot != null && spot.isMovableContainer)
-                    mult *= hidingMoveMultiplier;
-            }
-
             foreach (var kv in speedModifiers)
                 mult *= Mathf.Clamp(kv.Value, 0.01f, 10f);
 

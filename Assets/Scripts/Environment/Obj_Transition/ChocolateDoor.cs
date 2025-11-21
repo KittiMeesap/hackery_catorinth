@@ -31,22 +31,36 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
     [SerializeField] private float openToTeleportDelay = 0.1f;
     [SerializeField] private float reuseCooldown = 0.5f;
 
-    [Header("UI Offset")]
-    [SerializeField] private float interactPromptYOffset = 0.8f;
+    [Header("Prompt UI")]
+    [SerializeField] private Transform promptPoint;
 
     private float temperature = 0f;
     private bool isLocked = true;
-    private bool canUseDoor = true;
     private bool hasMelted = false;
+    private bool canUseDoor = true;
+
     private GameObject playerGO;
     private Collider2D triggerCol;
-    private Transform promptPoint;
+
 
     private void Awake()
     {
         animator ??= GetComponent<Animator>();
         triggerCol ??= GetComponent<Collider2D>();
         if (triggerCol) triggerCol.isTrigger = true;
+
+        EnsurePromptPoint();
+    }
+
+    private void EnsurePromptPoint()
+    {
+        if (promptPoint != null) return;
+
+        GameObject go = new GameObject("InteractPosition");
+        go.transform.SetParent(transform);
+        go.transform.localPosition = Vector3.zero;
+
+        promptPoint = go.transform;
     }
 
     private void Start()
@@ -59,12 +73,11 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
     private void Update()
     {
         if (!hasMelted && isLocked && temperature >= meltThreshold)
-        {
             MeltDoor();
-        }
     }
 
-    public void ApplyHeat(float delta) { temperature += delta; }
+    // ---------------- Heat / Cold ----------------
+    public void ApplyHeat(float delta) => temperature += delta;
     public void ApplyCold(float delta) { }
     public void CoolDown(float delta) { }
 
@@ -73,16 +86,18 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         hasMelted = true;
         isLocked = false;
         ApplyLockState(false);
+
         if (!string.IsNullOrEmpty(sfxMeltKey))
             AudioManager.Instance?.PlaySFX(sfxMeltKey);
     }
 
     private void ApplyLockState(bool locked)
     {
-        if (!animator) return;
-        animator.SetBool(meltParam, !locked);
+        if (animator)
+            animator.SetBool(meltParam, !locked);
     }
 
+    // ---------------- Trigger ----------------
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
@@ -91,18 +106,21 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         if (other.CompareTag("Player"))
         {
             playerGO = other.gameObject;
-            if (isLocked) return;
-            UIManager.Instance?.ShowInteractPrompt(this);
+
+            if (!isLocked)
+                UIManager.Instance?.ShowInteractPrompt(this);
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
+
         UIManager.Instance?.HideInteractPrompt(this);
         playerGO = null;
     }
 
+    // ---------------- Interact ----------------
     public void Interact()
     {
         if (isLocked || !canUseDoor) return;
@@ -112,28 +130,35 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
     private IEnumerator OpenAndGo()
     {
         if (isLocked || !canUseDoor || playerGO == null) yield break;
+
         canUseDoor = false;
 
         yield return new WaitForSeconds(openToTeleportDelay);
 
         var fader = UIManager.Instance?.screenFader;
-        if (fader != null) yield return fader.FadeOut();
+        if (fader != null)
+            yield return fader.FadeOut();
 
         if (openMode == OpenMode.Warp)
         {
             WarpEntity(playerGO);
-            if (fader != null) yield return fader.FadeIn();
+
+            if (fader != null)
+                yield return fader.FadeIn();
         }
         else
         {
             yield return DoLoadScene();
-            if (fader != null) yield return fader.FadeIn();
+
+            if (fader != null)
+                yield return fader.FadeIn();
         }
 
         yield return new WaitForSeconds(reuseCooldown);
         canUseDoor = true;
     }
 
+    // ---------------- Warp / Scene Load ----------------
     public void WarpEntity(GameObject entity)
     {
         if (entity == null || connectedDoor == null) return;
@@ -144,6 +169,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
         Vector3 oldPos = entity.transform.position;
         Vector3 targetPos = targetExit.position;
+
         Vector3 delta = targetPos - oldPos;
 
         entity.transform.position = targetPos;
@@ -152,8 +178,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         if (vcam != null)
             vcam.OnTargetObjectWarped(entity.transform, delta);
 
-        if (nextDoor)
-            nextDoor.DisableInteractionTemporarily(reuseCooldown);
+        nextDoor?.DisableInteractionTemporarily(reuseCooldown);
     }
 
     private IEnumerator DoLoadScene()
@@ -166,9 +191,12 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
         AsyncOperation op = SceneManager.LoadSceneAsync(targetSceneName);
         if (!waitForSceneLoaded) yield break;
-        while (!op.isDone) yield return null;
+
+        while (!op.isDone)
+            yield return null;
     }
 
+    // ---------------- Utility ----------------
     public void DisableInteractionTemporarily(float delay)
     {
         StartCoroutine(CoDisable(delay));
@@ -178,36 +206,31 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
     {
         bool prev = canUseDoor;
         canUseDoor = false;
+
         yield return new WaitForSeconds(delay);
+
         canUseDoor = prev;
     }
 
+
+    // ---------------- Interact Position ----------------
     public Transform GetPromptPoint()
     {
-        if (promptPoint == null)
-        {
-            GameObject offsetGO = new GameObject("ChocolateDoorPromptPoint");
-            offsetGO.transform.SetParent(transform);
-            offsetGO.transform.localPosition = new Vector3(0f, interactPromptYOffset, 0f);
-            promptPoint = offsetGO.transform;
-        }
-        return promptPoint;
+        return promptPoint != null ? promptPoint : transform;
     }
 
+
+    // ---------------- Open Check ----------------
     public bool CanOpenFor(GameObject entity)
     {
-        if (!canUseDoor)
-            return false;
+        if (!canUseDoor) return false;
 
         if (entity != null && entity.CompareTag("Enemy"))
-        {
             return connectedDoor != null && exitPoint != null;
-        }
 
-        if (isLocked)
-            return false;
+        if (isLocked) return false;
 
-        if (startLocked && hasMelted == false)
+        if (startLocked && !hasMelted)
             return false;
 
         return connectedDoor != null && exitPoint != null;
@@ -227,5 +250,4 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
         Debug.Log("[ChocolateDoor] Door unlocked by Safe.");
     }
-
 }

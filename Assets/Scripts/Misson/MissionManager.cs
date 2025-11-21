@@ -39,7 +39,7 @@ public class MissionManager : MonoBehaviour
         if (Instance == null) Instance = this;
     }
 
-    private async void Start()
+    private void Start()
     {
 
         PrepareInitialQueue();
@@ -60,7 +60,7 @@ public class MissionManager : MonoBehaviour
             return;
         }
 
-        await RefreshUITextAsync();
+        RefreshUIText();
         OnMissionChanged?.Invoke(ActiveMissionId);
     }
 
@@ -140,9 +140,7 @@ public class MissionManager : MonoBehaviour
 
         currentMissionIndex = 0;
 
-        // Refresh localized UI for the new set (async)
-        _ = RefreshUITextAsync();
-
+        RefreshUIText();
         OnMissionChanged?.Invoke(ActiveMissionId);
         OnSetChanged?.Invoke(currentSetOrdinal, currentSetOrdinal + setQueue.Count);
 
@@ -226,10 +224,10 @@ public class MissionManager : MonoBehaviour
     public void MarkInteractComplete(string missionId) => AddProgressStrict(missionId, 1);
 
     // --- UI ---
-    private async System.Threading.Tasks.Task RefreshUITextAsync()
+    private void RefreshUIText()
     {
         foreach (var s in missionStates)
-            s.cachedText = await s.data.GetDescriptionAsync();
+            s.cachedText = s.data.description;
 
         UpdateUI();
     }
@@ -246,19 +244,18 @@ public class MissionManager : MonoBehaviour
             string color;
 
             if (m.isCompleted)
-                color = "#00FF00";   // green = completed
+                color = "#00FF00";
             else if (i == currentMissionIndex)
-                color = "#1E90FF";   // blue (DodgerBlue) = active
+                color = "#1E90FF";
             else
-                color = "#000000";   // black = locked/not yet
+                color = "#000000";
 
             string progress = (m.data.missionType == MissionType.ReachLocation) ? "" : $" {m.currentAmount}/{m.data.requiredAmount}";
-            sb.Append($"<color={color}>• {m.cachedText}{progress}</color>\n");
+            sb.Append($"<color={color}>{m.cachedText}{progress}</color>\n");  // ← ไม่มี Bullet แล้ว
         }
 
         UIManager.Instance.missionText.text = sb.ToString().TrimEnd();
     }
-
 
     public void ResetMissionState()
     {

@@ -1652,7 +1652,7 @@ MonoBehaviour:
   fadeOverlay: {fileID: 1841931216}
   fadeDuration: 1
   pageFadeDuration: 1
-  pageUseFullFade: 01010100000001
+  pageUseFullFade: 01010000000001
   pauseGameTime: 0
   panelFadeDuration: 0.9
   subtitleFadeDuration: 0.35

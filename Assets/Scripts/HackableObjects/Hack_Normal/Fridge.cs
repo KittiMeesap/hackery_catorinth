@@ -11,6 +11,9 @@ public class Fridge : HackableObject
     [SerializeField] private float coldDecayRate = 0.5f;
     [SerializeField] private float checkInterval = 0.2f;
 
+    [Header("Pivot (New Center Point)")]
+    [SerializeField] private Transform freezePivot;
+
     [Header("Animator")]
     [SerializeField] private Animator animator;
     [SerializeField] private string isOpenParam = "isOpen";
@@ -32,7 +35,7 @@ public class Fridge : HackableObject
     [SerializeField] private bool startOn = false;
 
     [Header("Cooldown")]
-    [SerializeField] private float spellCooldown = 2f;
+    [SerializeField] private float hackCooldown = 2f;
     private bool isOnCooldown = false;
 
     private bool currentState;
@@ -40,6 +43,7 @@ public class Fridge : HackableObject
     private AudioSource loopSource;
     private readonly HashSet<IFreezable> coldablesInRange = new();
     private float lastColdTickTime = -1f;
+
 
     private void Awake()
     {
@@ -74,7 +78,8 @@ public class Fridge : HackableObject
 
     private void ApplyColdSystem(float dt)
     {
-        Vector2 center = transform.position;
+        Vector2 center = freezePivot ? (Vector2)freezePivot.position : (Vector2)transform.position;
+
         Collider2D[] hits = Physics2D.OverlapCircleAll(center, coldRadius, coldLayer);
 
         HashSet<IFreezable> current = new();
@@ -103,9 +108,11 @@ public class Fridge : HackableObject
             coldablesInRange.Add(f);
     }
 
-    public void Spell_TurnOn() => SetActiveInternal(true, playSfx: true);
-    public void Spell_TurnOff() => SetActiveInternal(false, playSfx: true);
-    public void Toggle() => SetActiveInternal(!currentState, playSfx: true);
+
+    public void Hack_TurnOn() => SetActiveInternal(true, true);
+    public void Hack_TurnOff() => SetActiveInternal(false, true);
+    public void Toggle() => SetActiveInternal(!currentState, true);
+
 
     private void SetActiveInternal(bool on, bool playSfx)
     {
@@ -160,6 +167,7 @@ public class Fridge : HackableObject
         }
     }
 
+
     private void StartLoopSound()
     {
         if (AudioManager.Instance == null || string.IsNullOrEmpty(sfxLoopKey))
@@ -191,6 +199,7 @@ public class Fridge : HackableObject
         }
     }
 
+
     private IEnumerator DisableParticleAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -198,11 +207,6 @@ public class Fridge : HackableObject
             freezeMistVFX.gameObject.SetActive(false);
     }
 
-    // ---------- Spellcasting ----------
-    public override void OnEnterHackingMode()
-    {
-        base.OnEnterHackingMode();
-    }
 
     protected override void HandleHackOptionComplete(HackOptionSO option)
     {
@@ -214,10 +218,10 @@ public class Fridge : HackableObject
         switch (option.optionType)
         {
             case HackOptionSO.HackType.Disable:
-                Spell_TurnOff();
+                Hack_TurnOff();
                 break;
             case HackOptionSO.HackType.Enable:
-                Spell_TurnOn();
+                Hack_TurnOn();
                 break;
             default:
                 Toggle();
@@ -225,18 +229,22 @@ public class Fridge : HackableObject
         }
     }
 
+
     private IEnumerator HackCooldownTimer()
     {
         isOnCooldown = true;
-        yield return new WaitForSeconds(spellCooldown);
+        yield return new WaitForSeconds(hackCooldown);
         isOnCooldown = false;
     }
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, coldRadius);
+
+        Vector3 center = freezePivot ? freezePivot.position : transform.position;
+        Gizmos.DrawWireSphere(center, coldRadius);
     }
 #endif
 }

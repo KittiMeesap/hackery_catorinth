@@ -11,6 +11,9 @@ public class Oven : HackableObject
     [SerializeField] private float heatDecayRate = 0.5f;
     [SerializeField] private float checkInterval = 0.2f;
 
+    [Header("Heat Pivot")]
+    [SerializeField] private Transform heatPivot;
+
     [Header("Animator")]
     [SerializeField] private Animator animator;
     [SerializeField] private string isOnParam = "isOn";
@@ -32,7 +35,7 @@ public class Oven : HackableObject
     [SerializeField] private bool startOn = false;
 
     [Header("Cooldown")]
-    [SerializeField] private float spellCooldown = 2f;
+    [SerializeField] private float hackCooldown = 2f;
     private bool isOnCooldown = false;
 
     private bool currentState;
@@ -40,6 +43,7 @@ public class Oven : HackableObject
     private AudioSource loopSource;
     private readonly HashSet<IHeatable> heatablesInRange = new();
     private float lastHeatTickTime = -1f;
+
 
     private void Awake()
     {
@@ -76,13 +80,15 @@ public class Oven : HackableObject
             float dt = (lastHeatTickTime < 0f) ? checkInterval : Mathf.Max(0.0001f, now - lastHeatTickTime);
             lastHeatTickTime = now;
             checkTimer = 0f;
+
             ApplyHeatSystem(dt);
         }
     }
 
     private void ApplyHeatSystem(float dt)
     {
-        Vector2 center = transform.position;
+        Vector2 center = heatPivot ? (Vector2)heatPivot.position : (Vector2)transform.position;
+
         Collider2D[] hits = Physics2D.OverlapCircleAll(center, heatRadius, heatLayer);
 
         HashSet<IHeatable> current = new();
@@ -102,30 +108,35 @@ public class Oven : HackableObject
                 enemy.EnterSmoke();
         }
 
+        // Decay heat
         foreach (var prev in heatablesInRange)
             if (!current.Contains(prev))
                 prev.CoolDown(heatDecayRate * dt);
 
         heatablesInRange.Clear();
-        foreach (var h in current) heatablesInRange.Add(h);
+        foreach (var h in current)
+            heatablesInRange.Add(h);
     }
 
+
     // ---------- Spell Actions ----------
-    public void Spell_TurnOn() => SetActiveInternal(true, true);
-    public void Spell_TurnOff() => SetActiveInternal(false, true);
+    public void Hack_TurnOn() => SetActiveInternal(true, true);
+    public void Hack_TurnOff() => SetActiveInternal(false, true);
     public void Toggle() => SetActiveInternal(!currentState, true);
+
 
     private void SetActiveInternal(bool on, bool playSfx)
     {
         if (currentState == on) return;
-        currentState = on;
 
+        currentState = on;
         SetVisualState(on);
 
         if (on)
         {
             StartLoopSound();
             ambientSoundGate?.EnableZone(true);
+
             if (playSfx && !string.IsNullOrEmpty(sfxOnKey))
                 AudioManager.Instance?.PlaySFX(sfxOnKey);
         }
@@ -133,10 +144,12 @@ public class Oven : HackableObject
         {
             StopLoopSound();
             ambientSoundGate?.EnableZone(false);
+
             if (playSfx && !string.IsNullOrEmpty(sfxOffKey))
                 AudioManager.Instance?.PlaySFX(sfxOffKey);
         }
     }
+
 
     private void SetVisualState(bool on)
     {
@@ -153,6 +166,7 @@ public class Oven : HackableObject
             {
                 if (hideParticleWhenOff && !heatEffect.gameObject.activeSelf)
                     heatEffect.gameObject.SetActive(true);
+
                 heatEffect.Play();
             }
             else
@@ -160,12 +174,14 @@ public class Oven : HackableObject
                 if (heatEffect.isPlaying)
                 {
                     heatEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
                     if (hideParticleWhenOff)
                         heatEffect.gameObject.SetActive(false);
                 }
             }
         }
     }
+
 
     private void StartLoopSound()
     {
@@ -199,26 +215,21 @@ public class Oven : HackableObject
         }
     }
 
-    // ---------- Spellcasting ----------
-    public override void OnEnterHackingMode()
-    {
-        base.OnEnterHackingMode();
-    }
 
     protected override void HandleHackOptionComplete(HackOptionSO option)
     {
         if (isOnCooldown) return;
-        StartCoroutine(SpellCooldownTimer());
+        StartCoroutine(HackCooldownTimer());
 
         if (option == null) return;
 
         switch (option.optionType)
         {
             case HackOptionSO.HackType.Disable:
-                Spell_TurnOff();
+                Hack_TurnOff();
                 break;
             case HackOptionSO.HackType.Enable:
-                Spell_TurnOn();
+                Hack_TurnOn();
                 break;
             default:
                 Toggle();
@@ -228,18 +239,21 @@ public class Oven : HackableObject
         base.HandleHackOptionComplete(option);
     }
 
-    private IEnumerator SpellCooldownTimer()
+    private IEnumerator HackCooldownTimer()
     {
         isOnCooldown = true;
-        yield return new WaitForSeconds(spellCooldown);
+        yield return new WaitForSeconds(hackCooldown);
         isOnCooldown = false;
     }
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, heatRadius);
+
+        Vector3 center = heatPivot ? heatPivot.position : transform.position;
+        Gizmos.DrawWireSphere(center, heatRadius);
     }
 #endif
 }

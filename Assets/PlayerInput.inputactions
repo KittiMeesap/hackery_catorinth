@@ -852,6 +852,45 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "GameControls",
+            "id": "19e28080-47ab-4b80-a690-0a6e5a62c63e",
+            "actions": [
+                {
+                    "name": "Continue",
+                    "type": "Button",
+                    "id": "ae73aaeb-75e0-4b10-8c6e-3eb3dcdfff56",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9ae6b375-f46e-45da-b8fa-8762c9d06dbb",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Continue",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "62fa3f2d-8c0a-4b3a-b9a9-81d23cddb65e",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Continue",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

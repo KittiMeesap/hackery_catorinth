@@ -36,6 +36,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1966570511694029074}
+  - {fileID: 4447730173588557264}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5006735406276428187
@@ -195,6 +196,7 @@ MonoBehaviour:
   coldPower: 5
   coldDecayRate: 0.5
   checkInterval: 0.5
+  freezePivot: {fileID: 4447730173588557264}
   animator: {fileID: 4668569760056860781}
   isOpenParam: isOpen
   isCloseParam: isClose
@@ -321,6 +323,37 @@ MonoBehaviour:
   maxVolume: 0.7
   loopSound: 1
   player: {fileID: 0}
+--- !u!1 &3817084079648294678
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4447730173588557264}
+  m_Layer: 0
+  m_Name: FreezePivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4447730173588557264
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3817084079648294678}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.477, y: 0.445, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9217403357204200388}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &8860219215201657873
 PrefabInstance:
   m_ObjectHideFlags: 0

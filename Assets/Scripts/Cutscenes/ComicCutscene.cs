@@ -15,9 +15,10 @@ public class ComicCutscene : MonoBehaviour
     // AUDIO (SoundLibrary Keys)
     // ============================
     [Header("Audio")]
-    [SerializeField] private string sfxPageFlipKey = "SFX_PageFlip";      
-    [SerializeField] private string sfxPanelRevealKey = "SFX_Panel";      
-    [SerializeField] private string[] pageSFXKeys;                        
+    [SerializeField] private string bgmCutsceneKey = "BGM_Cutscene";      
+    [SerializeField] private string sfxPageFlipKey = "SFX_PageFlip";
+    [SerializeField] private string sfxPanelRevealKey = "SFX_Panel";
+    [SerializeField] private string[] pageSFXKeys;
 
     [Header("Fade Overlay")]
     [SerializeField] private Image fadeOverlay;
@@ -46,8 +47,15 @@ public class ComicCutscene : MonoBehaviour
     private bool waitingForPanelClick = false;
     private List<Image> currentPanels;
 
+
+    // =========================================================
+    // START
+    // =========================================================
     private void Start()
     {
+        
+        PlayCutsceneBGM();
+
         if (fadeOverlay != null)
         {
             var c = fadeOverlay.color;
@@ -59,6 +67,16 @@ public class ComicCutscene : MonoBehaviour
         StartCutscene();
     }
 
+    private void PlayCutsceneBGM()
+    {
+        if (!string.IsNullOrEmpty(bgmCutsceneKey))
+            AudioManager.Instance?.PlayBGM(bgmCutsceneKey, true);
+    }
+
+
+    // =========================================================
+    // START CUTSCENE
+    // =========================================================
     public void StartCutscene()
     {
         foreach (var page in pageObjects)
@@ -83,11 +101,14 @@ public class ComicCutscene : MonoBehaviour
         yield return StartCoroutine(ShowPageRoutine());
     }
 
+
+    // =========================================================
+    // UPDATE
+    // =========================================================
     private void Update()
     {
         if (!isPlaying) return;
 
-        // reveal next panel
         if (waitingForPanelClick)
         {
             bool next =
@@ -101,7 +122,6 @@ public class ComicCutscene : MonoBehaviour
             return;
         }
 
-        // next page
         if (!allowNext) return;
 
         bool nextPage =
@@ -113,16 +133,16 @@ public class ComicCutscene : MonoBehaviour
             NextPage();
     }
 
-    // ============================
+
+    // =========================================================
     // MAIN PAGE ROUTINE
-    // ============================
+    // =========================================================
     IEnumerator ShowPageRoutine()
     {
         allowNext = false;
 
         bool useFade = PageShouldFade(currentIndex);
 
-        
         PlayPageFlipSFX();
 
         if (useFade && currentIndex > 0)
@@ -135,14 +155,11 @@ public class ComicCutscene : MonoBehaviour
                 p.SetActive(false);
 
             PreHidePagePanels(pageObjects[currentIndex]);
-
             pageObjects[currentIndex].SetActive(true);
         }
 
-        
         PlayPageSFX(currentIndex);
 
-        // Collect panels
         currentPanels = new List<Image>();
         foreach (Transform child in pageObjects[currentIndex].transform)
         {
@@ -153,7 +170,6 @@ public class ComicCutscene : MonoBehaviour
 
         bool multiplePanels = currentPanels.Count > 1;
 
-        // Subtitle
         TextMeshProUGUI tmpSub =
             pageObjects[currentIndex].GetComponentInChildren<TextMeshProUGUI>(true);
 
@@ -164,14 +180,11 @@ public class ComicCutscene : MonoBehaviour
             tmpSub.gameObject.SetActive(false);
         }
 
-        // MULTI PANEL LOGIC
         if (multiplePanels)
         {
-            // first panel
             yield return FadeInPanel(currentPanels[0]);
             PlayPanelSFX();
 
-            // next panels
             for (int i = 1; i < currentPanels.Count; i++)
             {
                 waitingForPanelClick = true;
@@ -191,7 +204,6 @@ public class ComicCutscene : MonoBehaviour
             }
         }
 
-        // subtitle reveal
         if (tmpSub != null)
         {
             tmpSub.gameObject.SetActive(true);
@@ -201,9 +213,10 @@ public class ComicCutscene : MonoBehaviour
         allowNext = true;
     }
 
-    // ============================
+
+    // =========================================================
     // AUDIO FUNCTIONS
-    // ============================
+    // =========================================================
     private void PlayPageFlipSFX()
     {
         if (!string.IsNullOrEmpty(sfxPageFlipKey))
@@ -225,9 +238,10 @@ public class ComicCutscene : MonoBehaviour
             AudioManager.Instance?.PlaySFX(key);
     }
 
-    // ============================
+
+    // =========================================================
     // HELPERS
-    // ============================
+    // =========================================================
     void PreHidePagePanels(GameObject page)
     {
         foreach (Transform child in page.transform)
@@ -254,11 +268,13 @@ public class ComicCutscene : MonoBehaviour
     {
         if (pageUseFullFade == null || pageUseFullFade.Length == 0)
             return true;
+
         if (index >= pageUseFullFade.Length)
             return true;
 
         return pageUseFullFade[index];
     }
+
 
     IEnumerator FullPageTransitionFade()
     {
@@ -268,11 +284,11 @@ public class ComicCutscene : MonoBehaviour
             p.SetActive(false);
 
         PreHidePagePanels(pageObjects[currentIndex]);
-
         pageObjects[currentIndex].SetActive(true);
 
         yield return FadeOverlaySmooth(1f, 0f, pageFadeDuration);
     }
+
 
     IEnumerator FadeOverlaySmooth(float start, float end, float duration)
     {
@@ -327,9 +343,10 @@ public class ComicCutscene : MonoBehaviour
         }
     }
 
-    // ============================
+
+    // =========================================================
     // PAGE CHANGE + END CUTSCENE
-    // ============================
+    // =========================================================
     void NextPage()
     {
         currentIndex++;
@@ -340,9 +357,13 @@ public class ComicCutscene : MonoBehaviour
             StartCoroutine(ShowPageRoutine());
     }
 
+
     void EndCutscene()
     {
         isPlaying = false;
+
+        
+        AudioManager.Instance?.StopBGM();
 
         if (pauseGameTime)
             Time.timeScale = 1f;
@@ -353,9 +374,13 @@ public class ComicCutscene : MonoBehaviour
         StartCoroutine(FadeOutAndExit());
     }
 
+
     IEnumerator FadeOutAndExit()
     {
         yield return FadeOverlaySmooth(0f, 1f, fadeDuration);
+
+        
+        AudioManager.Instance?.StopBGM();
 
         if (loadSceneAtEnd && !string.IsNullOrEmpty(nextSceneName))
             SceneManager.LoadScene(nextSceneName);

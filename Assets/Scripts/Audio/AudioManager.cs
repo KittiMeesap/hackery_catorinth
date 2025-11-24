@@ -13,7 +13,7 @@ public class AudioManager : MonoBehaviour
     [Header("Sound Library")]
     [SerializeField] private SoundLibrary soundLibrary;
 
-    [Header("Audio Sources")]
+    [Header("Audio Sources (Auto-Created if Missing)")]
     [SerializeField] private AudioSource musicSourceA;
     [SerializeField] private AudioSource musicSourceB;
     [SerializeField] private List<AudioSource> sfxPool = new();
@@ -36,7 +36,7 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton
+        // ---------- Singleton ----------
         if (Instance == null)
         {
             Instance = this;
@@ -48,12 +48,27 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        // Ensure UI source exists
-        if (uiSource == null)
-            uiSource = gameObject.AddComponent<AudioSource>();
+        // ---------- Auto-create missing music sources ----------
+        if (musicSourceA == null)
+        {
+            musicSourceA = gameObject.AddComponent<AudioSource>();
+            musicSourceA.playOnAwake = false;
+            musicSourceA.loop = true;
+        }
 
-        if (musicSourceA == null || musicSourceB == null)
-            Debug.LogError("[AudioManager] Missing music sources!");
+        if (musicSourceB == null)
+        {
+            musicSourceB = gameObject.AddComponent<AudioSource>();
+            musicSourceB.playOnAwake = false;
+            musicSourceB.loop = true;
+        }
+
+        // ---------- Auto-create UI source ----------
+        if (uiSource == null)
+        {
+            uiSource = gameObject.AddComponent<AudioSource>();
+            uiSource.playOnAwake = false;
+        }
 
         _currentMusicSource = musicSourceA;
 
@@ -68,18 +83,18 @@ public class AudioManager : MonoBehaviour
             _frustumPlanes = GeometryUtility.CalculateFrustumPlanes(_mainCam);
     }
 
-    // ======================================================================
+    // ============================================================
     // BGM
-    // ======================================================================
+    // ============================================================
     public void PlayBGM(string key, bool crossfade = true)
     {
         if (string.IsNullOrEmpty(key)) return;
 
-        if (currentBGMKey == key && _currentMusicSource.isPlaying)
-            return;
-
         AudioClip clip = GetClipSafe(key);
         if (clip == null) return;
+
+        if (currentBGMKey == key && _currentMusicSource.isPlaying)
+            return;
 
         currentBGMKey = key;
 
@@ -94,22 +109,20 @@ public class AudioManager : MonoBehaviour
         {
             _currentMusicSource.Stop();
             _currentMusicSource.clip = clip;
-            _currentMusicSource.loop = true;
             _currentMusicSource.volume = musicVolume * masterVolume;
+            _currentMusicSource.loop = true;
             _currentMusicSource.Play();
         }
     }
 
     private IEnumerator CrossfadeBGM(AudioClip newClip, float fadeTime)
     {
-        if (newClip == null) yield break;
-
         AudioSource from = _currentMusicSource;
         AudioSource to = (from == musicSourceA) ? musicSourceB : musicSourceA;
 
         to.clip = newClip;
-        to.loop = true;
         to.volume = 0f;
+        to.loop = true;
         to.Play();
 
         float t = 0f;
@@ -117,9 +130,11 @@ public class AudioManager : MonoBehaviour
         {
             t += Time.unscaledDeltaTime;
             float p = t / fadeTime;
+            p = p * p * (3 - 2 * p);
 
             to.volume = Mathf.Lerp(0f, musicVolume * masterVolume, p);
             from.volume = Mathf.Lerp(musicVolume * masterVolume, 0f, p);
+
             yield return null;
         }
 
@@ -128,9 +143,23 @@ public class AudioManager : MonoBehaviour
         bgmCrossfadeRoutine = null;
     }
 
-    // ======================================================================
+    public void StopBGM()
+    {
+        if (musicSourceA != null) musicSourceA.Stop();
+        if (musicSourceB != null) musicSourceB.Stop();
+
+        currentBGMKey = "";
+
+        if (bgmCrossfadeRoutine != null)
+        {
+            StopCoroutine(bgmCrossfadeRoutine);
+            bgmCrossfadeRoutine = null;
+        }
+    }
+
+    // ============================================================
     // SFX
-    // ======================================================================
+    // ============================================================
     public void PlaySFX(string key)
     {
         PlaySFXAt(key, Vector3.zero, false, false);
@@ -152,9 +181,9 @@ public class AudioManager : MonoBehaviour
         src.Play();
     }
 
-    // ======================================================================
-    // UI SOUND
-    // ======================================================================
+    // ============================================================
+    // UI Sound
+    // ============================================================
     public void PlayUI(string key)
     {
         AudioClip clip = GetClipSafe(key);
@@ -165,9 +194,9 @@ public class AudioManager : MonoBehaviour
         uiSource.Play();
     }
 
-    // ======================================================================
+    // ============================================================
     // Volume
-    // ======================================================================
+    // ============================================================
     public void SetMasterVolume(float value)
     {
         masterVolume = value;
@@ -203,12 +232,12 @@ public class AudioManager : MonoBehaviour
         SetSFXVolume(sfxVolume);
     }
 
-    private float VolumeToDb(float v) =>
-        Mathf.Log10(Mathf.Clamp(v, 0.0001f, 1f)) * 20f;
+    private float VolumeToDb(float v)
+        => Mathf.Log10(Mathf.Clamp(v, 0.0001f, 1f)) * 20f;
 
-    // ======================================================================
+    // ============================================================
     // Utilities
-    // ======================================================================
+    // ============================================================
     private AudioClip GetClipSafe(string key)
     {
         if (soundLibrary == null)
@@ -224,7 +253,7 @@ public class AudioManager : MonoBehaviour
         return clip;
     }
 
-    // 🔄 Compatibility with older scripts (Oven.cs, Fridge.cs)
+    // ⭐ Compatibility for older scripts (Oven.cs, Fridge.cs)
     public AudioClip GetClipByKey(string key)
     {
         return GetClipSafe(key);
@@ -235,19 +264,15 @@ public class AudioManager : MonoBehaviour
         if (mainMixer == null) return;
 
         float db = VolumeToDb(value);
-        bool success = mainMixer.SetFloat(param, db);
-
-        if (!success)
-            Debug.LogWarning($"[AudioManager] Mixer parameter '{param}' not found! Check exposed parameters.");
+        mainMixer.SetFloat(param, db);
     }
 
     private AudioSource GetAvailableSFXSource()
     {
-        foreach (AudioSource s in sfxPool)
-            if (s != null && !s.isPlaying)
-                return s;
+        foreach (AudioSource a in sfxPool)
+            if (a != null && !a.isPlaying)
+                return a;
 
-        // Auto-create new SFX source if pool is full
         AudioSource newSrc = gameObject.AddComponent<AudioSource>();
         sfxPool.Add(newSrc);
         return newSrc;

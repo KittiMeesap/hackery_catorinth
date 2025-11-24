@@ -70,4 +70,6 @@ MonoBehaviour:
   - key: Hack_Input
     clip: {fileID: 8300000, guid: 388c0763f60e34e41a87aff0119c1c0e, type: 3}
   - key: SFX_PageFlip
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b525c5d9da0857740a411a7af0f514ea, type: 3}
+  - key: BGM_Cutscene
+    clip: {fileID: 8300000, guid: bddaa977a9a5ac1459c7ff57abaab588, type: 3}

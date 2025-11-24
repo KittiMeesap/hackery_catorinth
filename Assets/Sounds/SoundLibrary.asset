@@ -79,3 +79,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: b254811e9ed020540ade32b5540930fa, type: 3}
   - key: Hack_Success
     clip: {fileID: 8300000, guid: 2b5ffeed2f7c6eb4ebcd97b73203fdcd, type: 3}
+  - key: SFX_SafeOpen
+    clip: {fileID: 8300000, guid: edd1c1fc7c8e781489babd6ef6db8460, type: 3}
+  - key: SFX_PaperFly
+    clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}

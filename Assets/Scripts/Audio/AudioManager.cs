@@ -36,7 +36,6 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
-        // ---------- Singleton ----------
         if (Instance == null)
         {
             Instance = this;
@@ -48,7 +47,6 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        // ---------- Auto-create missing music sources ----------
         if (musicSourceA == null)
         {
             musicSourceA = gameObject.AddComponent<AudioSource>();
@@ -63,7 +61,6 @@ public class AudioManager : MonoBehaviour
             musicSourceB.loop = true;
         }
 
-        // ---------- Auto-create UI source ----------
         if (uiSource == null)
         {
             uiSource = gameObject.AddComponent<AudioSource>();
@@ -195,6 +192,27 @@ public class AudioManager : MonoBehaviour
     }
 
     // ============================================================
+    // STOP ALL AUDIO (NEW)
+    // ============================================================
+    public void StopAllSFX()
+    {
+        foreach (var src in sfxPool)
+        {
+            if (src != null)
+                src.Stop();
+        }
+
+        if (uiSource != null)
+            uiSource.Stop();
+    }
+
+    public void StopAllAudio()
+    {
+        StopAllSFX();
+        StopBGM();
+    }
+
+    // ============================================================
     // Volume
     // ============================================================
     public void SetMasterVolume(float value)
@@ -253,7 +271,6 @@ public class AudioManager : MonoBehaviour
         return clip;
     }
 
-    // ⭐ Compatibility for older scripts (Oven.cs, Fridge.cs)
     public AudioClip GetClipByKey(string key)
     {
         return GetClipSafe(key);

@@ -137,7 +137,11 @@ public class Locker : HidingSpot, IInteractable
         cachedPlayerPosition = p.transform.position;
 
         var controller = p.GetComponent<PlayerController>();
-        if (controller) controller.SetFrozen(true);
+        if (controller)
+        {
+            controller.SetFrozen(true);
+            controller.ClearInputAndVelocity();
+        }
 
         p.EnterHiding(this);
         UIManager.Instance?.HideInteractPrompt(this);

@@ -34,22 +34,22 @@ public class PlayerHiding : MonoBehaviour
         if (IsHidingInContainer) return;
         IsHidingInContainer = true;
 
+        // invisible player
         if (spriteRenderer)
             spriteRenderer.enabled = false;
 
+        // freeze player
         if (playerController)
         {
-            playerController.SetFrozen(false);
+            playerController.SetFrozen(true);
             playerController.SetPhoneOut(false);
             playerController.ClearInputAndVelocity();
         }
 
-        transform.SetParent(null);
-
         transform.position = spot.GetHidingPosition();
-
         currentSpot = spot;
 
+        // disable hacking completely
         GetComponent<PlayerHacking>()?.SetHackingDisabled(true);
     }
 
@@ -69,9 +69,7 @@ public class PlayerHiding : MonoBehaviour
             playerController.SetFrozen(false);
         }
 
-        transform.SetParent(null);
         transform.position = spot.GetExitPosition();
-
         currentSpot = null;
 
         GetComponent<PlayerHacking>()?.SetHackingDisabled(false);

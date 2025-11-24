@@ -200,6 +200,12 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             return;
         }
 
+        if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer)
+        {
+            StopMovement(true);
+            return;
+        }
+
         if (isSleeping || isWaking)
         {
             StopMovement(true);

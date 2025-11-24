@@ -77,34 +77,11 @@ public class BoxHide : HidingSpot, IInteractable
 
     private void Update()
     {
-        if (isInside && !isBusy)
-            HandleMovement();
-
-        UpdatePromptPointPosition();
-    }
-
-    private void HandleMovement()
-    {
-        if (playerController == null) return;
-
-        moveInput = playerController.GetMoveInput();
-        Vector2 delta = moveInput * moveSpeed * Time.deltaTime;
-
-        rb.MovePosition(rb.position + delta);
-
-        playerController.transform.position = transform.position;
-
-        // Animation
-        bool walking = moveInput.sqrMagnitude > 0.01f;
-        anim.SetBool(hashIsWalking, walking);
-        anim.Play(walking ? hashWalk : hashIdle);
-
-        // Flip
-        if (moveInput.x != 0)
+        if (isInside)
         {
-            float dir = Mathf.Sign(moveInput.x);
-            transform.localScale = new Vector3(defaultScale.x * dir, defaultScale.y, defaultScale.z);
+            return;
         }
+        UpdatePromptPointPosition();
     }
 
     // ------------------ INTERACT ----------------------

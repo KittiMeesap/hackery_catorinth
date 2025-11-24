@@ -399,31 +399,26 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     {
         if (isDead || !dealContactDamage) return;
         if ((playerLayer.value & (1 << other.gameObject.layer)) == 0) return;
-        if (IsInSmoke || IsInCold || (PlayerHiding.Instance && PlayerHiding.Instance.IsHiddenBySmoke)) return;
 
-        emotionUI?.PulseAlert(0.6f);
+        // PLAYER HIDING NO DAMAGE AT ALL
+        if (PlayerHiding.Instance && PlayerHiding.Instance.IsHidingInContainer)
+            return;
 
-        FaceTowards(other.bounds.center);
+        // smoke hide
+        if (IsInSmoke || IsInCold || (PlayerHiding.Instance && PlayerHiding.Instance.IsHiddenBySmoke))
+            return;
 
         var damageable = other.GetComponentInParent<IDamageable>();
         if (damageable == null) return;
 
         int id = other.transform.root.GetInstanceID();
         float now = Time.time;
-        if (lastHitTimeByTarget.TryGetValue(id, out float last) && now - last < perTargetCooldown) return;
+
+        if (lastHitTimeByTarget.TryGetValue(id, out float last) && now - last < perTargetCooldown)
+            return;
 
         damageable.TakeDamage(contactDamage);
         lastHitTimeByTarget[id] = now;
-
-        if (knockbackOnHit)
-        {
-            var rb2 = other.attachedRigidbody;
-            if (rb2 != null && knockbackForce > 0f)
-            {
-                Vector2 dir = ((Vector2)other.bounds.center - (Vector2)transform.position).normalized;
-                rb2.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
-            }
-        }
     }
 
     // ---------- Helpers ----------

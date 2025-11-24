@@ -28,6 +28,9 @@ public class PlayerHacking : MonoBehaviour
         if (GameManager.Instance == null || UIManager.Instance == null) return;
         if (hackingDisabled) return;
 
+        if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer)
+            return;
+
         if (PlayerController.Instance != null)
         {
             var player = PlayerController.Instance;

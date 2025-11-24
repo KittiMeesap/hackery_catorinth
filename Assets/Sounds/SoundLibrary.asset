@@ -73,3 +73,9 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: b525c5d9da0857740a411a7af0f514ea, type: 3}
   - key: BGM_Cutscene
     clip: {fileID: 8300000, guid: bddaa977a9a5ac1459c7ff57abaab588, type: 3}
+  - key: BGM_Cutscene
+    clip: {fileID: 8300000, guid: bddaa977a9a5ac1459c7ff57abaab588, type: 3}
+  - key: SFX_TimerEnd
+    clip: {fileID: 8300000, guid: b254811e9ed020540ade32b5540930fa, type: 3}
+  - key: Hack_Success
+    clip: {fileID: 8300000, guid: 2b5ffeed2f7c6eb4ebcd97b73203fdcd, type: 3}

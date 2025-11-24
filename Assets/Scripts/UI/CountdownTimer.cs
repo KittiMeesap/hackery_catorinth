@@ -29,6 +29,7 @@ public class CountdownTimer : MonoBehaviour
     private float currentTime;
     private bool isRunning = false;
     private bool warned = false;
+    private bool forceStopped = false;       // ?? NEW
     private Vector3 defaultScale;
 
     private void Start()
@@ -39,10 +40,9 @@ public class CountdownTimer : MonoBehaviour
         ResetTimer();
     }
 
-
     private void Update()
     {
-        if (!isRunning) return;
+        if (!isRunning || forceStopped) return;   // ?? NEW (Block update when forced stop)
 
         if (currentTime > 0)
         {
@@ -68,7 +68,8 @@ public class CountdownTimer : MonoBehaviour
         int seconds = Mathf.FloorToInt(currentTime % 60);
         timerText.text = $"{minutes:00}:{seconds:00}";
 
-        // Warning mode (10 seconds left)
+        if (forceStopped) return; // ?? NEW prevent blinking/sound after forced stop
+
         if (currentTime <= warningThreshold)
         {
             timerText.color = warningColor;
@@ -97,6 +98,12 @@ public class CountdownTimer : MonoBehaviour
 
     private void PlayWarningBeep()
     {
+        if (forceStopped)  // ?? NEW
+        {
+            CancelInvoke(nameof(PlayWarningBeep));
+            return;
+        }
+
         if (currentTime > 0 && currentTime <= warningThreshold)
         {
             AudioManager.Instance?.PlaySFX(warningSFXKey);
@@ -109,24 +116,66 @@ public class CountdownTimer : MonoBehaviour
 
     private void OnTimeOver()
     {
+        if (forceStopped) return;   // ?? NEW block timeOver sound
+
         CancelInvoke(nameof(PlayWarningBeep));
         AudioManager.Instance?.PlaySFX(timeOverSFXKey);
 
         if (sweeperIntroDirector)
-        {
             sweeperIntroDirector.Play();
-            Debug.Log("[CountdownTimer] Time's up — Playing Sweeper Intro Timeline.");
-        }
-        else
-        {
-            Debug.LogWarning("[CountdownTimer] No Timeline assigned. Nothing will happen.");
-        }
     }
 
-    //Damage Flash
+    public void ResetTimer()
+    {
+        CancelInvoke(nameof(PlayWarningBeep));
+        AudioManager.Instance?.StopAllSFX();
+
+        forceStopped = false; // ?? NEW reset state
+
+        currentTime = startTime;
+        warned = false;
+
+        if (timerText != null)
+            timerText.transform.localScale = defaultScale;
+
+        UpdateTimerUI();
+    }
+
+    public void ReduceTime(float amount)
+    {
+        currentTime -= amount;
+        if (currentTime < 0)
+            currentTime = 0;
+
+        UpdateTimerUI();
+        PlayDamageFlash();
+    }
+
+    public void StartCountdown()
+    {
+        forceStopped = false;  // ?? NEW
+        isRunning = true;
+    }
+
+    public void StopCountdown()
+    {
+        CancelInvoke(nameof(PlayWarningBeep));
+        AudioManager.Instance?.StopAllSFX();
+        isRunning = false;
+    }
+
+    // ?? NEW — used by PauseMenuUI + GameOverUI
+    public void ForceStopAllTimerAudio()
+    {
+        forceStopped = true;
+        CancelInvoke(nameof(PlayWarningBeep));
+        AudioManager.Instance?.StopAllSFX();
+        isRunning = false;
+    }
+
     public void PlayDamageFlash()
     {
-        if (timerText == null) return;
+        if (timerText == null || forceStopped) return; // ?? NEW
         StartCoroutine(DamageFlashRoutine());
     }
 
@@ -142,12 +191,10 @@ public class CountdownTimer : MonoBehaviour
         {
             t += Time.deltaTime * 4f;
 
-            // Shake
             float shakeStrength = 5f * (1f - (t / shakeTime));
             timerText.rectTransform.localPosition =
                 originalPos + (Vector3)Random.insideUnitCircle * shakeStrength;
 
-            // Flash red
             float f = Mathf.PingPong(t * 6f, 1f);
             Color c = Color.Lerp(originalColor, Color.red, f);
             timerText.color = c;
@@ -155,30 +202,7 @@ public class CountdownTimer : MonoBehaviour
             yield return null;
         }
 
-        // Restore
         timerText.rectTransform.localPosition = originalPos;
         timerText.color = originalColor;
     }
-
-    // TIME CONTROL
-    public void ResetTimer()
-    {
-        currentTime = startTime;
-        warned = false;
-        UpdateTimerUI();
-    }
-
-    public void ReduceTime(float amount)
-    {
-        currentTime -= amount;
-        if (currentTime < 0)
-            currentTime = 0;
-
-        UpdateTimerUI();
-
-        PlayDamageFlash();
-    }
-
-    public void StartCountdown() => isRunning = true;
-    public void StopCountdown() => isRunning = false;
 }

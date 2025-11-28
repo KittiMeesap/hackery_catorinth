@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Fridge : HackableObject
+public class Fridge : HackableObject, IInteractable
 {
     [Header("Cold Settings")]
     [SerializeField] private float coldRadius = 2.5f;
@@ -38,37 +38,68 @@ public class Fridge : HackableObject
     [SerializeField] private float hackCooldown = 2f;
     private bool isOnCooldown = false;
 
+    [Header("Auto Close Settings")]
+    [SerializeField] private float autoCloseDelay = 4f;
+    private Coroutine autoCloseRoutine;
+
+    [Header("Highlight")]
+    [SerializeField] private SpriteRenderer highlightSprite;
+
+    [Header("Prompt Point")]
+    [SerializeField] private Transform promptPoint;
+
+    [Header("Interact Radius")]
+    [SerializeField] private float interactRadius = 0.9f;
+    public float GetInteractRadius() => interactRadius;
+
     private bool currentState;
     private float checkTimer;
     private AudioSource loopSource;
+
     private readonly HashSet<IFreezable> coldablesInRange = new();
     private float lastColdTickTime = -1f;
 
-
     private void Awake()
     {
+        allowRepeatHack = true;
+
         if (!animator) animator = GetComponent<Animator>();
-        if (ambientSoundGate != null)
-            ambientSoundGate.EnableZone(startOn);
+        if (promptPoint == null) promptPoint = transform;
+        if (highlightSprite) highlightSprite.enabled = false;
+
+        loopSource = GetComponent<AudioSource>();
+        if (loopSource)
+        {
+            loopSource.playOnAwake = false;
+            loopSource.Stop();
+        }
+
+        ambientSoundGate?.EnableZone(startOn);
     }
 
     private void Start()
     {
-        SetActiveInternal(startOn, playSfx: false);
+        currentState = startOn;
+        SetActiveInternal(startOn, false);
 
-        if (freezeMistVFX && hideParticleWhenOff && !currentState)
+        if (!currentState && freezeMistVFX && hideParticleWhenOff)
             freezeMistVFX.gameObject.SetActive(false);
     }
 
     private void Update()
     {
+        RefreshHighlight();
+
         if (!currentState) return;
 
         checkTimer += Time.deltaTime;
         if (checkTimer >= checkInterval)
         {
             float now = Time.time;
-            float dt = (lastColdTickTime < 0f) ? checkInterval : Mathf.Max(0.0001f, now - lastColdTickTime);
+            float dt = (lastColdTickTime < 0f)
+                ? checkInterval
+                : Mathf.Max(0.0001f, now - lastColdTickTime);
+
             lastColdTickTime = now;
             checkTimer = 0f;
 
@@ -92,9 +123,6 @@ public class Fridge : HackableObject
                 current.Add(fz);
             }
 
-            if (col.TryGetComponent<PlayerHiding>(out var hiding))
-                hiding.EnterSmoke();
-
             if (col.TryGetComponent<EnemyController>(out var enemy))
                 enemy.EnterSmoke();
         }
@@ -108,16 +136,112 @@ public class Fridge : HackableObject
             coldablesInRange.Add(f);
     }
 
+    public override bool ShouldShowHighlight =>
+        !currentState &&
+        !isOnCooldown &&
+        PlayerController.Instance != null &&
+        Vector2.Distance(PlayerController.Instance.transform.position, promptPoint.position)
+            <= interactRadius;
+
+    private void RefreshHighlight()
+    {
+        if (!highlightSprite) return;
+        highlightSprite.enabled = ShouldShowHighlight;
+    }
+
+    public override void RefreshHighlightExternal()
+    {
+        if (highlightSprite != null)
+            highlightSprite.enabled = ShouldShowHighlight;
+    }
+
+    public Transform GetPromptPoint() => promptPoint;
+
+    public void Interact()
+    {
+        if (!currentState && !isOnCooldown)
+            OnEnterHackingMode();
+    }
+
+    private HackOptionSO GetCurrentOption()
+    {
+        if (hackOptions == null || hackOptions.Count == 0)
+            return null;
+
+        return hackOptions.Find(o => o.optionType == HackOptionSO.HackType.Enable);
+    }
+
+    public override void OnEnterHackingMode()
+    {
+        if (UIManager.Instance == null || UIManager.Instance.IsHacking)
+            return;
+
+        var selected = GetCurrentOption();
+        if (selected == null) return;
+
+        currentUI = UIManager.Instance.hackingUI;
+        currentUI.SetCurrentHackTarget(this);
+
+        PlayerController.Instance.SetPhoneOut(true);
+        PlayerController.Instance.SetFrozen(true);
+        GameManager.Instance.ToggleHackingMode(true);
+
+        var seq = selected.isRandom ?
+                  GenerateRandomSequence(selected.randomLength) :
+                  selected.sequence;
+
+        currentUI.ShowSingleOptionSequence(
+            seq,
+            transform,
+            selected.icon,
+            () => HandleHackOptionComplete(selected),
+            OnHackFailed,
+            useHackTimer,
+            hackTimeLimit
+        );
+    }
+
+    protected override void HandleHackOptionComplete(HackOptionSO option)
+    {
+        if (isOnCooldown) return;
+
+        StartCoroutine(HackCooldownTimer());
+
+        Hack_TurnOn();
+        StartAutoClose();
+
+        base.HandleHackOptionComplete(option);
+    }
+
+    private void StartAutoClose()
+    {
+        if (autoCloseRoutine != null)
+            StopCoroutine(autoCloseRoutine);
+
+        autoCloseRoutine = StartCoroutine(AutoCloseRoutine());
+    }
+
+    private IEnumerator AutoCloseRoutine()
+    {
+        yield return new WaitForSeconds(autoCloseDelay);
+
+        Hack_TurnOff();
+        ResetHack();
+
+        RefreshHighlight();
+    }
 
     public void Hack_TurnOn() => SetActiveInternal(true, true);
     public void Hack_TurnOff() => SetActiveInternal(false, true);
-    public void Toggle() => SetActiveInternal(!currentState, true);
 
+    public void Toggle() { }
 
     private void SetActiveInternal(bool on, bool playSfx)
     {
         if (currentState == on) return;
+
         currentState = on;
+        RefreshHighlight();
 
         if (on) lastColdTickTime = -1f;
 
@@ -130,23 +254,23 @@ public class Fridge : HackableObject
 
         if (freezeMistVFX)
         {
-            var vfxGO = freezeMistVFX.gameObject;
             if (on)
             {
-                if (hideParticleWhenOff && !vfxGO.activeSelf)
-                    vfxGO.SetActive(true);
-
-                freezeMistVFX.Clear(true);
-                if (!freezeMistVFX.isPlaying)
-                    freezeMistVFX.Play();
+                if (hideParticleWhenOff && !freezeMistVFX.gameObject.activeSelf)
+                    freezeMistVFX.gameObject.SetActive(true);
+                freezeMistVFX.Play();
             }
             else
             {
                 if (freezeMistVFX.isPlaying)
                 {
                     freezeMistVFX.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
                     if (hideParticleWhenOff)
-                        StartCoroutine(DisableParticleAfterDelay(freezeMistVFX.main.startLifetime.constantMax));
+                    {
+                        float delay = freezeMistVFX.main.startLifetime.constantMax;
+                        StartCoroutine(DisableParticleAfterDelay(delay));
+                    }
                 }
             }
         }
@@ -156,27 +280,25 @@ public class Fridge : HackableObject
             StartLoopSound();
             ambientSoundGate?.EnableZone(true);
             if (playSfx && !string.IsNullOrEmpty(sfxOnKey))
-                AudioManager.Instance?.PlaySFX(sfxOnKey);
+                AudioManager.Instance.PlaySFX(sfxOnKey);
         }
         else
         {
             StopLoopSound();
             ambientSoundGate?.EnableZone(false);
             if (playSfx && !string.IsNullOrEmpty(sfxOffKey))
-                AudioManager.Instance?.PlaySFX(sfxOffKey);
+                AudioManager.Instance.PlaySFX(sfxOffKey);
         }
     }
-
 
     private void StartLoopSound()
     {
         if (AudioManager.Instance == null || string.IsNullOrEmpty(sfxLoopKey))
             return;
 
-        if (loopSource == null)
+        if (!loopSource)
         {
             loopSource = gameObject.AddComponent<AudioSource>();
-            loopSource.playOnAwake = false;
             loopSource.loop = true;
             loopSource.spatialBlend = 0f;
         }
@@ -185,58 +307,34 @@ public class Fridge : HackableObject
         if (clip != null)
         {
             loopSource.clip = clip;
-            loopSource.volume = 1f;
             loopSource.Play();
         }
     }
 
     private void StopLoopSound()
     {
-        if (loopSource != null && loopSource.isPlaying)
-        {
+        if (loopSource && loopSource.isPlaying)
             loopSource.Stop();
-            loopSource.clip = null;
-        }
     }
-
 
     private IEnumerator DisableParticleAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
+
         if (freezeMistVFX && hideParticleWhenOff)
             freezeMistVFX.gameObject.SetActive(false);
     }
 
-
-    protected override void HandleHackOptionComplete(HackOptionSO option)
-    {
-        if (isOnCooldown) return;
-        StartCoroutine(HackCooldownTimer());
-
-        if (option == null) return;
-
-        switch (option.optionType)
-        {
-            case HackOptionSO.HackType.Disable:
-                Hack_TurnOff();
-                break;
-            case HackOptionSO.HackType.Enable:
-                Hack_TurnOn();
-                break;
-            default:
-                Toggle();
-                break;
-        }
-    }
-
-
     private IEnumerator HackCooldownTimer()
     {
         isOnCooldown = true;
-        yield return new WaitForSeconds(hackCooldown);
-        isOnCooldown = false;
-    }
+        RefreshHighlight();
 
+        yield return new WaitForSeconds(hackCooldown);
+
+        isOnCooldown = false;
+        RefreshHighlight();
+    }
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
@@ -245,6 +343,10 @@ public class Fridge : HackableObject
 
         Vector3 center = freezePivot ? freezePivot.position : transform.position;
         Gizmos.DrawWireSphere(center, coldRadius);
+
+        Gizmos.color = Color.pink;
+        if (promptPoint != null)
+            Gizmos.DrawWireSphere(promptPoint.position, interactRadius);
     }
 #endif
 }

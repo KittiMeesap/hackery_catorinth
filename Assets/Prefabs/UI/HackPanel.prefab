@@ -66,11 +66,15 @@ MonoBehaviour:
   arrowDownPrefab: {fileID: 4062521740420822897, guid: b36fa2e61ce4f7140a0f2ad69e53ecd3, type: 3}
   arrowLeftPrefab: {fileID: 4062521740420822897, guid: 4a849feff68e7e941af910a41a84368e, type: 3}
   arrowRightPrefab: {fileID: 4062521740420822897, guid: c495d0cd780214643a593ef86b9f4ce9, type: 3}
-  anchor: 0
-  yOffset: 0
-  xOffset: 0
-  hackingSoundKey: SFX_HackInput
-  failSoundKey: SFX_HackFail
+  sfxOpenUI: Hack_Open
+  sfxSuccess: Hack_Success
+  sfxFail: Hack_Fail
+  sfxInput: Hack_Input
+  panelPopDuration: 0.4
+  arrowPopScale: 1.15
+  shakeIntensity: 2
+  shakeDuration: 0.25
+  arrowPulseScale: 1.25
 --- !u!1 &5802008248057809295
 GameObject:
   m_ObjectHideFlags: 0
@@ -140,7 +144,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 3
-  m_Spacing: 0
+  m_Spacing: 0.3
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0

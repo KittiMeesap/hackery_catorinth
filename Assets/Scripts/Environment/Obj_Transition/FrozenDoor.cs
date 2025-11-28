@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
+public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor
 {
     public enum OpenMode { Warp, LoadScene }
 
@@ -30,17 +30,13 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
     [Header("Behaviour")]
     [SerializeField] private bool startFrozen = true;
     [SerializeField] private float meltThreshold = 2f;
-    [SerializeField] private float openToTeleportDelay = 0.1f;
+    [SerializeField] private float teleportDelay = 0.1f;
     [SerializeField] private float reuseCooldown = 0.5f;
-
-    [Header("Prompt UI")]
-    [SerializeField] private Transform promptPoint;
 
     private float temperature = 0f;
     private bool isFrozen = true;
     private bool canUseDoor = true;
 
-    private GameObject playerGO;
     private Collider2D triggerCol;
 
     private void Awake()
@@ -48,20 +44,6 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         animator ??= GetComponent<Animator>();
         triggerCol ??= GetComponent<Collider2D>();
         if (triggerCol) triggerCol.isTrigger = true;
-
-        EnsurePromptPoint();
-    }
-
-    private void EnsurePromptPoint()
-    {
-        if (promptPoint == null)
-        {
-            GameObject go = new GameObject("InteractPosition");
-            go.transform.SetParent(transform);
-            go.transform.localPosition = Vector3.zero;
-
-            promptPoint = go.transform;
-        }
     }
 
     private void Start()
@@ -76,6 +58,7 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
             MeltDoor();
     }
 
+    // -------- Heat System --------
     public void ApplyHeat(float delta) => temperature += delta;
     public void ApplyCold(float delta) { }
     public void CoolDown(float delta) { }
@@ -93,73 +76,52 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         animator?.SetBool(unfreezeParam, !frozen);
     }
 
+    // -------- Trigger Logic --------
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
-        if (other.CompareTag("Player"))
-        {
-            playerGO = other.gameObject;
+        if (!isFrozen)
+            animator?.SetBool(openParam, true);
+    }
 
-            if (!isFrozen)
-            {
-                UIManager.Instance?.ShowInteractPrompt(this);
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+            return;
 
-                animator?.SetBool(closeParam, false);
-                animator?.SetBool(openParam, true);
+        if (isFrozen || !canUseDoor) return;
+        if (!CanOpenFor(other.gameObject)) return;
 
-                AudioManager.Instance?.PlaySFX(sfxOpenKey);
-            }
-        }
+        StartCoroutine(TeleportRoutine(other.gameObject));
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-
         if (!isFrozen)
-        {
-            UIManager.Instance?.HideInteractPrompt(this);
-
             animator?.SetBool(openParam, false);
-            animator?.SetBool(closeParam, true);
-
-            AudioManager.Instance?.PlaySFX(sfxCloseKey);
-        }
-
-        playerGO = null;
     }
 
-    public void Interact()
+    // -------- Auto Teleport --------
+    private IEnumerator TeleportRoutine(GameObject entity)
     {
-        if (isFrozen || !canUseDoor) return;
-        StartCoroutine(OpenAndGo());
-    }
-
-    private IEnumerator OpenAndGo()
-    {
-        if (isFrozen || !canUseDoor || playerGO == null)
-            yield break;
-
         canUseDoor = false;
 
-        animator?.SetBool(openParam, true);
-
-        yield return new WaitForSeconds(openToTeleportDelay);
+        yield return new WaitForSeconds(teleportDelay);
 
         var fader = UIManager.Instance?.screenFader;
-        if (fader) yield return fader.FadeOut();
+        if (fader != null) yield return fader.FadeOut();
 
         if (openMode == OpenMode.Warp)
-            WarpEntity(playerGO);
+            WarpEntity(entity);
         else
-            yield return DoLoadScene();
+            yield return LoadSceneRoutine();
 
-        if (fader) yield return fader.FadeIn();
+        if (fader != null) yield return fader.FadeIn();
 
         yield return new WaitForSeconds(reuseCooldown);
-
         canUseDoor = true;
     }
 
@@ -184,13 +146,27 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
         nextDoor?.DisableInteractionTemporarily(reuseCooldown);
     }
 
-    private IEnumerator DoLoadScene()
+    private IEnumerator LoadSceneRoutine()
     {
         AsyncOperation op = SceneManager.LoadSceneAsync(targetSceneName);
         if (!waitForSceneLoaded) yield break;
 
         while (!op.isDone)
             yield return null;
+    }
+
+    public bool CanOpenFor(GameObject entity)
+    {
+        if (!canUseDoor || isFrozen) return false;
+        return connectedDoor != null && exitPoint != null;
+    }
+
+    public void OpenForEntity(GameObject entity)
+    {
+        if (!CanOpenFor(entity))
+            return;
+
+        StartCoroutine(TeleportRoutine(entity));
     }
 
     public void DisableInteractionTemporarily(float delay)
@@ -200,36 +176,8 @@ public class FrozenDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
 
     private IEnumerator CoDisable(float delay)
     {
-        bool prev = canUseDoor;
         canUseDoor = false;
-
         yield return new WaitForSeconds(delay);
-
-        canUseDoor = prev;
-    }
-
-    public Transform GetPromptPoint()
-    {
-        return promptPoint != null ? promptPoint : transform;
-    }
-
-    public bool CanOpenFor(GameObject entity)
-    {
-        if (!canUseDoor)
-            return false;
-
-        if (entity != null && entity.CompareTag("Enemy"))
-            return connectedDoor != null && exitPoint != null;
-
-        if (isFrozen)
-            return false;
-
-        return connectedDoor != null && exitPoint != null;
-    }
-
-    public void OpenForEntity(GameObject entity)
-    {
-        if (!CanOpenFor(entity)) return;
-        WarpEntity(entity);
+        canUseDoor = true;
     }
 }

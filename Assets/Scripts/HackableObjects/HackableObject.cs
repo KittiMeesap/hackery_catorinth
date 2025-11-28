@@ -1,6 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 public class HackableObject : MonoBehaviour
 {
@@ -18,58 +18,59 @@ public class HackableObject : MonoBehaviour
     public float hackTimeLimit = 5f;
 
     [Header("Hack State")]
-    public bool allowRepeatHack = false;
+    public bool allowRepeatHack = true;
 
     [Header("Mission Settings")]
     public bool completeMissionOnHack = false;
     public string missionId;
 
     protected bool isHacked = false;
+    public bool IsHacked => isHacked;
+
     public static HackableObject ActiveProximityHackable;
     protected HackingUI currentUI;
 
-    public bool IsHacked => isHacked;
+    // let child classes control highlight
+    public virtual bool ShouldShowHighlight => false;
+
+    public virtual bool IsFullyOpened => false;
+    public virtual bool IsOnCooldown => false;
 
     private void Start()
     {
         isHacked = false;
     }
 
+    public virtual void RefreshHighlightExternal()
+    {
+
+    }
+
     public virtual void OnEnterHackingMode()
     {
-        if ((!allowRepeatHack && isHacked) || UIManager.Instance == null || UIManager.Instance.IsHacking)
+        if (UIManager.Instance == null || UIManager.Instance.IsHacking)
             return;
 
         currentUI = UIManager.Instance.hackingUI;
-
         currentUI.SetCurrentHackTarget(this);
 
         PlayerController.Instance?.SetPhoneOut(true);
         PlayerController.Instance?.SetFrozen(true);
-
         GameManager.Instance?.ToggleHackingMode(true);
 
-        var playerHacking = Object.FindFirstObjectByType<PlayerHacking>();
+        var playerHacking = FindFirstObjectByType<PlayerHacking>();
         playerHacking?.SetCurrentHackedObject(this);
 
         if (triggerType == HackTriggerType.ProximityInteract)
             ActiveProximityHackable = this;
 
-        if (useHackOptions && hackOptions != null && hackOptions.Count > 1)
-        {
-            UIManager.Instance.StartMultiOptionHack(
-                hackOptions,
-                transform,
-                HandleHackOptionComplete,
-                useHackTimer,
-                hackTimeLimit
-            );
-        }
-        else
-        {
-            var selected = (hackOptions != null && hackOptions.Count == 1) ? hackOptions[0] : defaultHackOption;
-            if (selected != null) OnOptionSelected(selected);
-        }
+        HackOptionSO selected = defaultHackOption;
+
+        if (useHackOptions && hackOptions != null && hackOptions.Count > 0)
+            selected = hackOptions[0];
+
+        if (selected != null)
+            OnOptionSelected(selected);
     }
 
     protected virtual void OnOptionSelected(HackOptionSO selectedOption)
@@ -77,9 +78,6 @@ public class HackableObject : MonoBehaviour
         var sequence = selectedOption.isRandom
             ? GenerateRandomSequence(selectedOption.randomLength)
             : new List<ArrowUI.Direction>(selectedOption.sequence);
-
-        if (!selectedOption.isRandom && (sequence == null || sequence.Count == 0))
-            return;
 
         currentUI.ShowSingleOptionSequence(
             sequence,
@@ -94,39 +92,49 @@ public class HackableObject : MonoBehaviour
 
     protected virtual void HandleHackOptionComplete(HackOptionSO option)
     {
-        if (!allowRepeatHack)
-            isHacked = true;
+        // mark hacked only for the moment of this action
+        isHacked = true;
 
         PerformHackedAction(option);
 
         HideHackingUI();
 
+        // allow next hack after exit
+        StartCoroutine(ResetHackNextFrame());
+
         if (completeMissionOnHack && !string.IsNullOrEmpty(missionId))
             MissionManager.Instance?.MarkHackComplete(missionId);
     }
+
+    private IEnumerator ResetHackNextFrame()
+    {
+        // wait 1 frame so highlight/Interact logic has time to update
+        yield return null;
+        isHacked = false;
+    }
+
+    protected virtual void PerformHackedAction(HackOptionSO option) { }
 
     public void HideHackingUI()
     {
         currentUI?.HideHackingUI();
 
-        if (triggerType == HackTriggerType.ProximityInteract && ActiveProximityHackable == this)
+        if (triggerType == HackTriggerType.ProximityInteract &&
+            ActiveProximityHackable == this)
             ActiveProximityHackable = null;
 
         GameManager.Instance?.ToggleHackingMode(false);
 
         PlayerController.Instance?.ClearInputAndVelocity();
-
         StartCoroutine(UnfreezeAfterDelay(0.4f));
     }
 
     private IEnumerator UnfreezeAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-
         PlayerController.Instance?.SetFrozen(false);
 
         yield return new WaitForSeconds(0.15f);
-
         PlayerController.Instance?.SetPhoneOut(false);
         PlayerController.Instance?.ClearInputAndVelocity();
     }
@@ -135,7 +143,8 @@ public class HackableObject : MonoBehaviour
     {
         HideHackingUI();
 
-        if (triggerType == HackTriggerType.ProximityInteract && ActiveProximityHackable == this)
+        if (triggerType == HackTriggerType.ProximityInteract &&
+            ActiveProximityHackable == this)
             ActiveProximityHackable = null;
 
         var timer = FindFirstObjectByType<CountdownTimer>();
@@ -144,13 +153,9 @@ public class HackableObject : MonoBehaviour
         PlayerController.Instance?.ClearInputAndVelocity();
     }
 
-    protected virtual void PerformHackedAction(HackOptionSO option) { }
-
-    public virtual void ResetHack() => isHacked = false;
-
     protected List<ArrowUI.Direction> GenerateRandomSequence(int length)
     {
-        var options = new List<ArrowUI.Direction>
+        var dirs = new List<ArrowUI.Direction>
         {
             ArrowUI.Direction.Up,
             ArrowUI.Direction.Down,
@@ -160,13 +165,17 @@ public class HackableObject : MonoBehaviour
 
         var result = new List<ArrowUI.Direction>();
         for (int i = 0; i < length; i++)
-            result.Add(options[Random.Range(0, options.Count)]);
+            result.Add(dirs[Random.Range(0, dirs.Count)]);
+
         return result;
     }
 
+    public virtual void ResetHack() { isHacked = false; }
+
     private void OnDisable()
     {
-        if (triggerType == HackTriggerType.ProximityInteract && ActiveProximityHackable == this)
+        if (triggerType == HackTriggerType.ProximityInteract &&
+            ActiveProximityHackable == this)
             ActiveProximityHackable = null;
     }
 }

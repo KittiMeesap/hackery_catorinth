@@ -25,27 +25,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Look",
-                    "type": "Value",
-                    "id": "9c8da4a2-b131-447e-a821-9027060a3784",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "Interact",
                     "type": "Button",
                     "id": "e018cc34-8ada-4419-8713-ed2704af1818",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Phone",
-                    "type": "Button",
-                    "id": "46e26f9d-ae28-4278-a53b-5ed769d16add",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -71,28 +53,6 @@
                 }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "2d691d19-4fe3-4f34-9975-5e9ecaa996ca",
-                    "path": "<VirtualMouse>/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "222c918c-6477-49d8-b07a-28fc81940d20",
-                    "path": "<Gamepad>/rightStick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
                 {
                     "name": "",
                     "id": "4d88301d-3169-4f7b-a2f5-cb46992a5e19",
@@ -293,23 +253,45 @@
                 },
                 {
                     "name": "",
-                    "id": "32118ddc-b68f-49a5-8427-571236474969",
-                    "path": "<Keyboard>/space",
+                    "id": "81c60bae-7d12-49aa-aa79-106496b3906d",
+                    "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Phone",
+                    "action": "Hack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "5b65196e-4e48-4a70-8f4b-51caa4c2cb11",
-                    "path": "<Gamepad>/leftShoulder",
+                    "id": "b16a8f1d-b429-401c-abca-1f4ccb2b549a",
+                    "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Phone",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Hack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a8f5ee26-c432-4bcf-8f2b-0019cdce64e4",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Hack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "03102c56-6481-406c-b011-28e04e45c5aa",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -872,6 +854,17 @@
                     "name": "",
                     "id": "9ae6b375-f46e-45da-b8fa-8762c9d06dbb",
                     "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Continue",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f45255eb-2b47-446a-bbe5-601ac4f7a56f",
+                    "path": "<Mouse>/press",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",

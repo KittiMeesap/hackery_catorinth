@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 1473695885345231508}
   - component: {fileID: 671632273726037475}
   - component: {fileID: 2283077383662525979}
-  - component: {fileID: 5408046801839891082}
   m_Layer: 8
   m_Name: Enemy
   m_TagString: Enemy
@@ -224,25 +223,11 @@ MonoBehaviour:
   dealContactDamage: 1
   contactDamage: 1
   perTargetCooldown: 0.5
-  knockbackOnHit: 1
   knockbackForce: 5
   spriteRenderer: {fileID: 6876511256430132359}
   animator: {fileID: 2586289172562378010}
   lockYToStart: 1
   emotionUI: {fileID: 4206301058492289073}
---- !u!114 &5408046801839891082
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 304414325789651764}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4705326f6bcf93040acf103e721401de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  owner: {fileID: 2283077383662525979}
 --- !u!1 &1516424532146303313
 GameObject:
   m_ObjectHideFlags: 0
@@ -420,7 +405,7 @@ Transform:
   m_GameObject: {fileID: 2795215799362819850}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.83, y: 0.85, z: 0}
+  m_LocalPosition: {x: 0.6, y: 0.85, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -460,7 +445,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.13585716, y: -0.29147547}
+  m_Offset: {x: 0.13585716, y: -0.16477609}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -470,7 +455,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.7282857, y: 0.6838231}
+  m_Size: {x: 0.7282857, y: 1.6381123}
   m_EdgeRadius: 0
 --- !u!114 &7622134986186163685
 MonoBehaviour:

@@ -32,6 +32,10 @@ public class Locker : HidingSpot, IInteractable
     [Header("Cooldown")]
     [SerializeField] private float hideCooldown = 0.75f;
 
+    [Header("Interact Radius")]
+    [SerializeField] private float interactRadius = 0.9f;
+    public float GetInteractRadius() => interactRadius;
+
     private static int HashGetIn;
     private static int HashGetOut;
     private static int HashOpen;
@@ -182,10 +186,7 @@ public class Locker : HidingSpot, IInteractable
 
         var controller = p.GetComponent<PlayerController>();
         if (controller)
-        {
             controller.SetFrozen(false);
-            controller.TriggerMoveDelay(0.05f);
-        }
 
         OnExitHiding(p);
         currentPlayer = p;
@@ -196,11 +197,13 @@ public class Locker : HidingSpot, IInteractable
         isBusy = false;
     }
 
-    // Required overrides
-    public override Vector2 GetHidingPosition() => currentPlayer ? currentPlayer.transform.position : transform.position;
+    public override Vector2 GetHidingPosition() =>
+        currentPlayer ? currentPlayer.transform.position : transform.position;
+
     public override Vector2 GetExitPosition() => cachedPlayerPosition;
 
-    public Transform GetPromptPoint() => promptPoint != null ? promptPoint : transform;
+    public Transform GetPromptPoint() =>
+        promptPoint != null ? promptPoint : transform;
 
     private void RefreshHighlight()
     {

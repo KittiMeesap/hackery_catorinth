@@ -2,65 +2,47 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableDoor
+public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
 {
     public enum OpenMode { Warp, LoadScene }
 
     [Header("Open Mode")]
     [SerializeField] private OpenMode openMode = OpenMode.Warp;
 
-    [Header("Warp Settings")]
+    [Header("Warp")]
     [SerializeField] private GameObject connectedDoor;
     [SerializeField] private Transform exitPoint;
 
-    [Header("Scene Settings")]
+    [Header("Scene")]
     [SerializeField] private string targetSceneName = "";
     [SerializeField] private bool waitForSceneLoaded = true;
 
-    [Header("Animator Params")]
+    [Header("Animator")]
     [SerializeField] private Animator animator;
     [SerializeField] private string meltParam = "IsMelt";
 
-    [Header("Audio Keys")]
+    [Header("Audio")]
     [SerializeField] private string sfxMeltKey = "SFX_ChocolateDoor_Break";
     [SerializeField] private string sfxOpenKey = "SFX_DoorSugarOpening";
 
     [Header("Behaviour")]
     [SerializeField] private bool startLocked = true;
     [SerializeField] private float meltThreshold = 2f;
-    [SerializeField] private float openToTeleportDelay = 0.1f;
+    [SerializeField] private float teleportDelay = 0.1f;
     [SerializeField] private float reuseCooldown = 0.5f;
-
-    [Header("Prompt UI")]
-    [SerializeField] private Transform promptPoint;
 
     private float temperature = 0f;
     private bool isLocked = true;
     private bool hasMelted = false;
     private bool canUseDoor = true;
 
-    private GameObject playerGO;
     private Collider2D triggerCol;
-
 
     private void Awake()
     {
         animator ??= GetComponent<Animator>();
         triggerCol ??= GetComponent<Collider2D>();
         if (triggerCol) triggerCol.isTrigger = true;
-
-        EnsurePromptPoint();
-    }
-
-    private void EnsurePromptPoint()
-    {
-        if (promptPoint != null) return;
-
-        GameObject go = new GameObject("InteractPosition");
-        go.transform.SetParent(transform);
-        go.transform.localPosition = Vector3.zero;
-
-        promptPoint = go.transform;
     }
 
     private void Start()
@@ -76,7 +58,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
             MeltDoor();
     }
 
-    // ---------------- Heat / Cold ----------------
+    // ---- Heat ----
     public void ApplyHeat(float delta) => temperature += delta;
     public void ApplyCold(float delta) { }
     public void CoolDown(float delta) { }
@@ -85,6 +67,7 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
     {
         hasMelted = true;
         isLocked = false;
+
         ApplyLockState(false);
 
         if (!string.IsNullOrEmpty(sfxMeltKey))
@@ -97,68 +80,57 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
             animator.SetBool(meltParam, !locked);
     }
 
-    // ---------------- Trigger ----------------
+    // -------- Trigger --------
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
-        if (other.CompareTag("Player"))
-        {
-            playerGO = other.gameObject;
+        if (!isLocked)
+            AudioManager.Instance?.PlaySFX(sfxOpenKey);
+    }
 
-            if (!isLocked)
-                UIManager.Instance?.ShowInteractPrompt(this);
-        }
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+            return;
+
+        if (isLocked || !canUseDoor) return;
+        if (!CanOpenFor(other.gameObject)) return;
+
+        StartCoroutine(TeleportRoutine(other.gameObject));
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
-
-        UIManager.Instance?.HideInteractPrompt(this);
-        playerGO = null;
+        // nothing is required anymore (no interact UI)
     }
 
-    // ---------------- Interact ----------------
-    public void Interact()
+    // -------- Auto Teleport --------
+    private IEnumerator TeleportRoutine(GameObject entity)
     {
-        if (isLocked || !canUseDoor) return;
-        StartCoroutine(OpenAndGo());
-    }
-
-    private IEnumerator OpenAndGo()
-    {
-        if (isLocked || !canUseDoor || playerGO == null) yield break;
-
         canUseDoor = false;
 
-        yield return new WaitForSeconds(openToTeleportDelay);
+        yield return new WaitForSeconds(teleportDelay);
 
         var fader = UIManager.Instance?.screenFader;
-        if (fader != null)
-            yield return fader.FadeOut();
+        if (fader != null) yield return fader.FadeOut();
 
         if (openMode == OpenMode.Warp)
         {
-            WarpEntity(playerGO);
-
-            if (fader != null)
-                yield return fader.FadeIn();
+            WarpEntity(entity);
+            if (fader != null) yield return fader.FadeIn();
         }
         else
         {
-            yield return DoLoadScene();
-
-            if (fader != null)
-                yield return fader.FadeIn();
+            yield return LoadSceneRoutine();
+            if (fader != null) yield return fader.FadeIn();
         }
 
         yield return new WaitForSeconds(reuseCooldown);
         canUseDoor = true;
     }
 
-    // ---------------- Warp / Scene Load ----------------
     public void WarpEntity(GameObject entity)
     {
         if (entity == null || connectedDoor == null) return;
@@ -169,7 +141,6 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
         Vector3 oldPos = entity.transform.position;
         Vector3 targetPos = targetExit.position;
-
         Vector3 delta = targetPos - oldPos;
 
         entity.transform.position = targetPos;
@@ -181,14 +152,8 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         nextDoor?.DisableInteractionTemporarily(reuseCooldown);
     }
 
-    private IEnumerator DoLoadScene()
+    private IEnumerator LoadSceneRoutine()
     {
-        if (string.IsNullOrEmpty(targetSceneName))
-        {
-            Debug.LogWarning("[ChocolateDoor] targetSceneName is empty.");
-            yield break;
-        }
-
         AsyncOperation op = SceneManager.LoadSceneAsync(targetSceneName);
         if (!waitForSceneLoaded) yield break;
 
@@ -196,7 +161,22 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
             yield return null;
     }
 
-    // ---------------- Utility ----------------
+    public bool CanOpenFor(GameObject entity)
+    {
+        if (!canUseDoor) return false;
+        if (isLocked) return false;
+
+        return connectedDoor != null && exitPoint != null;
+    }
+
+    public void OpenForEntity(GameObject entity)
+    {
+        if (!CanOpenFor(entity))
+            return;
+
+        StartCoroutine(TeleportRoutine(entity));
+    }
+
     public void DisableInteractionTemporarily(float delay)
     {
         StartCoroutine(CoDisable(delay));
@@ -204,42 +184,9 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
 
     private IEnumerator CoDisable(float delay)
     {
-        bool prev = canUseDoor;
         canUseDoor = false;
-
         yield return new WaitForSeconds(delay);
-
-        canUseDoor = prev;
-    }
-
-
-    // ---------------- Interact Position ----------------
-    public Transform GetPromptPoint()
-    {
-        return promptPoint != null ? promptPoint : transform;
-    }
-
-
-    // ---------------- Open Check ----------------
-    public bool CanOpenFor(GameObject entity)
-    {
-        if (!canUseDoor) return false;
-
-        if (entity != null && entity.CompareTag("Enemy"))
-            return connectedDoor != null && exitPoint != null;
-
-        if (isLocked) return false;
-
-        if (startLocked && !hasMelted)
-            return false;
-
-        return connectedDoor != null && exitPoint != null;
-    }
-
-    public void OpenForEntity(GameObject entity)
-    {
-        if (!CanOpenFor(entity)) return;
-        WarpEntity(entity);
+        canUseDoor = true;
     }
 
     public void UnlockDoorFromSafe()
@@ -247,7 +194,5 @@ public class ChocolateDoor : MonoBehaviour, IInteractable, IHeatable, IOpenableD
         isLocked = false;
         hasMelted = true;
         ApplyLockState(false);
-
-        Debug.Log("[ChocolateDoor] Door unlocked by Safe.");
     }
 }

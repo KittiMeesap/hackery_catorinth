@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using Unity.Cinemachine;
 
-public class BoxHide : HidingSpot, IInteractable
+public class BoxHide : HidingSpot
 {
     [Header("Animator")]
     [SerializeField] private Animator anim;
@@ -26,13 +26,10 @@ public class BoxHide : HidingSpot, IInteractable
 
     [Header("Interact Radius")]
     [SerializeField] private float interactRadius = 0.9f;
-    public float GetInteractRadius() => interactRadius;
 
     private bool isPlayerNear = false;
     private bool isInside = false;
     private bool isBusy = false;
-
-    private float lastHideTime = -999f;
 
     private PlayerHiding currentPlayer;
     private PlayerController controller;
@@ -48,14 +45,12 @@ public class BoxHide : HidingSpot, IInteractable
 
     private void Awake()
     {
-        // Setup animator hash
         if (anim == null) anim = GetComponent<Animator>();
         hashGetIn = Animator.StringToHash(getInTrigger);
         hashGetOut = Animator.StringToHash(getOutTrigger);
 
         sr = GetComponentInChildren<SpriteRenderer>();
 
-        // Create prompt point if missing
         if (promptPoint == null)
         {
             GameObject go = new GameObject("PromptPoint");
@@ -67,7 +62,6 @@ public class BoxHide : HidingSpot, IInteractable
         if (highlightSprite != null)
             highlightSprite.enabled = false;
 
-        // Cinemachine
         cineCam = FindFirstObjectByType<CinemachineCamera>();
         if (cineCam != null)
             originalCameraFollow = cineCam.Follow;
@@ -79,10 +73,21 @@ public class BoxHide : HidingSpot, IInteractable
             UpdatePromptPoint();
     }
 
-    // ------------------------------------------------------
-    // INTERACT
-    // ------------------------------------------------------
-    public void Interact()
+    //--------------------------------------------------
+    //  OVERRIDE GET INTERACT RADIUS
+    //--------------------------------------------------
+    public override float GetInteractRadius() => interactRadius;
+
+    //--------------------------------------------------
+    //  OVERRIDE GET PROMPT POINT
+    //--------------------------------------------------
+    public override Transform GetPromptPoint()
+        => promptPoint != null ? promptPoint : transform;
+
+    //--------------------------------------------------
+    //  OVERRIDE INTERACT
+    //--------------------------------------------------
+    public override void Interact()
     {
         if (isBusy) return;
         if (Time.time < lastHideTime + hideCooldown) return;
@@ -97,9 +102,6 @@ public class BoxHide : HidingSpot, IInteractable
         lastHideTime = Time.time;
     }
 
-    // ------------------------------------------------------
-    // ENTER
-    // ------------------------------------------------------
     private IEnumerator EnterRoutine(PlayerHiding p)
     {
         isBusy = true;
@@ -117,23 +119,17 @@ public class BoxHide : HidingSpot, IInteractable
             controller.ClearInputAndVelocity();
         }
 
-        // Call hiding system
         p.EnterHiding(this);
 
-        // Play animation
         if (anim) anim.SetTrigger(hashGetIn);
 
-        // Sound
         if (!string.IsNullOrEmpty(sfxOpenKey))
             AudioManager.Instance?.PlaySFX(sfxOpenKey);
 
-        // Hide player sprite
         playerSprites = controller.GetComponentsInChildren<SpriteRenderer>();
         foreach (var s in playerSprites) s.enabled = false;
 
-        // Camera follow box
-        if (cineCam != null)
-            cineCam.Follow = this.transform;
+        if (cineCam) cineCam.Follow = this.transform;
 
         yield return new WaitForSeconds(enterAnimTime);
 
@@ -141,35 +137,26 @@ public class BoxHide : HidingSpot, IInteractable
         isBusy = false;
     }
 
-    // ------------------------------------------------------
-    // EXIT
-    // ------------------------------------------------------
     private IEnumerator ExitRoutine(PlayerHiding p)
     {
         isBusy = true;
 
-        // Play animation
         if (anim) anim.SetTrigger(hashGetOut);
 
-        // Sound
         if (!string.IsNullOrEmpty(sfxCloseKey))
             AudioManager.Instance?.PlaySFX(sfxCloseKey);
 
         yield return new WaitForSeconds(exitAnimTime);
 
-        // Show player
         foreach (var s in playerSprites)
             if (s != null) s.enabled = true;
 
-        // Exit hiding system
         p.ExitHiding(this);
         isInside = false;
 
-        // Restore camera
         if (cineCam && originalCameraFollow != null)
             cineCam.Follow = originalCameraFollow;
 
-        // Restore movement
         if (controller) controller.SetFrozen(false);
 
         RefreshHighlight();
@@ -180,9 +167,6 @@ public class BoxHide : HidingSpot, IInteractable
         isBusy = false;
     }
 
-    // ------------------------------------------------------
-    // TRIGGERS
-    // ------------------------------------------------------
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
@@ -208,9 +192,6 @@ public class BoxHide : HidingSpot, IInteractable
         RefreshHighlight();
     }
 
-    // ------------------------------------------------------
-    // VISUAL / UI
-    // ------------------------------------------------------
     private void RefreshHighlight()
     {
         if (!highlightSprite) return;
@@ -226,15 +207,9 @@ public class BoxHide : HidingSpot, IInteractable
             new Vector3(b.center.x, b.max.y + 0.25f, transform.position.z);
     }
 
-    // ------------------------------------------------------
-    // Required by HidingSpot
-    // ------------------------------------------------------
     public override Vector2 GetHidingPosition()
         => cachedPlayerPosition;
 
     public override Vector2 GetExitPosition()
         => cachedPlayerPosition;
-
-    public Transform GetPromptPoint()
-        => promptPoint != null ? promptPoint : transform;
 }

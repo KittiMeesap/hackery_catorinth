@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class Locker : HidingSpot, IInteractable
+public class Locker : HidingSpot
 {
     [Header("Locker Visual")]
     [SerializeField] private Animator lockerAnimator;
@@ -34,7 +34,6 @@ public class Locker : HidingSpot, IInteractable
 
     [Header("Interact Radius")]
     [SerializeField] private float interactRadius = 0.9f;
-    public float GetInteractRadius() => interactRadius;
 
     private static int HashGetIn;
     private static int HashGetOut;
@@ -102,7 +101,12 @@ public class Locker : HidingSpot, IInteractable
         RefreshHighlight();
     }
 
-    public void Interact()
+    public override float GetInteractRadius() => interactRadius;
+
+    public override Transform GetPromptPoint() =>
+        promptPoint != null ? promptPoint : transform;
+
+    public override void Interact()
     {
         if (isBusy) return;
         if (Time.time < lastHideTime + hideCooldown) return;
@@ -201,9 +205,6 @@ public class Locker : HidingSpot, IInteractable
         currentPlayer ? currentPlayer.transform.position : transform.position;
 
     public override Vector2 GetExitPosition() => cachedPlayerPosition;
-
-    public Transform GetPromptPoint() =>
-        promptPoint != null ? promptPoint : transform;
 
     private void RefreshHighlight()
     {

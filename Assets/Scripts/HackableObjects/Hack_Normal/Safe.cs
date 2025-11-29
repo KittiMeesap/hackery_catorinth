@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Safe : HackableObject, IInteractable
+public class Safe : HackableObject
 {
     [Header("Animation")]
     [SerializeField] private Animator animator;
@@ -31,7 +31,6 @@ public class Safe : HackableObject, IInteractable
 
     [Header("Interact Radius")]
     [SerializeField] private float interactRadius = 0.9f;
-    public float GetInteractRadius() => interactRadius;
 
     private bool isOpened = false;
     private bool isAnimating = false;
@@ -50,9 +49,11 @@ public class Safe : HackableObject, IInteractable
             promptPoint = transform;
     }
 
-    public Transform GetPromptPoint() => promptPoint;
+    public override float GetInteractRadius() => interactRadius;
 
-    public void Interact()
+    public override Transform GetPromptPoint() => promptPoint;
+
+    public override void Interact()
     {
         if (isOpened || isAnimating) return;
         OnEnterHackingMode();

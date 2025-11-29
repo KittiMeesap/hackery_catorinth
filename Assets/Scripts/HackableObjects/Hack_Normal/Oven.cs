@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Oven : HackableObject, IInteractable
+public class Oven : HackableObject
 {
     [Header("Heat Settings")]
     [SerializeField] private float heatRadius = 2.5f;
@@ -47,7 +47,6 @@ public class Oven : HackableObject, IInteractable
 
     [Header("Interact Radius")]
     [SerializeField] private float interactRadius = 0.9f;
-    public float GetInteractRadius() => interactRadius;
 
     [Header("Highlight")]
     [SerializeField] private SpriteRenderer highlightSprite;
@@ -159,9 +158,11 @@ public class Oven : HackableObject, IInteractable
             highlightSprite.enabled = ShouldShowHighlight;
     }
 
-    public Transform GetPromptPoint() => promptPoint;
+    public override Transform GetPromptPoint() => promptPoint;
 
-    public void Interact()
+    public override float GetInteractRadius() => interactRadius;
+
+    public override void Interact()
     {
         if (!currentState && !isOnCooldown)
             OnEnterHackingMode();
@@ -237,8 +238,6 @@ public class Oven : HackableObject, IInteractable
 
     public void Hack_TurnOn() => SetActiveInternal(true, true);
     public void Hack_TurnOff() => SetActiveInternal(false, true);
-
-    public void Toggle() { }
 
     private void SetActiveInternal(bool on, bool playSfx)
     {

@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class AlarmMonitor : HackableObject, IInteractable
+public class AlarmMonitor : HackableObject
 {
     [Header("Detection Settings")]
     [SerializeField] private float detectionRadius = 6f;
@@ -32,7 +32,6 @@ public class AlarmMonitor : HackableObject, IInteractable
 
     [Header("Interact Radius")]
     [SerializeField] private float interactRadius = 0.9f;
-    public float GetInteractRadius() => interactRadius;
 
     private bool isOn = false;
     private Coroutine alarmRoutine;
@@ -64,15 +63,16 @@ public class AlarmMonitor : HackableObject, IInteractable
             promptPoint = transform;
     }
 
-    public Transform GetPromptPoint() => promptPoint;
+    public override float GetInteractRadius() => interactRadius;
 
-    public void Interact()
+    public override Transform GetPromptPoint() => promptPoint;
+
+    public override void Interact()
     {
         if (!isOn && !isOnCooldown)
             OnEnterHackingMode();
     }
 
-    // ---------------- HIGHLIGHT ----------------
     public override bool ShouldShowHighlight
     {
         get
@@ -82,8 +82,7 @@ public class AlarmMonitor : HackableObject, IInteractable
 
             float dist = Vector2.Distance(
                 PlayerController.Instance.transform.position,
-                promptPoint.position
-            );
+                promptPoint.position);
 
             return dist <= interactRadius &&
                    !UIManager.Instance.IsHacking &&
@@ -204,7 +203,6 @@ public class AlarmMonitor : HackableObject, IInteractable
         StopAlarm();
     }
 
-    // ---------------- STOP ALARM ----------------
     public void StopAlarm()
     {
         if (!isOn) return;

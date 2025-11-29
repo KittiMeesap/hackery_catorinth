@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HackableObject : MonoBehaviour
+public class HackableObject : MonoBehaviour, IInteractable
 {
     public enum HackTriggerType { MouseHover, ProximityInteract }
     public HackTriggerType triggerType = HackTriggerType.MouseHover;
@@ -30,7 +30,6 @@ public class HackableObject : MonoBehaviour
     public static HackableObject ActiveProximityHackable;
     protected HackingUI currentUI;
 
-    // let child classes control highlight
     public virtual bool ShouldShowHighlight => false;
 
     public virtual bool IsFullyOpened => false;
@@ -40,6 +39,23 @@ public class HackableObject : MonoBehaviour
     {
         isHacked = false;
     }
+
+    public virtual Transform GetPromptPoint()
+    {
+        return transform;
+    }
+
+    public virtual float GetInteractRadius()
+    {
+        return 1.2f;
+    }
+
+    public virtual void Interact()
+    {
+        if (!isHacked)
+            OnEnterHackingMode();
+    }
+    // ------------------------------------------------------------
 
     public virtual void RefreshHighlightExternal()
     {
@@ -92,14 +108,12 @@ public class HackableObject : MonoBehaviour
 
     protected virtual void HandleHackOptionComplete(HackOptionSO option)
     {
-        // mark hacked only for the moment of this action
         isHacked = true;
 
         PerformHackedAction(option);
 
         HideHackingUI();
 
-        // allow next hack after exit
         StartCoroutine(ResetHackNextFrame());
 
         if (completeMissionOnHack && !string.IsNullOrEmpty(missionId))
@@ -108,7 +122,6 @@ public class HackableObject : MonoBehaviour
 
     private IEnumerator ResetHackNextFrame()
     {
-        // wait 1 frame so highlight/Interact logic has time to update
         yield return null;
         isHacked = false;
     }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Fridge : HackableObject, IInteractable
+public class Fridge : HackableObject
 {
     [Header("Cold Settings")]
     [SerializeField] private float coldRadius = 2.5f;
@@ -50,7 +50,6 @@ public class Fridge : HackableObject, IInteractable
 
     [Header("Interact Radius")]
     [SerializeField] private float interactRadius = 0.9f;
-    public float GetInteractRadius() => interactRadius;
 
     private bool currentState;
     private float checkTimer;
@@ -136,6 +135,7 @@ public class Fridge : HackableObject, IInteractable
             coldablesInRange.Add(f);
     }
 
+    // -------- Highlight --------
     public override bool ShouldShowHighlight =>
         !currentState &&
         !isOnCooldown &&
@@ -155,9 +155,11 @@ public class Fridge : HackableObject, IInteractable
             highlightSprite.enabled = ShouldShowHighlight;
     }
 
-    public Transform GetPromptPoint() => promptPoint;
+    public override Transform GetPromptPoint() => promptPoint;
 
-    public void Interact()
+    public override float GetInteractRadius() => interactRadius;
+
+    public override void Interact()
     {
         if (!currentState && !isOnCooldown)
             OnEnterHackingMode();

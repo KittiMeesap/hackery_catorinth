@@ -39,7 +39,6 @@ public class EnemySweeper : MonoBehaviour
     private void OnEnable()
     {
         laneY = transform.position.y;
-
         StartCoroutine(SweepRoutine());
     }
 
@@ -85,12 +84,10 @@ public class EnemySweeper : MonoBehaviour
 
             rb.linearVelocity = Vector2.zero;
 
-            // Trigger melting on door
             var heatObj = target.GetComponentInParent<IHeatable>();
             if (heatObj != null)
                 heatObj.ApplyHeat(999f);
 
-            // Check if door can open
             var door = target.GetComponent<IOpenableDoor>();
             if (door == null)
                 door = target.GetComponentInParent<IOpenableDoor>();

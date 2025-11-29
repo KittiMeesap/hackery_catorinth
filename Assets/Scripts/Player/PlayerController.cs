@@ -297,64 +297,93 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, maxInteractScanRadius);
 
-        List<IInteractable> list = new();
+        HidingSpot bestHiding = null;
+        List<HackableObject> hackables = new();
 
         foreach (var h in hits)
         {
-            if (h.TryGetComponent(out IInteractable obj))
+            if (h.TryGetComponent(out HidingSpot hide))
             {
-                float dist = Vector2.Distance(transform.position, obj.GetPromptPoint().position);
-
-                if (dist <= obj.GetInteractRadius())
-                    list.Add(obj);
+                if (hide.GetComponent<Collider2D>().bounds.Intersects(
+                        GetComponent<Collider2D>().bounds))
+                {
+                    bestHiding = hide;
+                }
+            }
+            else if (h.TryGetComponent(out HackableObject hack))
+            {
+                float dist = Vector2.Distance(transform.position, hack.transform.position);
+                if (dist <= hack.GetInteractRadius())
+                    hackables.Add(hack);
             }
         }
 
-        if (list.Count == 0)
+        // --- PRIORITY 1 : HidingSpot ---
+        if (bestHiding != null)
         {
-            if (currentInteractable != null)
-                UIManager.Instance.HideInteractPrompt(currentInteractable);
-
-            currentInteractable = null;
-            CurrentInteractable = null;
-
-            RefreshNearbyHackables();
+            SetBestInteractable(bestHiding);
             return;
         }
 
-        IInteractable best = null;
-        float bestScore = float.MaxValue;
-
-        foreach (var obj in list)
+        // --- PRIORITY 2 : HackableObject ---
+        if (hackables.Count > 0)
         {
-            float dist = Vector2.Distance(transform.position, obj.GetPromptPoint().position);
-            float score = GetPriority(obj) * 10 + dist;
+            HackableObject bestHack = ChooseBestHackable(hackables);
+            SetBestInteractable(bestHack);
+            return;
+        }
 
-            if (score < bestScore)
+        // --- NOTHING ---
+        if (currentInteractable != null)
+            UIManager.Instance.HideInteractPrompt(currentInteractable);
+
+        currentInteractable = null;
+        CurrentInteractable = null;
+        RefreshNearbyHackables();
+    }
+
+    private HackableObject ChooseBestHackable(List<HackableObject> list)
+    {
+        HackableObject best = null;
+        float bestDist = float.MaxValue;
+
+        foreach (var h in list)
+        {
+            float dist = Vector2.Distance(transform.position, h.GetPromptPoint().position);
+
+            if (dist < bestDist - 0.05f)
             {
-                bestScore = score;
-                best = obj;
+                bestDist = dist;
+                best = h;
+            }
+            else if (Mathf.Abs(dist - bestDist) <= 0.05f)
+            {
+                float dirX = Mathf.Sign(transform.localScale.x);
+                float dot = Mathf.Sign(h.transform.position.x - transform.position.x);
+
+                if (dirX == dot)
+                    best = h;
             }
         }
 
-        if (best != currentInteractable)
+        return best;
+    }
+
+    private void SetBestInteractable(IInteractable obj)
+    {
+        if (obj != currentInteractable)
         {
             if (currentInteractable != null)
                 UIManager.Instance.HideInteractPrompt(currentInteractable);
 
-            currentInteractable = best;
-            CurrentInteractable = best;
+            currentInteractable = obj;
+            CurrentInteractable = obj;
 
             RefreshNearbyHackables();
 
-            UIManager.Instance.ShowInteractPrompt(best);
-        }
-        else
-        {
-            RefreshNearbyHackables();
+            UIManager.Instance.ShowInteractPrompt(obj);
         }
     }
-
 
     private void StopMovement(bool resetInput)
     {

@@ -1,8 +1,9 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
+public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 {
     public enum OpenMode { Warp, LoadScene }
 
@@ -12,6 +13,8 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
     [Header("Warp")]
     [SerializeField] private GameObject connectedDoor;
     [SerializeField] private Transform exitPoint;
+
+    public Transform ExitPoint => exitPoint;
 
     [Header("Scene")]
     [SerializeField] private string targetSceneName = "";
@@ -37,6 +40,7 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
     private bool canUseDoor = true;
 
     private Collider2D triggerCol;
+    private HashSet<GameObject> recentlyTeleported = new HashSet<GameObject>();
 
     private void Awake()
     {
@@ -58,7 +62,6 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
             MeltDoor();
     }
 
-    // ---- Heat ----
     public void ApplyHeat(float delta) => temperature += delta;
     public void ApplyCold(float delta) { }
     public void CoolDown(float delta) { }
@@ -80,7 +83,6 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
             animator.SetBool(meltParam, !locked);
     }
 
-    // -------- Trigger --------
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
@@ -92,21 +94,20 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
 
     private void OnTriggerStay2D(Collider2D other)
     {
+        GameObject entity = other.gameObject;
+
+        if (recentlyTeleported.Contains(entity))
+            return;
+
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
         if (isLocked || !canUseDoor) return;
-        if (!CanOpenFor(other.gameObject)) return;
+        if (!CanOpenFor(entity)) return;
 
-        StartCoroutine(TeleportRoutine(other.gameObject));
+        StartCoroutine(TeleportRoutine(entity));
     }
 
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        // nothing is required anymore (no interact UI)
-    }
-
-    // -------- Auto Teleport --------
     private IEnumerator TeleportRoutine(GameObject entity)
     {
         canUseDoor = false;
@@ -135,8 +136,10 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
     {
         if (entity == null || connectedDoor == null) return;
 
-        var nextDoor = connectedDoor.GetComponent<ChocolateDoor>();
-        Transform targetExit = nextDoor ? nextDoor.exitPoint : null;
+        var nextDoorExit = connectedDoor.GetComponent<IHasExitPoint>();
+        if (nextDoorExit == null) return;
+
+        Transform targetExit = nextDoorExit.ExitPoint;
         if (targetExit == null) return;
 
         Vector3 oldPos = entity.transform.position;
@@ -149,7 +152,9 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
         if (vcam != null)
             vcam.OnTargetObjectWarped(entity.transform, delta);
 
-        nextDoor?.DisableInteractionTemporarily(reuseCooldown);
+        var openable = connectedDoor.GetComponent<IOpenableDoor>();
+        openable?.MarkRecentlyTeleported(entity);
+        openable?.DisableInteractionTemporarily(reuseCooldown);
     }
 
     private IEnumerator LoadSceneRoutine()
@@ -171,9 +176,7 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
 
     public void OpenForEntity(GameObject entity)
     {
-        if (!CanOpenFor(entity))
-            return;
-
+        if (!CanOpenFor(entity)) return;
         StartCoroutine(TeleportRoutine(entity));
     }
 
@@ -194,5 +197,23 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor
         isLocked = false;
         hasMelted = true;
         ApplyLockState(false);
+    }
+
+    public void MarkRecentlyTeleported(GameObject entity)
+    {
+        recentlyTeleported.Add(entity);
+        StartCoroutine(ClearRecentTeleport(entity));
+    }
+
+    private IEnumerator ClearRecentTeleport(GameObject entity)
+    {
+        yield return new WaitUntil(() => !IsEntityInside(entity));
+        recentlyTeleported.Remove(entity);
+    }
+
+    private bool IsEntityInside(GameObject entity)
+    {
+        if (triggerCol == null) return false;
+        return triggerCol.bounds.Contains(entity.transform.position);
     }
 }

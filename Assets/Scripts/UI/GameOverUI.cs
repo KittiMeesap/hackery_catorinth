@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class GameOverUI : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class GameOverUI : MonoBehaviour
 
     [Header("Optional")]
     public ScreenFader screenFader;
-    public string mainMenuSceneName = "UI - Menu";
+    public string mainMenuSceneName = "MainMenu";
 
     [Header("Controller Support")]
     public GameObject firstSelectedButton;
@@ -26,7 +27,13 @@ public class GameOverUI : MonoBehaviour
     {
         if (shown) return;
         shown = true;
-        if (panel != null) panel.SetActive(true);
+
+        if (panel != null)
+            panel.SetActive(true);
+
+        var input = FindFirstObjectByType<PlayerInput>();
+        if (input != null)
+            input.SwitchCurrentActionMap("UI");
 
         if (firstSelectedButton != null && EventSystem.current != null)
         {
@@ -37,7 +44,7 @@ public class GameOverUI : MonoBehaviour
 
     public void OnClickRetry()
     {
-        StartCoroutine(RetryRoutine());
+        StartCoroutine(RespawnRoutine());
     }
 
     public void OnClickMainMenu()
@@ -45,11 +52,23 @@ public class GameOverUI : MonoBehaviour
         StartCoroutine(MainMenuRoutine());
     }
 
-    private System.Collections.IEnumerator RetryRoutine()
+    private System.Collections.IEnumerator RespawnRoutine()
     {
-        if (screenFader != null) yield return screenFader.FadeOut();
-        Scene current = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(current.buildIndex);
+        if (screenFader != null)
+            yield return screenFader.FadeOut();
+
+        var player = FindFirstObjectByType<PlayerController>();
+
+        if (player != null)
+            GameManager.Instance.RespawnPlayer(player.gameObject);
+
+        GameManager.Instance.FreezeGame(false);
+
+        shown = false;
+        panel.SetActive(false);
+
+        if (screenFader != null)
+            yield return screenFader.FadeIn();
     }
 
     private System.Collections.IEnumerator MainMenuRoutine()

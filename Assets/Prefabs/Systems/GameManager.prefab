@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 2501551089953630458}
   - component: {fileID: 3952603335062983750}
   - component: {fileID: 478135692803941156}
-  - component: {fileID: 3106019404702404283}
+  - component: {fileID: 8953658594916956299}
+  - component: {fileID: 3813407427434714636}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -51,6 +52,7 @@ MonoBehaviour:
   missionSetForScene: {fileID: 0}
   missionText: {fileID: 0}
   countdownManager: {fileID: 0}
+  screenFader: {fileID: 0}
 --- !u!114 &3952603335062983750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,12 +65,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf8a6338faa8d648a6ef80910040764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  missionSet: {fileID: 0}
-  initialSets:
-  - {fileID: 11400000, guid: 3b1614ee40af7994ab4dec554e5602e2, type: 2}
-  - {fileID: 11400000, guid: ddb83449a4a1b294cbc5eb1117fdc49a, type: 2}
-  - {fileID: 11400000, guid: e2025d5a7574370478b3e3a303a95f13, type: 2}
-  - {fileID: 11400000, guid: 8d81ff24a84de4943a0fe1d610018b32, type: 2}
+  missionSet: {fileID: 11400000, guid: 3b1614ee40af7994ab4dec554e5602e2, type: 2}
+  initialSets: []
   pointExitWhenAllSetsDone: 1
   switchSetDelay: 0.4
 --- !u!114 &478135692803941156
@@ -86,8 +84,20 @@ MonoBehaviour:
   pausePanel: {fileID: 0}
   defaultSelectedButton: {fileID: 0}
   homeSceneName: MainMenu
-  pauseAction: {fileID: -7328723258279640216, guid: 742c1733af453cf40b19b809db247eee, type: 3}
---- !u!114 &3106019404702404283
+  pauseAction: {fileID: -7933011945050117503, guid: 742c1733af453cf40b19b809db247eee, type: 3}
+--- !u!114 &8953658594916956299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3336330316463316781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26ffd8b5836ca664cb54849c1651f044, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameFreezeManager
+--- !u!114 &3813407427434714636
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

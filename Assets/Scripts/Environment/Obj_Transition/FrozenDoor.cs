@@ -18,6 +18,9 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
     [SerializeField] private string targetSceneName = "";
     [SerializeField] private bool waitForSceneLoaded = true;
 
+    [Header("Checkpoint Settings")]
+    [SerializeField] private bool isCheckpointDoor = false;
+
     [Header("Animator Params")]
     [SerializeField] private Animator animator;
     [SerializeField] private string freezeParam = "isLock";
@@ -81,7 +84,7 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+        if (!other.CompareTag("Player"))
             return;
 
         if (!isFrozen)
@@ -95,7 +98,11 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
         if (recentlyTeleported.Contains(entity))
             return;
 
-        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+        if (!other.CompareTag("Player"))
+            return;
+
+        // กัน Sweeper ไม่ให้ใช้ FrozenDoor
+        if (entity.CompareTag("Sweeper"))
             return;
 
         if (isFrozen || !canUseDoor) return;
@@ -151,6 +158,8 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
         if (vcam != null)
             vcam.OnTargetObjectWarped(entity.transform, delta);
 
+        if (isCheckpointDoor && entity.CompareTag("Player"))
+            GameManager.Instance.SetCheckpoint(targetExit);
         var openable = connectedDoor.GetComponent<IOpenableDoor>();
         openable?.MarkRecentlyTeleported(entity);
         openable?.DisableInteractionTemporarily(reuseCooldown);
@@ -167,6 +176,9 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
     public bool CanOpenFor(GameObject entity)
     {
+        if (entity.CompareTag("Sweeper"))
+            return false;
+
         if (!canUseDoor || isFrozen) return false;
         return connectedDoor != null && exitPoint != null;
     }

@@ -18,8 +18,6 @@ public class ScreenFader : MonoBehaviour
         }
     }
 
-    // PUBLIC API
-
     public IEnumerator FadeOut()
     {
         if (fadeImage == null) yield break;
@@ -40,10 +38,9 @@ public class ScreenFader : MonoBehaviour
         yield return FadeRoutine(1f, 0f);
 
         fadeImage.raycastTarget = false;
-        fadeImage.gameObject.SetActive(false);
+
     }
 
-    // CORE SMOOTHSTEP FADE
 
     private IEnumerator FadeRoutine(float start, float end)
     {

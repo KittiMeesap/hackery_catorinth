@@ -191,7 +191,7 @@ MonoBehaviour:
   allowRepeatHack: 1
   completeMissionOnHack: 0
   missionId: 
-  heatRadius: 2.5
+  heatRadius: 2
   heatLayer:
     serializedVersion: 2
     m_Bits: 3392
@@ -475,7 +475,7 @@ Transform:
   m_GameObject: {fileID: 9213408178415284952}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.496, y: 0.287, z: 0}
+  m_LocalPosition: {x: 0.459, y: 0.399, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

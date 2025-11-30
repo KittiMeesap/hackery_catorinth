@@ -31,9 +31,6 @@ public class Fridge : HackableObject
     [Header("Ambient Sound Zone")]
     [SerializeField] private SoundAreaGate ambientSoundGate;
 
-    [Header("Behaviour")]
-    [SerializeField] private bool startOn = false;
-
     [Header("Cooldown")]
     [SerializeField] private float hackCooldown = 2f;
     private bool isOnCooldown = false;
@@ -72,15 +69,10 @@ public class Fridge : HackableObject
             loopSource.playOnAwake = false;
             loopSource.Stop();
         }
-
-        ambientSoundGate?.EnableZone(startOn);
     }
 
     private void Start()
     {
-        currentState = startOn;
-        SetActiveInternal(startOn, false);
-
         if (!currentState && freezeMistVFX && hideParticleWhenOff)
             freezeMistVFX.gameObject.SetActive(false);
     }

@@ -9,7 +9,6 @@ public class GameManager : MonoBehaviour
     [Header("Game States")]
     public bool IsPhoneOut { get; private set; } = false;
     public bool IsInHackingMode { get; private set; } = false;
-    public float time = 0;
 
     [Header("Mission Settings")]
     public MissionSetSO missionSetForScene;
@@ -25,6 +24,10 @@ public class GameManager : MonoBehaviour
 
     private PlayerInput playerInput;
     private InputAction exitAction;
+
+    [Header("Checkpoint System")]
+    public Transform currentCheckpoint;
+    public float savedCountdownTime = 0f;
 
     private void Awake()
     {
@@ -59,19 +62,36 @@ public class GameManager : MonoBehaviour
             exitAction.performed -= OnExitPressed;
     }
 
-    private void Update()
+    public void ToggleHackingMode(bool isActive)
     {
-        time += Time.deltaTime;
+        IsInHackingMode = isActive;
+    }
+    public void SetPhoneOut(bool isOut)
+    {
+        IsPhoneOut = isOut;
     }
 
-    public void StartCountdown()
+    public void SetCheckpoint(Transform point)
     {
-        countdownManager?.StartCountdown();
+        currentCheckpoint = point;
+
+        if (countdownManager != null)
+        {
+            savedCountdownTime = countdownManager.GetCurrentTime();
+        }
+
+        Debug.Log("Checkpoint Saved | Time Left = " + savedCountdownTime);
     }
 
-    public void StopCountdown()
+    public void RespawnPlayer(GameObject player)
     {
-        countdownManager?.StopCountdown();
+        if (currentCheckpoint != null)
+            player.transform.position = currentCheckpoint.position;
+
+        if (countdownManager != null)
+            countdownManager.SetTime(savedCountdownTime);
+
+        Debug.Log("Respawned | Restored Countdown = " + savedCountdownTime);
     }
 
     private void OnExitPressed(InputAction.CallbackContext context)
@@ -88,31 +108,17 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
-    public void SetPhoneOut(bool isOut)
-    {
-        IsPhoneOut = isOut;
-    }
-
-    public void ToggleHackingMode(bool isActive)
-    {
-        IsInHackingMode = isActive;
-    }
-
     public void FreezeGame(bool freeze)
     {
         if (freeze)
         {
             Time.timeScale = 0f;
-
-            if (playerInput != null)
-                playerInput.enabled = false;
+            if (playerInput != null) playerInput.enabled = false;
         }
         else
         {
             Time.timeScale = 1f;
-
-            if (playerInput != null)
-                playerInput.enabled = true;
+            if (playerInput != null) playerInput.enabled = true;
         }
     }
 }

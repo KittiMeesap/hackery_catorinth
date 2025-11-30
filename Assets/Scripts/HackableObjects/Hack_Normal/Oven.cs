@@ -31,9 +31,6 @@ public class Oven : HackableObject
     [Header("Ambient Sound Zone")]
     [SerializeField] private SoundAreaGate ambientSoundGate;
 
-    [Header("Behaviour")]
-    [SerializeField] private bool startOn = false;
-
     [Header("Cooldown")]
     [SerializeField] private float hackCooldown = 2f;
     private bool isOnCooldown = false;
@@ -79,7 +76,6 @@ public class Oven : HackableObject
 
     private void Start()
     {
-        currentState = startOn;
         SetVisualState(currentState);
 
         if (!currentState)

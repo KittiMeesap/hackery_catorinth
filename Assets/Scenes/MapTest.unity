@@ -29102,6 +29102,67 @@ Material:
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!1001 &1043416871
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.27648926
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.5081675
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: m_Name
+      value: Locker
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
 --- !u!1 &1044919527
 GameObject:
   m_ObjectHideFlags: 0
@@ -46238,7 +46299,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000061035156}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0.00012207031}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1210602458
@@ -78879,7 +78940,7 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
+  m_DefaultActionMap: 19e28080-47ab-4b80-a690-0a6e5a62c63e
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 661818492}
 --- !u!4 &791259387162998903 stripped
@@ -79502,6 +79563,10 @@ PrefabInstance:
       propertyPath: m_UIInputModule
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6968075099159965957, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
+      propertyPath: m_DefaultActionMap
+      value: b86e66c9-abf3-4d58-a89a-5f7a4a00c5b4
+      objectReference: {fileID: 0}
     - target: {fileID: 7323349239095205498, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_IsTrigger
       value: 0
@@ -79689,3 +79754,4 @@ SceneRoots:
   - {fileID: 1058598223}
   - {fileID: 1901072188}
   - {fileID: 731486679}
+  - {fileID: 1043416871}

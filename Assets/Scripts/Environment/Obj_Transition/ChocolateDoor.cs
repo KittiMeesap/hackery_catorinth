@@ -20,6 +20,9 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
     [SerializeField] private string targetSceneName = "";
     [SerializeField] private bool waitForSceneLoaded = true;
 
+    [Header("Checkpoint Settings")]
+    [SerializeField] private bool isCheckpointDoor = false;
+
     [Header("Animator")]
     [SerializeField] private Animator animator;
     [SerializeField] private string meltParam = "IsMelt";
@@ -85,7 +88,7 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+        if (!other.CompareTag("Player"))
             return;
 
         if (!isLocked)
@@ -99,7 +102,10 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         if (recentlyTeleported.Contains(entity))
             return;
 
-        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+        if (!other.CompareTag("Player"))
+            return;
+
+        if (entity.CompareTag("Sweeper"))
             return;
 
         if (isLocked || !canUseDoor) return;
@@ -152,6 +158,9 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         if (vcam != null)
             vcam.OnTargetObjectWarped(entity.transform, delta);
 
+        if (isCheckpointDoor && entity.CompareTag("Player"))
+            GameManager.Instance.SetCheckpoint(targetExit);
+
         var openable = connectedDoor.GetComponent<IOpenableDoor>();
         openable?.MarkRecentlyTeleported(entity);
         openable?.DisableInteractionTemporarily(reuseCooldown);
@@ -168,6 +177,9 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
 
     public bool CanOpenFor(GameObject entity)
     {
+        if (entity.CompareTag("Sweeper"))
+            return false;
+
         if (!canUseDoor) return false;
         if (isLocked) return false;
 

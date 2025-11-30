@@ -194,12 +194,17 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (isDead) return;
         isDead = true;
 
+        GameFreezeManager.Instance?.FreezeGame();
+
+        FindFirstObjectByType<CountdownTimer>()?.ForceStopAllTimerAudio();
+
         if (AudioManager.Instance != null && !string.IsNullOrEmpty(deathSFXKey))
             AudioManager.Instance.PlaySFX(deathSFXKey);
 
         PlayerController.Instance?.SetFrozen(true);
         StartCoroutine(DeathRoutine());
     }
+
 
     private IEnumerator DeathRoutine()
     {

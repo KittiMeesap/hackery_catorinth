@@ -1,122 +1,144 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class Settings : MonoBehaviour
 {
-    [Header("Display Mode")]
-    [SerializeField] private TMP_Dropdown displayDropdown;
+    [Header("UI References")]
+    public TextMeshProUGUI displayModeText;
+    public TextMeshProUGUI resolutionText;
+    public TextMeshProUGUI masterText;
+    public TextMeshProUGUI musicText;
+    public TextMeshProUGUI sfxText;
 
-    [Header("Resolution")]
-    [SerializeField] private TMP_Dropdown resolutionDropdown;
-
-    [Header("Sliders")]
-    [SerializeField] private Slider masterSlider;
-    [SerializeField] private Slider musicSlider;
-    [SerializeField] private Slider sfxSlider;
-
-    void Start()
+    private string[] displayModes = { "Full screen", "Windowed" };
+    private string[] resolutions =
     {
-        StartCoroutine(DelayedInit());
+        "1920 x 1080",
+        "1600 x 900",
+        "1366 x 768",
+        "1280 x 720"
+    };
+
+    private int displayIndex;
+    private int resolutionIndex;
+    private int masterVol;
+    private int musicVol;
+    private int sfxVol;
+
+    private void Start()
+    {
+        LoadSettings();
+        ApplyToUI();
     }
 
-    IEnumerator DelayedInit()
-    {
-        yield return null; 
+    // LOAD / SAVE
 
-        SetupDisplayMode();
-        SetupResolutionDropdown();
-        SetupVolumeSliders();
+    public void LoadSettings()
+    {
+        displayIndex = PlayerPrefs.GetInt("DisplayMode", 0);
+        resolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
+
+        masterVol = Mathf.RoundToInt(PlayerPrefs.GetFloat("MasterVol", 1f) * 100f);
+        musicVol = Mathf.RoundToInt(PlayerPrefs.GetFloat("MusicVol", 1f) * 100f);
+        sfxVol = Mathf.RoundToInt(PlayerPrefs.GetFloat("SFXVol", 1f) * 100f);
     }
 
-    void SetupDisplayMode()
+    public void SaveSettings()
     {
-        displayDropdown.ClearOptions();
-        displayDropdown.AddOptions(new List<string> { "Fullscreen", "Windowed" });
+        PlayerPrefs.SetInt("DisplayMode", displayIndex);
+        PlayerPrefs.SetInt("ResolutionIndex", resolutionIndex);
 
-        int savedMode = PlayerPrefs.GetInt("DisplayMode", 0);
-        displayDropdown.value = savedMode;
+        PlayerPrefs.SetFloat("MasterVol", masterVol / 100f);
+        PlayerPrefs.SetFloat("MusicVol", musicVol / 100f);
+        PlayerPrefs.SetFloat("SFXVol", sfxVol / 100f);
 
-        ApplyDisplayMode(savedMode);
+        PlayerPrefs.Save();
 
-        displayDropdown.onValueChanged.AddListener(ApplyDisplayMode);
+        // Refresh AudioManager
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetMasterVolume(masterVol / 100f);
+            AudioManager.Instance.SetMusicVolume(musicVol / 100f);
+            AudioManager.Instance.SetSFXVolume(sfxVol / 100f);
+        }
+
+        ApplyDisplayMode();
+        ApplyResolution();
     }
 
-    void ApplyDisplayMode(int index)
+    // APPLY TO GAME
+
+    private void ApplyDisplayMode()
     {
-        Screen.fullScreenMode = index == 0
+        Screen.fullScreenMode = displayIndex == 0
             ? FullScreenMode.FullScreenWindow
             : FullScreenMode.Windowed;
-
-        PlayerPrefs.SetInt("DisplayMode", index);
     }
 
-    void SetupResolutionDropdown()
+    private void ApplyResolution()
     {
-        resolutionDropdown.ClearOptions();
+        string[] parts = resolutions[resolutionIndex].Split('x');
 
-        List<string> presetRes = new()
-        {
-            "1920x1080",
-            "1600x900",
-            "1366x768",
-            "1280x720"
-        };
+        int w = int.Parse(parts[0]);
+        int h = int.Parse(parts[1]);
 
-        resolutionDropdown.AddOptions(presetRes);
-
-        int savedIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
-        resolutionDropdown.value = savedIndex;
-        resolutionDropdown.RefreshShownValue();
-
-        resolutionDropdown.onValueChanged.AddListener(ApplyCustomResolution);
-        ApplyCustomResolution(savedIndex);
+        Screen.SetResolution(w, h, Screen.fullScreenMode);
     }
 
-    void ApplyCustomResolution(int index)
+    // UI UPDATE
+
+    private void ApplyToUI()
     {
-        string res = resolutionDropdown.options[index].text;
-        string[] parts = res.Split('x', 'X');
+        displayModeText.text = displayModes[displayIndex];
+        resolutionText.text = resolutions[resolutionIndex];
 
-        if (parts.Length == 2 &&
-            int.TryParse(parts[0], out int w) &&
-            int.TryParse(parts[1], out int h))
-        {
-            Screen.SetResolution(w, h, Screen.fullScreenMode);
-            PlayerPrefs.SetInt("ResolutionIndex", index);
-        }
+        masterText.text = masterVol.ToString();
+        musicText.text = musicVol.ToString();
+        sfxText.text = sfxVol.ToString();
     }
 
-    void SetupVolumeSliders()
+    // BUTTON EVENTS
+
+    public void DisplayLeft()
     {
-        
-        masterSlider.onValueChanged.RemoveAllListeners();
-        musicSlider.onValueChanged.RemoveAllListeners();
-        sfxSlider.onValueChanged.RemoveAllListeners();
-
-        masterSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MasterVol", 1f));
-        musicSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MusicVol", 1f));
-        sfxSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("SFXVol", 1f));
-
-        
-        masterSlider.onValueChanged.AddListener(v =>
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.SetMasterVolume(v);
-        });
-
-        musicSlider.onValueChanged.AddListener(v =>
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.SetMusicVolume(v);
-        });
-
-        sfxSlider.onValueChanged.AddListener(v =>
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.SetSFXVolume(v);
-        });
+        displayIndex--;
+        if (displayIndex < 0) displayIndex = displayModes.Length - 1;
+        displayModeText.text = displayModes[displayIndex];
     }
+
+    public void DisplayRight()
+    {
+        displayIndex++;
+        if (displayIndex >= displayModes.Length) displayIndex = 0;
+        displayModeText.text = displayModes[displayIndex];
+    }
+
+    public void ResolutionLeft()
+    {
+        resolutionIndex--;
+        if (resolutionIndex < 0) resolutionIndex = resolutions.Length - 1;
+        resolutionText.text = resolutions[resolutionIndex];
+    }
+
+    public void ResolutionRight()
+    {
+        resolutionIndex++;
+        if (resolutionIndex >= resolutions.Length) resolutionIndex = 0;
+        resolutionText.text = resolutions[resolutionIndex];
+    }
+
+    // Volume Buttons
+    private int ClampVol(int v)
+    {
+        return Mathf.Clamp(v, 0, 100);
+    }
+
+    public void MasterInc() { masterVol = ClampVol(masterVol + 1); masterText.text = masterVol.ToString(); }
+    public void MasterDec() { masterVol = ClampVol(masterVol - 1); masterText.text = masterVol.ToString(); }
+
+    public void MusicInc() { musicVol = ClampVol(musicVol + 1); musicText.text = musicVol.ToString(); }
+    public void MusicDec() { musicVol = ClampVol(musicVol - 1); musicText.text = musicVol.ToString(); }
+
+    public void SFXInc() { sfxVol = ClampVol(sfxVol + 1); sfxText.text = sfxVol.ToString(); }
+    public void SFXDec() { sfxVol = ClampVol(sfxVol - 1); sfxText.text = sfxVol.ToString(); }
 }

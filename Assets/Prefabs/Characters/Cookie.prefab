@@ -106,7 +106,7 @@ Animator:
   m_GameObject: {fileID: 304414325789651764}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: ae9916aca5d93f14f93074531fcbe0fb, type: 2}
+  m_Controller: {fileID: 9100000, guid: e973c101c563fde4aaa1a362777bae0f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3216b8694416a2438cc6197c1d74fbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  missionTag: Q3_Obj2
+  missionTag: 
   maxHealth: 1
   patrolMode: 1
   waypoints: []

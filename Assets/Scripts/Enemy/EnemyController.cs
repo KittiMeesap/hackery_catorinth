@@ -1,7 +1,3 @@
-// --- EnemyController (Gizmo Vision Version) ---
-// VisionTrigger & VisionTriggerRelay removed.
-// Enemy now detects player using Radius + Angle + LOS.
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +22,7 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     [SerializeField] private float patrolSpeed = 2f;
     [SerializeField] private float waitAtPoint = 0.4f;
 
-    [Header("Range Patrol (X only)")]
+    [Header("Range Patrol")]
     [SerializeField] private bool rangeIsOffsetFromStart = true;
     [SerializeField] private float rangeLeft = -2f;
     [SerializeField] private float rangeRight = 2f;

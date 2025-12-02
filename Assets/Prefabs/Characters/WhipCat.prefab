@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2586289172562378010}
   - component: {fileID: 1473695885345231508}
   - component: {fileID: 8172384623632730226}
-  - component: {fileID: 2283077383662525979}
+  - component: {fileID: 2044060751028066039}
   m_Layer: 8
   m_Name: WhipCat
   m_TagString: Enemy
@@ -106,7 +106,7 @@ Animator:
   m_GameObject: {fileID: 304414325789651764}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 679f9b9befe8bf748b096ad75783d592, type: 2}
+  m_Controller: {fileID: 9100000, guid: ae9916aca5d93f14f93074531fcbe0fb, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -191,7 +191,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.78125, y: 0.8125}
   m_EdgeRadius: 0
---- !u!114 &2283077383662525979
+--- !u!114 &2044060751028066039
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -200,42 +200,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 304414325789651764}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3216b8694416a2438cc6197c1d74fbd, type: 3}
+  m_Script: {fileID: 11500000, guid: bd65a4d8153400440a801e157a8719d2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  missionTag: Q3_Obj2
-  maxHealth: 1
-  patrolMode: 1
-  waypoints: []
-  patrolSpeed: 1
-  waitAtPoint: 1
+  m_EditorClassIdentifier: Assembly-CSharp::WhipcreamRoller
   rangeIsOffsetFromStart: 1
   rangeLeft: -2
   rangeRight: 2
-  startMovingRight: 1
-  boundLeeway: 0.02
-  chaseOnSight: 0
-  chaseSpeed: 3.5
-  stopChaseDistance: 0.25
-  visionRadius: 3
-  visionAngle: 70
-  visionYOffset: 0.4
-  debugVisionGizmo: 1
+  idleWaitTime: 0.5
+  moveSpeed: 2
+  spinSpeed: 4
+  stopSpinDistanceLeeway: 0.05
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
-  useLineOfSight: 1
   obstacleLayers:
     serializedVersion: 2
     m_Bits: 1024
-  dealContactDamage: 1
-  contactDamage: 1
-  perTargetCooldown: 0.5
-  knockbackForce: 5
+  visionRadius: 4
+  visionAngle: 70
+  visionYOffset: 0.4
+  boomTriggerDistance: 1
+  boomRadius: 1.5
+  boomDamageHearts: 2
+  boomKnockbackForce: 8
+  boomDelay: 0.15
+  heatStunTime: 0.25
+  flashSpeed: 20
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  sfxMoveStart: SFX_WhipMove
+  sfxSpinLoop: SFX_WhipSpin
+  sfxBoom: SFX_WhipBoom
+  sfxFreeze: SFX_WhipFreeze
+  sfxUnfreeze: SFX_WhipUnfreeze
+  sfxHeatStun: SFX_WhipHeatStun
   spriteRenderer: {fileID: 6876511256430132359}
   animator: {fileID: 2586289172562378010}
-  lockYToStart: 1
-  emotionUI: {fileID: 4206301058492289073}
+  drawVisionGizmo: 1
+  drawBoomGizmo: 1
 --- !u!1 &1516424532146303313
 GameObject:
   m_ObjectHideFlags: 0

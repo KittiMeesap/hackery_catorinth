@@ -6,99 +6,118 @@ using System.Collections;
 
 public class PauseMenuUI : MonoBehaviour
 {
-    [Header("UI Menus")]
+    [Header("Main Panels")]
     public GameObject pausePanel;
-    public GameObject defaultSelectedButton;
+    public GameObject settingsPanel;
+    public GameObject defaultPauseButton;
+    public GameObject defaultSettingButton;
 
+    [Header("Scene Navigation")]
     public string homeSceneName = "MainMenu";
 
     private bool isPaused = false;
 
-    [Header("Input References")]
+    [Header("Input")]
     public InputActionReference pauseAction;
 
     private PlayerInput playerInput;
-    private const string gameplayMap = "Player";
-    private const string uiMap = "UI";
+    private const string MAP_GAMEPLAY = "Player";
+    private const string MAP_UI = "UI";
 
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
         if (playerInput == null)
-            Debug.LogError("PlayerInput is missing.");
+            Debug.LogError("PlayerInput missing on PauseMenuUI.");
     }
 
     private void OnEnable()
     {
-        if (pauseAction != null)
-        {
-            pauseAction.action.performed += OnPausePerformed;
-            pauseAction.action.Enable();
-        }
+        pauseAction.action.performed += OnPausePressed;
+        pauseAction.action.Enable();
     }
 
     private void OnDisable()
     {
-        if (pauseAction != null)
-        {
-            pauseAction.action.performed -= OnPausePerformed;
-            pauseAction.action.Disable();
-        }
+        pauseAction.action.performed -= OnPausePressed;
+        pauseAction.action.Disable();
     }
 
-    private void OnPausePerformed(InputAction.CallbackContext ctx)
+    private void OnPausePressed(InputAction.CallbackContext ctx)
     {
+        if (settingsPanel.activeSelf)
+        {
+            CloseSettings();
+            return;
+        }
+
         if (isPaused)
             ResumeGame();
         else
             PauseGame();
     }
 
+    // PAUSE / RESUME
     public void PauseGame()
     {
-        if (pausePanel == null) return;
-
-        pausePanel.SetActive(true);
         Time.timeScale = 0f;
         isPaused = true;
 
-        playerInput.SwitchCurrentActionMap(uiMap);
+        pausePanel.SetActive(true);
+        settingsPanel.SetActive(false);
 
-        StartCoroutine(SetDefaultButtonNextFrame());
+        playerInput.SwitchCurrentActionMap(MAP_UI);
+
+        StartCoroutine(SelectButtonNextFrame(defaultPauseButton));
     }
-
-    private IEnumerator SetDefaultButtonNextFrame()
-    {
-        yield return null;
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(defaultSelectedButton);
-    }
-
 
     public void ResumeGame()
     {
-        if (pausePanel == null) return;
+        Time.timeScale = 1f;
+        isPaused = false;
 
         pausePanel.SetActive(false);
-        Time.timeScale = 1f;
-        isPaused = false;
+        settingsPanel.SetActive(false);
 
-        playerInput.SwitchCurrentActionMap(gameplayMap);
-
+        playerInput.SwitchCurrentActionMap(MAP_GAMEPLAY);
     }
 
-    public void ResetGame()
+    // SETTINGS
+    public void OpenSettings()
+    {
+        pausePanel.SetActive(false);
+        settingsPanel.SetActive(true);
+
+        StartCoroutine(SelectButtonNextFrame(defaultSettingButton));
+    }
+
+    public void CloseSettings()
+    {
+        settingsPanel.SetActive(false);
+        pausePanel.SetActive(true);
+
+        StartCoroutine(SelectButtonNextFrame(defaultPauseButton));
+    }
+
+    // BUTTONS
+    public void ResetLevel()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         isPaused = false;
-        if (pausePanel != null)
-            pausePanel.SetActive(false);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void GoHome()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(homeSceneName);
+    }
+
+    // UI Helper
+    private IEnumerator SelectButtonNextFrame(GameObject button)
+    {
+        yield return null;
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(button);
     }
 }

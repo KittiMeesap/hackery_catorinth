@@ -11,9 +11,8 @@ GameObject:
   - component: {fileID: 6084727096742625702}
   - component: {fileID: 2501551089953630458}
   - component: {fileID: 3952603335062983750}
-  - component: {fileID: 478135692803941156}
   - component: {fileID: 8953658594916956299}
-  - component: {fileID: 3813407427434714636}
+  - component: {fileID: 2406146102767485511}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -48,11 +47,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 172d511af381fbc4db41c18a893ee3c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  time: 0
   missionSetForScene: {fileID: 0}
   missionText: {fileID: 0}
   countdownManager: {fileID: 0}
   screenFader: {fileID: 0}
+  currentCheckpoint: {fileID: 0}
+  savedCountdownTime: 0
 --- !u!114 &3952603335062983750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,22 +69,6 @@ MonoBehaviour:
   initialSets: []
   pointExitWhenAllSetsDone: 1
   switchSetDelay: 0.4
---- !u!114 &478135692803941156
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3336330316463316781}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b37e25ce45df01d4d8769f46e55c560a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pausePanel: {fileID: 0}
-  defaultSelectedButton: {fileID: 0}
-  homeSceneName: MainMenu
-  pauseAction: {fileID: -7933011945050117503, guid: 742c1733af453cf40b19b809db247eee, type: 3}
 --- !u!114 &8953658594916956299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,7 +81,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26ffd8b5836ca664cb54849c1651f044, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameFreezeManager
---- !u!114 &3813407427434714636
+--- !u!114 &2406146102767485511
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -124,6 +108,6 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
+  m_DefaultActionMap: MenuControls
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}

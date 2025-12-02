@@ -1,3 +1,7 @@
+// --- EnemyController (Gizmo Vision Version) ---
+// VisionTrigger & VisionTriggerRelay removed.
+// Enemy now detects player using Radius + Angle + LOS.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,16 +39,16 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     [SerializeField] private float stopChaseDistance = 0.25f;
     private Coroutine alarmSeekRoutine;
 
-    [Header("Vision")]
+    [Header("Vision Settings")]
+    [SerializeField] private float visionRadius = 3f;
+    [SerializeField] private float visionAngle = 70f;
+    [SerializeField] private float visionYOffset = 0.4f;
+    [SerializeField] private bool debugVisionGizmo = true;
+
+    [Header("LOS Settings")]
     [SerializeField] protected LayerMask playerLayer;
     [SerializeField] private bool useLineOfSight = true;
     [SerializeField] private LayerMask obstacleLayers;
-    [SerializeField] private Collider2D visionTrigger;
-
-    [Header("Vision Follow Facing")]
-    [SerializeField] private bool flipVisionWithFacing = true;
-    [SerializeField] private float visionSideOffset = 1.0f;
-    [SerializeField] private bool visionIsChildTransform = true;
 
     [Header("Contact Damage (No Hitbox)")]
     [SerializeField] private bool dealContactDamage = true;
@@ -76,10 +80,7 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
 
     private readonly Dictionary<int, float> lastHit = new();
 
-    private Vector3 cachedVisionLocalPos;
-    private Vector2 cachedColliderOffset;
     private int facingSign = 1;
-
     private float startX;
     private float leftBound;
     private float rightBound;
@@ -153,21 +154,6 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
         if (!animator) animator = GetComponentInChildren<Animator>();
         myCols = GetComponentsInChildren<Collider2D>(true);
         if (!emotionUI) emotionUI = GetComponentInChildren<EnemyEmotionUI>(true);
-
-        if (visionTrigger)
-        {
-            visionTrigger.isTrigger = true;
-            if (visionIsChildTransform)
-            {
-                cachedVisionLocalPos = visionTrigger.transform.localPosition;
-                cachedVisionLocalPos.x = Mathf.Abs(cachedVisionLocalPos.x) > 0.001f ? Mathf.Abs(cachedVisionLocalPos.x) : visionSideOffset;
-            }
-            else
-            {
-                cachedColliderOffset = GetOffset(visionTrigger);
-                cachedColliderOffset.x = cachedColliderOffset.x == 0 ? visionSideOffset : Mathf.Abs(cachedColliderOffset.x);
-            }
-        }
     }
 
     private void Start()
@@ -202,6 +188,80 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
     {
         if (patrolRoutine != null) StopCoroutine(patrolRoutine);
     }
+
+    //GIZMO VISION
+
+    private bool GizmoDetectPlayer()
+    {
+        if (!player) return false;
+        if (isDead || IsInSmoke || IsInCold) return false;
+
+        Vector2 origin = (Vector2)transform.position + new Vector2(visionYOffset * 0f, visionYOffset);
+        Vector2 dir = (player.position - transform.position);
+        float dist = dir.magnitude;
+
+        if (dist > visionRadius) return false;
+
+        // Angle
+        float angle = Vector2.Angle(new Vector2(facingSign, 0f), dir.normalized);
+        if (angle > visionAngle * 0.5f) return false;
+
+        // LOS
+        if (useLineOfSight)
+        {
+            var hit = Physics2D.Raycast(origin, dir.normalized, dist, obstacleLayers);
+            if (hit.collider != null) return false;
+        }
+
+        return true;
+    }
+
+    private void HandleGizmoVision()
+    {
+        if (!player)
+        {
+            var p = GameObject.FindGameObjectWithTag("Player");
+            if (p) player = p.transform;
+        }
+
+        if (!player) return;
+
+        if (GizmoDetectPlayer())
+        {
+            OnPlayerSpotted(player);
+            emotionUI?.ForceAlert();
+        }
+        else
+        {
+            OnPlayerLost();
+            emotionUI?.ForceHidden();
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!debugVisionGizmo) return;
+
+        Gizmos.color = new Color(1f, 1f, 0f, 0.2f);
+
+        Vector3 origin = transform.position + new Vector3(0f, visionYOffset, 0f);
+        Gizmos.DrawWireSphere(origin, visionRadius);
+
+        Vector3 left = Quaternion.Euler(0, 0, visionAngle * 0.5f) * Vector3.right * facingSign;
+        Vector3 right = Quaternion.Euler(0, 0, -visionAngle * 0.5f) * Vector3.right * facingSign;
+
+        Gizmos.DrawLine(origin, origin + left * visionRadius);
+        Gizmos.DrawLine(origin, origin + right * visionRadius);
+    }
+
+    //UPDATE
+
+    private void Update()
+    {
+        HandleGizmoVision();
+    }
+
+    // PATROL
 
     private IEnumerator PatrolLoop()
     {
@@ -256,56 +316,14 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
         UpdateAnim(false);
     }
 
-    public void Vision_OnTriggerEnter2D(Collider2D other)
-    {
-        if (isDead || IsInSmoke || IsInCold) return;
-        if (!IsPlayer(other)) return;
-        if (!useLineOfSight || ClearLOS(other.transform))
-        {
-            OnPlayerSpotted(other.transform);
-            emotionUI?.ForceAlert();
-        }
-    }
-
-    public void Vision_OnTriggerStay2D(Collider2D other)
-    {
-        if (isDead) return;
-        if (IsInSmoke || IsInCold) { OnPlayerLost(); emotionUI?.ForceHidden(); return; }
-        if (!IsPlayer(other)) return;
-        if (!useLineOfSight || ClearLOS(other.transform))
-            emotionUI?.ForceAlert();
-        else
-        {
-            OnPlayerLost();
-            emotionUI?.ForceHidden();
-        }
-    }
-
-    public void Vision_OnTriggerExit2D(Collider2D other)
-    {
-        if (!IsPlayer(other)) return;
-        OnPlayerLost();
-        emotionUI?.ForceHidden();
-    }
-
-    private bool IsPlayer(Collider2D col) =>
-        (playerLayer.value & (1 << col.gameObject.layer)) != 0;
-
-    private bool ClearLOS(Transform t)
-    {
-        Vector2 o = rb.position;
-        Vector2 d = (Vector2)t.position - o;
-        float dist = d.magnitude;
-        if (dist < 0.1f) return true;
-        return !Physics2D.Raycast(o, d.normalized, dist, obstacleLayers);
-    }
+    // VISION EVENTS REMOVED
 
     private void OnPlayerSpotted(Transform t)
     {
         if (!chaseOnSight || IsInSmoke || IsInCold || isDead) return;
-        player = t;
         if (!chasing)
         {
+            player = t;
             chasing = true;
             StopPatrol();
             StartCoroutine(ChaseLoop());
@@ -344,11 +362,14 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
             {
                 UpdateAnim(false);
             }
+
             emotionUI?.ForceAlert();
             yield return new WaitForFixedUpdate();
         }
         UpdateAnim(false);
     }
+
+    //CONTACT DAMAGE
 
     private void TryTouchDamage(Collider2D other)
     {
@@ -394,9 +415,6 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
 
         if (spriteRenderer)
             spriteRenderer.flipX = facingSign < 0;
-
-        if (flipVisionWithFacing)
-            UpdateVisionFlip();
     }
 
     private void UpdateAnim(bool walk)
@@ -404,40 +422,6 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
         if (!animator) return;
         animator.SetBool("IsWalking", walk);
         animator.SetBool("IsIdle", !walk);
-    }
-
-    private void UpdateVisionFlip()
-    {
-        if (!visionTrigger) return;
-
-        if (visionIsChildTransform)
-        {
-            Vector3 lp = cachedVisionLocalPos;
-            lp.x = Mathf.Abs(lp.x);
-            lp.x *= facingSign;
-            visionTrigger.transform.localPosition = lp;
-        }
-        else
-        {
-            Vector2 off = cachedColliderOffset;
-            off.x = Mathf.Abs(off.x) * facingSign;
-            SetOffset(visionTrigger, off);
-        }
-    }
-
-    private static Vector2 GetOffset(Collider2D c)
-    {
-        if (c is BoxCollider2D b) return b.offset;
-        if (c is CircleCollider2D cc) return cc.offset;
-        if (c is CapsuleCollider2D cap) return cap.offset;
-        return Vector2.zero;
-    }
-
-    private static void SetOffset(Collider2D c, Vector2 o)
-    {
-        if (c is BoxCollider2D b) b.offset = o;
-        else if (c is CircleCollider2D cc) cc.offset = o;
-        else if (c is CapsuleCollider2D cap) cap.offset = o;
     }
 
     public void TakeDamage(int amt)
@@ -470,7 +454,6 @@ public class EnemyController : MonoBehaviour, IDamageable, ITemperatureAffectabl
             emotionUI.gameObject.SetActive(false);
 
         dealContactDamage = false;
-        if (visionTrigger) visionTrigger.enabled = false;
 
         foreach (var c in myCols) if (c) c.enabled = false;
 

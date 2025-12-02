@@ -6739,7 +6739,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960.00006, y: -57.635}
+  m_AnchoredPosition: {x: 960.00006, y: -57.63501}
   m_SizeDelta: {x: 1880, y: 115.27}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &317680879
@@ -6857,7 +6857,7 @@ AudioSource:
   m_GameObject: {fileID: 331009426}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -5282351626284963647, guid: 69c6ee4c360b37943902a1404df78657, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
@@ -9353,7 +9353,7 @@ MonoBehaviour:
   mainMixer: {fileID: 24100000, guid: 69c6ee4c360b37943902a1404df78657, type: 2}
   soundLibrary: {fileID: 11400000, guid: 7ce57ef63e46a964a80983fdf3b9c85b, type: 2}
   musicSourceA: {fileID: 331009427}
-  musicSourceB: {fileID: 0}
+  musicSourceB: {fileID: 331009427}
   sfxPool: []
   uiSource: {fileID: 0}
   masterVolume: 1
@@ -17039,7 +17039,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960.00006, y: -217.51714}
+  m_AnchoredPosition: {x: 960.00006, y: -217.51715}
   m_SizeDelta: {x: 1600, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1519357599

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: dd924ab4eb251e04a82e5e24a88850d5
+guid: 42da0f455c38f7e48b33565f2bb2d719
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3092954031401789017
-    second: BG_CakeShop2-3_02_0
+      213: 183184970110740061
+    second: BG_Footpath_DecoratingRoom_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BG_CakeShop2-3_02_0
+      name: BG_Footpath_DecoratingRoom_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 6
+        y: 0
         width: 128
-        height: 58
+        height: 9
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7a91fa312be9315d0800000000000000
-      internalID: -3092954031401789017
+      spriteID: d5624af72cdca8200800000000000000
+      internalID: 183184970110740061
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BG_CakeShop2-3_02_0: -3092954031401789017
+      BG_Footpath_DecoratingRoom_0: 183184970110740061
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

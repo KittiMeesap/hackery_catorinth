@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -19,7 +19,9 @@ public class ScreenFader : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        fadeImage.gameObject.SetActive(false);
+
+        if (fadeImage != null)
+            fadeImage.gameObject.SetActive(false);
     }
 
     public IEnumerator FadeOut()
@@ -27,22 +29,27 @@ public class ScreenFader : MonoBehaviour
         fadeImage.gameObject.SetActive(true);
         fadeImage.raycastTarget = true;
 
-        float t = 0;
+        float t = 0f;
         while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
-            fadeImage.color = new Color(0, 0, 0, Mathf.Lerp(0, 1, t / fadeDuration));
+            float a = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            fadeImage.color = new Color(0, 0, 0, a);
             yield return null;
         }
     }
 
     public IEnumerator FadeIn()
     {
-        float t = 0;
+        fadeImage.gameObject.SetActive(true);
+        fadeImage.raycastTarget = true;
+
+        float t = 0f;
         while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
-            fadeImage.color = new Color(0, 0, 0, Mathf.Lerp(1, 0, t / fadeDuration));
+            float a = Mathf.Lerp(1f, 0f, t / fadeDuration);
+            fadeImage.color = new Color(0, 0, 0, a);
             yield return null;
         }
 

@@ -30,6 +30,7 @@
   <Project Path="Unity.AI.ModelTrainer.csproj" />
   <Project Path="Unity.AI.Material.csproj" />
   <Project Path="Unity.VisualScripting.Flow.Editor.csproj" />
+  <Project Path="Unity.Recorder.Editor.csproj" />
   <Project Path="Unity.2D.SpriteShape.Editor.csproj" />
   <Project Path="Unity.InputSystem.csproj" />
   <Project Path="Unity.VisualStudio.Editor.csproj" />
@@ -45,7 +46,6 @@
   <Project Path="UnityEditor.TestRunner.csproj" />
   <Project Path="Unity.VisualScripting.Core.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.Runtime.csproj" />
-  <Project Path="Unity.CollabProxy.Editor.csproj" />
   <Project Path="Unity.VisualScripting.State.Editor.csproj" />
   <Project Path="Unity.Burst.CodeGen.csproj" />
   <Project Path="Unity.Cinemachine.csproj" />
@@ -74,6 +74,8 @@
   <Project Path="UnityEditor.UI.csproj" />
   <Project Path="Unity.2D.Sprite.Editor.csproj" />
   <Project Path="Unity.InternalAPIEditorBridge.013.csproj" />
+  <Project Path="Unity.2D.PixelPerfect.Editor.csproj" />
+  <Project Path="Unity.Recorder.csproj" />
   <Project Path="Unity.Multiplayer.Center.Common.csproj" />
   <Project Path="Unity.AI.Generators.UI.csproj" />
   <Project Path="Unity.InputSystem.ForUI.csproj" />
@@ -88,9 +90,11 @@
   <Project Path="Unity.AI.Material.Srp.csproj" />
   <Project Path="Unity.Settings.Editor.csproj" />
   <Project Path="Unity.InputSystem.TestFramework.csproj" />
+  <Project Path="Unity.CollabProxy.Editor.csproj" />
   <Project Path="Unity.ShaderGraph.Utilities.csproj" />
   <Project Path="Unity.AI.Toolkit.Async.csproj" />
   <Project Path="Unity.VisualScripting.Shared.Editor.csproj" />
+  <Project Path="Unity.Recorder.Base.csproj" />
   <Project Path="Unity.Profiling.Core.csproj" />
   <Project Path="Unity.AI.Toolkit.Compliance.csproj" />
   <Project Path="Unity.Toolchain.Win-x86_64-Linux-x86_64.csproj" />
@@ -100,7 +104,9 @@
   <Project Path="Unity.AI.Generators.Chat.csproj" />
   <Project Path="Unity.RenderPipeline.Universal.ShaderLibrary.csproj" />
   <Project Path="Unity.2D.Common.Runtime.csproj" />
+  <Project Path="Unity.Bindings.OpenImageIO.Editor.csproj" />
   <Project Path="Unity.AI.Toolkit.Asset.csproj" />
+  <Project Path="Unity.2D.PixelPerfect.csproj" />
   <Project Path="Unity.SysrootPackage.Editor.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Unity.Rendering.LightTransport.Editor.csproj" />

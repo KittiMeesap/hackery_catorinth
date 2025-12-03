@@ -1,83 +1,170 @@
 using System.Collections;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+using Unity.Cinemachine;
 
-public class BoxHide : HidingSpot, IInteractable
+public class BoxHide : HidingSpot
 {
-    [Header("Animator & States")]
+    [Header("Animator")]
     [SerializeField] private Animator anim;
-    [SerializeField] private string idleStateName = "Idle";
-    [SerializeField] private string getInTriggerParam = "GetIn";
-    [SerializeField] private string getOutTriggerParam = "GetOut";
-
-    [Header("Timings")]
+    [SerializeField] private string getInTrigger = "GetIn";
+    [SerializeField] private string getOutTrigger = "GetOut";
     [SerializeField] private float enterAnimTime = 0.35f;
     [SerializeField] private float exitAnimTime = 0.35f;
-    [SerializeField] private float idleBlendTime = 0.05f;
-
-    [Header("Mission")]
-    [SerializeField] private bool completeMissionOnEnterHide = false;
-    [SerializeField] private string missionIdOnEnterHide;
 
     [Header("Prompt UI")]
     [SerializeField] private Transform promptPoint;
-    [SerializeField] private bool autoPlacePromptAbove = true;
-    [SerializeField] private float promptMarginY = 0.15f;
-
-    [Header("Audio ( key SoundLibrary)")]
-    [Tooltip(" key SFX_BoxOpen")]
-    [SerializeField] private string sfxOpenKey = "SFX_BoxOpen";
-    [Tooltip("key SFX_BoxClose")]
-    [SerializeField] private string sfxCloseKey = "SFX_BoxClose";
 
     [Header("Highlight")]
     [SerializeField] private SpriteRenderer highlightSprite;
 
+    [Header("Audio")]
+    [SerializeField] private string sfxOpenKey = "SFX_BoxOpen";
+    [SerializeField] private string sfxCloseKey = "SFX_BoxClose";
+
     [Header("Cooldown")]
     [SerializeField] private float hideCooldown = 0.75f;
 
-    private int hashIdle, hashGetIn, hashGetOut;
-    private bool isPlayerNear;
-    private bool isInside;
-    private bool isBusy;
-    private float lastHideTime = -999f;
+    [Header("Interact Radius")]
+    [SerializeField] private float interactRadius = 0.9f;
+
+    private bool isPlayerNear = false;
+    private bool isInside = false;
+    private bool isBusy = false;
 
     private PlayerHiding currentPlayer;
+    private PlayerController controller;
+
     private Vector2 cachedPlayerPosition;
     private SpriteRenderer sr;
+    private SpriteRenderer[] playerSprites;
+
+    private CinemachineCamera cineCam;
+    private Transform originalCameraFollow;
+
+    private int hashGetIn, hashGetOut;
 
     private void Awake()
     {
         if (anim == null) anim = GetComponent<Animator>();
+        hashGetIn = Animator.StringToHash(getInTrigger);
+        hashGetOut = Animator.StringToHash(getOutTrigger);
+
         sr = GetComponentInChildren<SpriteRenderer>();
 
-        hashIdle = string.IsNullOrEmpty(idleStateName) ? 0 : Animator.StringToHash(idleStateName);
-        hashGetIn = string.IsNullOrEmpty(getInTriggerParam) ? 0 : Animator.StringToHash(getInTriggerParam);
-        hashGetOut = string.IsNullOrEmpty(getOutTriggerParam) ? 0 : Animator.StringToHash(getOutTriggerParam);
+        if (promptPoint == null)
+        {
+            GameObject go = new GameObject("PromptPoint");
+            go.transform.SetParent(transform);
+            go.transform.localPosition = Vector3.zero;
+            promptPoint = go.transform;
+        }
 
-        EnsurePromptPoint();
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
+        if (highlightSprite != null)
+            highlightSprite.enabled = false;
 
-        if (highlightSprite != null) highlightSprite.enabled = false;
-
-        PlayIdleImmediate();
+        cineCam = FindFirstObjectByType<CinemachineCamera>();
+        if (cineCam != null)
+            originalCameraFollow = cineCam.Follow;
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
+    private void Update()
     {
-        if (Application.isPlaying) return;
-        if (anim == null) anim = GetComponent<Animator>();
-        EnsurePromptPoint();
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
+        if (!isInside)
+            UpdatePromptPoint();
     }
-#endif
 
-    private void LateUpdate()
+    //--------------------------------------------------
+    //  OVERRIDE GET INTERACT RADIUS
+    //--------------------------------------------------
+    public override float GetInteractRadius() => interactRadius;
+
+    //--------------------------------------------------
+    //  OVERRIDE GET PROMPT POINT
+    //--------------------------------------------------
+    public override Transform GetPromptPoint()
+        => promptPoint != null ? promptPoint : transform;
+
+    //--------------------------------------------------
+    //  OVERRIDE INTERACT
+    //--------------------------------------------------
+    public override void Interact()
     {
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
+        if (isBusy) return;
+        if (Time.time < lastHideTime + hideCooldown) return;
+        if (!isPlayerNear && !isInside) return;
+        if (currentPlayer == null) return;
+
+        if (!isInside)
+            StartCoroutine(EnterRoutine(currentPlayer));
+        else
+            StartCoroutine(ExitRoutine(currentPlayer));
+
+        lastHideTime = Time.time;
+    }
+
+    private IEnumerator EnterRoutine(PlayerHiding p)
+    {
+        isBusy = true;
+        isInside = true;
+
+        UIManager.Instance?.HideInteractPrompt(this);
+        RefreshHighlight();
+
+        controller = p.GetComponent<PlayerController>();
+        cachedPlayerPosition = p.transform.position;
+
+        if (controller)
+        {
+            controller.SetFrozen(true);
+            controller.ClearInputAndVelocity();
+        }
+
+        p.EnterHiding(this);
+
+        if (anim) anim.SetTrigger(hashGetIn);
+
+        if (!string.IsNullOrEmpty(sfxOpenKey))
+            AudioManager.Instance?.PlaySFX(sfxOpenKey);
+
+        playerSprites = controller.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var s in playerSprites) s.enabled = false;
+
+        if (cineCam) cineCam.Follow = this.transform;
+
+        yield return new WaitForSeconds(enterAnimTime);
+
+        if (controller) controller.SetFrozen(false);
+        isBusy = false;
+    }
+
+    private IEnumerator ExitRoutine(PlayerHiding p)
+    {
+        isBusy = true;
+
+        if (anim) anim.SetTrigger(hashGetOut);
+
+        if (!string.IsNullOrEmpty(sfxCloseKey))
+            AudioManager.Instance?.PlaySFX(sfxCloseKey);
+
+        yield return new WaitForSeconds(exitAnimTime);
+
+        foreach (var s in playerSprites)
+            if (s != null) s.enabled = true;
+
+        p.ExitHiding(this);
+        isInside = false;
+
+        if (cineCam && originalCameraFollow != null)
+            cineCam.Follow = originalCameraFollow;
+
+        if (controller) controller.SetFrozen(false);
+
+        RefreshHighlight();
+
+        if (isPlayerNear)
+            UIManager.Instance?.ShowInteractPrompt(this);
+
+        isBusy = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -87,7 +174,9 @@ public class BoxHide : HidingSpot, IInteractable
         isPlayerNear = true;
         currentPlayer = other.GetComponent<PlayerHiding>();
 
-        UIManager.Instance?.ShowInteractPrompt(this);
+        if (!isInside)
+            UIManager.Instance?.ShowInteractPrompt(this);
+
         RefreshHighlight();
     }
 
@@ -96,165 +185,31 @@ public class BoxHide : HidingSpot, IInteractable
         if (!other.CompareTag("Player")) return;
 
         isPlayerNear = false;
-        if (!isInside) currentPlayer = null;
+        if (!isInside)
+            currentPlayer = null;
 
         UIManager.Instance?.HideInteractPrompt(this);
         RefreshHighlight();
-    }
-
-    public void Interact()
-    {
-        if (isBusy) return;
-        if (Time.time < lastHideTime + hideCooldown) return;
-        if (!isPlayerNear && !isInside) return;
-        if (currentPlayer == null) return;
-
-        if (!isInside) StartCoroutine(EnterRoutine(currentPlayer));
-        else StartCoroutine(ExitRoutine(currentPlayer));
-
-        lastHideTime = Time.time;
-    }
-
-    public override void OnEnterHiding(PlayerHiding player)
-    {
-        isInside = true;
-        RefreshHighlight();
-
-        if (completeMissionOnEnterHide && !string.IsNullOrEmpty(missionIdOnEnterHide))
-            MissionManager.Instance?.MarkInteractComplete(missionIdOnEnterHide);
-    }
-
-    public override void OnExitHiding(PlayerHiding player)
-    {
-        isInside = false;
-        RefreshHighlight();
-    }
-
-    private IEnumerator EnterRoutine(PlayerHiding p)
-    {
-        isBusy = true;
-
-        OnEnterHiding(p);
-        currentPlayer = p;
-        cachedPlayerPosition = p.transform.position;
-
-        p.EnterHiding(this);
-        UIManager.Instance?.HideInteractPrompt(this);
-
-        if (anim != null && hashGetIn != 0)
-            anim.SetTrigger(hashGetIn);
-
-        if (AudioManager.Instance != null && !string.IsNullOrEmpty(sfxOpenKey))
-            AudioManager.Instance.PlaySFX(sfxOpenKey);
-
-        yield return new WaitForSeconds(enterAnimTime);
-        PlayIdleBlend();
-        isBusy = false;
-    }
-
-    private IEnumerator ExitRoutine(PlayerHiding p)
-    {
-        isBusy = true;
-
-        if (anim != null && hashGetOut != 0)
-            anim.SetTrigger(hashGetOut);
-
-        if (AudioManager.Instance != null && !string.IsNullOrEmpty(sfxCloseKey))
-            AudioManager.Instance.PlaySFX(sfxCloseKey);
-
-        yield return new WaitForSeconds(exitAnimTime);
-
-        p.transform.position = cachedPlayerPosition;
-        p.ExitHiding(this);
-
-        OnExitHiding(p);
-        currentPlayer = p;
-
-        if (isPlayerNear) UIManager.Instance?.ShowInteractPrompt(this);
-        PlayIdleBlend();
-
-        isBusy = false;
-    }
-
-    private void PlayIdleImmediate()
-    {
-        if (anim == null || hashIdle == 0) return;
-        if (anim.HasState(0, hashIdle))
-            anim.Play(hashIdle, 0, 0f);
-    }
-
-    private void PlayIdleBlend()
-    {
-        if (anim == null || hashIdle == 0) return;
-        if (anim.HasState(0, hashIdle))
-            anim.CrossFade(hashIdle, idleBlendTime, 0, 0f);
-    }
-
-    private void EnsurePromptPoint()
-    {
-#if UNITY_EDITOR
-        if (!Application.isPlaying && PrefabUtility.IsPartOfPrefabAsset(this))
-            return;
-#endif
-        if (promptPoint == null)
-        {
-            var go = new GameObject("PromptPoint");
-            go.transform.SetParent(transform);
-            promptPoint = go.transform;
-        }
-    }
-
-    private void UpdatePromptPointPosition()
-    {
-        if (promptPoint == null) return;
-
-        Bounds b = default;
-        bool hasBounds = false;
-
-        if (sr != null && sr.sprite != null)
-        {
-            b = sr.bounds;
-            hasBounds = true;
-        }
-        else
-        {
-            var col = GetComponent<Collider2D>();
-            if (col != null) { b = col.bounds; hasBounds = true; }
-        }
-
-        if (!hasBounds)
-        {
-            promptPoint.position = transform.position + new Vector3(0, 1f + promptMarginY, 0);
-            return;
-        }
-
-        Vector3 topCenter = new Vector3(b.center.x, b.max.y + promptMarginY, transform.position.z);
-        promptPoint.position = topCenter;
-    }
-
-    public override Vector2 GetHidingPosition()
-    {
-        return currentPlayer != null ? (Vector2)currentPlayer.transform.position : (Vector2)transform.position;
-    }
-
-    public override Vector2 GetExitPosition() => cachedPlayerPosition;
-
-    public Transform GetPromptPoint()
-    {
-        if (autoPlacePromptAbove) UpdatePromptPointPosition();
-        return promptPoint != null ? promptPoint : transform;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (promptPoint == null) return;
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(promptPoint.position, 0.05f);
     }
 
     private void RefreshHighlight()
     {
-        if (highlightSprite == null) return;
-        highlightSprite.enabled = isPlayerNear && !isInside;
+        if (!highlightSprite) return;
+        highlightSprite.enabled = isPlayerNear && !isInside && !isBusy;
     }
+
+    private void UpdatePromptPoint()
+    {
+        if (promptPoint == null || sr == null) return;
+
+        Bounds b = sr.bounds;
+        promptPoint.position =
+            new Vector3(b.center.x, b.max.y + 0.25f, transform.position.z);
+    }
+
+    public override Vector2 GetHidingPosition()
+        => cachedPlayerPosition;
+
+    public override Vector2 GetExitPosition()
+        => cachedPlayerPosition;
 }

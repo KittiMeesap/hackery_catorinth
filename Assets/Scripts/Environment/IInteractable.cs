@@ -1,7 +1,8 @@
 using UnityEngine;
+
 public interface IInteractable
 {
-    void Interact();
     Transform GetPromptPoint();
+    float GetInteractRadius();
+    void Interact();
 }
-

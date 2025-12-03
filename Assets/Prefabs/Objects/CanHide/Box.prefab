@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 8095352114229112524}
   - component: {fileID: 8350222037464325328}
   - component: {fileID: 1289790854788181516}
+  - component: {fileID: 3391792897887262741}
   - component: {fileID: 4408032765947699607}
   - component: {fileID: 261096842793109056}
   m_Layer: 0
@@ -202,8 +203,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -989438933
-  m_SortingLayer: 2
+  m_SortingLayerID: -1334594335
+  m_SortingLayer: 4
   m_SortingOrder: 1
   m_Sprite: {fileID: 8602429355946865552, guid: ba19b3411f60fba4aab6a18cc91470c0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -238,6 +239,33 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!50 &3391792897887262741
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5313338234478560124}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!61 &4408032765947699607
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -296,21 +324,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c388b042febe65441b97bfbb2f496d97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  exitCooldown: 0.3
   anim: {fileID: 1289790854788181516}
   idleStateName: Box_PlayerIdle
   walkStateName: Box_PlayerWalk
-  getInTriggerParam: GetIn
-  getOutTriggerParam: GetOut
-  isWalkingBoolParam: IsWalking
-  enterAnimTime: 0.35
-  exitAnimTime: 0.35
-  idleBlendTime: 0.05
-  completeMissionOnEnterHide: 0
-  missionIdOnEnterHide: 
+  getInTrigger: GetIn
+  getOutTrigger: GetOut
+  isWalkingBool: IsWalking
+  moveSpeed: 5
   promptPoint: {fileID: 5576222159225290152}
-  autoPlacePromptAbove: 1
   promptMarginY: 0.15
   sfxOpenKey: SFX_BoxOpen
   sfxCloseKey: SFX_BoxClose
   highlightSprite: {fileID: 5196892023579630836}
-  hideCooldown: 0.75

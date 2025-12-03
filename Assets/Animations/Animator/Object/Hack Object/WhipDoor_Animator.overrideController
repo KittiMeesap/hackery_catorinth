@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: WhipDoor_Animator
+  m_Controller: {fileID: 9100000, guid: 2c1789dc82d18cf479fd75dc31643011, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: d254eeff58061e545b635bf8bf2d5e2d, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 6d4f7fd3154c2974b9627ac732787412, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 22548dcc443f9214ab0452eeeae16582, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: d0a6a618c91dc60468e857c8bac47a5f, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: e5cabcdbaee02be45b72674d82cf6317, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 79455e4716e494348af900d4a442d3c1, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 7bf741df426bb814489cd2a96d15bf83, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: a43ba088ed38cc84988a65e28165a488, type: 2}

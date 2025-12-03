@@ -7,13 +7,13 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Audio Mixer & Groups")]
+    [Header("Audio Mixer")]
     [SerializeField] private AudioMixer mainMixer;
 
     [Header("Sound Library")]
     [SerializeField] private SoundLibrary soundLibrary;
 
-    [Header("Audio Sources")]
+    [Header("Audio Sources (Auto-Created if Missing)")]
     [SerializeField] private AudioSource musicSourceA;
     [SerializeField] private AudioSource musicSourceB;
     [SerializeField] private List<AudioSource> sfxPool = new();
@@ -24,7 +24,7 @@ public class AudioManager : MonoBehaviour
     [Range(0f, 1f)] public float musicVolume = 1f;
     [Range(0f, 1f)] public float sfxVolume = 1f;
 
-    [Header("BGM Crossfade Settings")]
+    [Header("Crossfade Settings")]
     [SerializeField] private float bgmCrossfadeTime = 1.5f;
 
     private AudioSource _currentMusicSource;
@@ -34,12 +34,8 @@ public class AudioManager : MonoBehaviour
     private Camera _mainCam;
     private Plane[] _frustumPlanes;
 
-    // ===========================================================
-    // 🧩 INITIALIZE
-    // ===========================================================
     private void Awake()
     {
-        // Singleton
         if (Instance == null)
         {
             Instance = this;
@@ -51,11 +47,28 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        // ตรวจสอบ AudioSource
-        if (musicSourceA == null || musicSourceB == null)
-            Debug.LogError("[AudioManager] Missing music sources (A or B)!");
+        if (musicSourceA == null)
+        {
+            musicSourceA = gameObject.AddComponent<AudioSource>();
+            musicSourceA.playOnAwake = false;
+            musicSourceA.loop = true;
+        }
+
+        if (musicSourceB == null)
+        {
+            musicSourceB = gameObject.AddComponent<AudioSource>();
+            musicSourceB.playOnAwake = false;
+            musicSourceB.loop = true;
+        }
+
+        if (uiSource == null)
+        {
+            uiSource = gameObject.AddComponent<AudioSource>();
+            uiSource.playOnAwake = false;
+        }
 
         _currentMusicSource = musicSourceA;
+
         LoadVolume();
         ApplyVolumes();
     }
@@ -67,23 +80,18 @@ public class AudioManager : MonoBehaviour
             _frustumPlanes = GeometryUtility.CalculateFrustumPlanes(_mainCam);
     }
 
-    // ===========================================================
-    // 🎵 BGM ZONE CONTROL
-    // ===========================================================
+    // ============================================================
+    // BGM
+    // ============================================================
     public void PlayBGM(string key, bool crossfade = true)
     {
         if (string.IsNullOrEmpty(key)) return;
 
-        // ถ้าเพลงเดิมเล่นอยู่แล้ว → ไม่ต้องเปลี่ยน
+        AudioClip clip = GetClipSafe(key);
+        if (clip == null) return;
+
         if (currentBGMKey == key && _currentMusicSource.isPlaying)
             return;
-
-        AudioClip clip = GetClipByKey(key);
-        if (clip == null)
-        {
-            Debug.LogWarning($"[AudioManager] BGM clip not found for key: {key}");
-            return;
-        }
 
         currentBGMKey = key;
 
@@ -98,8 +106,8 @@ public class AudioManager : MonoBehaviour
         {
             _currentMusicSource.Stop();
             _currentMusicSource.clip = clip;
-            _currentMusicSource.loop = true;
             _currentMusicSource.volume = musicVolume * masterVolume;
+            _currentMusicSource.loop = true;
             _currentMusicSource.Play();
         }
     }
@@ -110,8 +118,8 @@ public class AudioManager : MonoBehaviour
         AudioSource to = (from == musicSourceA) ? musicSourceB : musicSourceA;
 
         to.clip = newClip;
-        to.loop = true;
         to.volume = 0f;
+        to.loop = true;
         to.Play();
 
         float t = 0f;
@@ -119,8 +127,11 @@ public class AudioManager : MonoBehaviour
         {
             t += Time.unscaledDeltaTime;
             float p = t / fadeTime;
+            p = p * p * (3 - 2 * p);
+
             to.volume = Mathf.Lerp(0f, musicVolume * masterVolume, p);
             from.volume = Mathf.Lerp(musicVolume * masterVolume, 0f, p);
+
             yield return null;
         }
 
@@ -129,79 +140,99 @@ public class AudioManager : MonoBehaviour
         bgmCrossfadeRoutine = null;
     }
 
-    // ===========================================================
-    // 🎶 MANUAL MUSIC CONTROL (optional use)
-    // ===========================================================
-    public void PlayMusic(string key)
+    public void StopBGM()
     {
-        PlayBGM(key, true);
+        if (musicSourceA != null) musicSourceA.Stop();
+        if (musicSourceB != null) musicSourceB.Stop();
+
+        currentBGMKey = "";
+
+        if (bgmCrossfadeRoutine != null)
+        {
+            StopCoroutine(bgmCrossfadeRoutine);
+            bgmCrossfadeRoutine = null;
+        }
     }
 
-    // ===========================================================
-    // 🔊 SFX CONTROL
-    // ===========================================================
+    // ============================================================
+    // SFX
+    // ============================================================
     public void PlaySFX(string key)
     {
         PlaySFXAt(key, Vector3.zero, false, false);
     }
 
-    public void PlaySFXAt(string key, Vector3 worldPos, bool use3D = true, bool requireVisible = false, float radius = 0f)
+    public void PlaySFXAt(string key, Vector3 pos, bool use3D = true, bool requireVisible = false, float radius = 0f)
     {
-        var clip = GetClipByKey(key);
+        AudioClip clip = GetClipSafe(key);
         if (clip == null) return;
 
-        if (requireVisible && !IsOnScreen(worldPos, radius)) return;
-
-        var src = GetAvailableSFXSource();
-        if (src == null)
-        {
-            Debug.LogWarning("[AudioManager] No available SFX source in pool!");
+        if (requireVisible && !IsOnScreen(pos, radius))
             return;
-        }
 
-        src.transform.position = worldPos;
+        AudioSource src = GetAvailableSFXSource();
+        src.transform.position = pos;
         src.spatialBlend = use3D ? 1f : 0f;
         src.clip = clip;
         src.volume = sfxVolume * masterVolume;
         src.Play();
     }
 
-    // ===========================================================
-    // 🧩 UI SOUND
-    // ===========================================================
+    // ============================================================
+    // UI Sound
+    // ============================================================
     public void PlayUI(string key)
     {
-        var clip = GetClipByKey(key);
-        if (clip == null || uiSource == null) return;
+        AudioClip clip = GetClipSafe(key);
+        if (clip == null) return;
+
         uiSource.clip = clip;
         uiSource.volume = sfxVolume * masterVolume;
         uiSource.Play();
     }
 
-    // ===========================================================
-    // ⚙️ VOLUME CONTROL
-    // ===========================================================
+    // ============================================================
+    // STOP ALL AUDIO (NEW)
+    // ============================================================
+    public void StopAllSFX()
+    {
+        foreach (var src in sfxPool)
+        {
+            if (src != null)
+                src.Stop();
+        }
+
+        if (uiSource != null)
+            uiSource.Stop();
+    }
+
+    public void StopAllAudio()
+    {
+        StopAllSFX();
+        StopBGM();
+    }
+
+    // ============================================================
+    // Volume
+    // ============================================================
     public void SetMasterVolume(float value)
     {
         masterVolume = value;
-        if (mainMixer)
-            mainMixer.SetFloat("MasterVol", VolumeToDb(value));
+        SetMixerSafe("MasterVol", value);
         PlayerPrefs.SetFloat("MasterVol", value);
     }
 
     public void SetMusicVolume(float value)
     {
         musicVolume = value;
-        if (mainMixer)
-            mainMixer.SetFloat("MusicVol", VolumeToDb(value));
+        SetMixerSafe("MusicVol", value);
         PlayerPrefs.SetFloat("MusicVol", value);
     }
 
     public void SetSFXVolume(float value)
     {
         sfxVolume = value;
-        if (mainMixer)
-            mainMixer.SetFloat("SFXVol", VolumeToDb(value));
+        SetMixerSafe("SFXVol", value);
         PlayerPrefs.SetFloat("SFXVol", value);
     }
 
@@ -219,45 +250,56 @@ public class AudioManager : MonoBehaviour
         SetSFXVolume(sfxVolume);
     }
 
-    private float VolumeToDb(float v) => Mathf.Log10(Mathf.Clamp(v, 0.0001f, 1f)) * 20f;
+    private float VolumeToDb(float v)
+        => Mathf.Log10(Mathf.Clamp(v, 0.0001f, 1f)) * 20f;
 
-    // ===========================================================
-    // 🧠 UTILITIES
-    // ===========================================================
+    // ============================================================
+    // Utilities
+    // ============================================================
+    private AudioClip GetClipSafe(string key)
+    {
+        if (soundLibrary == null)
+        {
+            Debug.LogWarning("[AudioManager] SoundLibrary not assigned!");
+            return null;
+        }
+
+        AudioClip clip = soundLibrary.GetClip(key);
+        if (clip == null)
+            Debug.LogWarning($"[AudioManager] Clip not found for key: {key}");
+
+        return clip;
+    }
+
+    public AudioClip GetClipByKey(string key)
+    {
+        return GetClipSafe(key);
+    }
+
+    private void SetMixerSafe(string param, float value)
+    {
+        if (mainMixer == null) return;
+
+        float db = VolumeToDb(value);
+        mainMixer.SetFloat(param, db);
+    }
+
     private AudioSource GetAvailableSFXSource()
     {
-        foreach (var s in sfxPool)
-            if (s && !s.isPlaying)
-                return s;
+        foreach (AudioSource a in sfxPool)
+            if (a != null && !a.isPlaying)
+                return a;
 
-        return (sfxPool != null && sfxPool.Count > 0) ? sfxPool[0] : null;
+        AudioSource newSrc = gameObject.AddComponent<AudioSource>();
+        sfxPool.Add(newSrc);
+        return newSrc;
     }
 
     public bool IsOnScreen(Vector3 pos, float radius = 0f)
     {
         if (_mainCam == null || _frustumPlanes == null) return true;
-        var bounds = new Bounds(pos, Vector3.one * (radius * 2f));
-        return GeometryUtility.TestPlanesAABB(_frustumPlanes, bounds);
-    }
 
-    // ===========================================================
-    // 📚 SOUND LIBRARY ACCESS
-    // ===========================================================
-    public AudioClip GetClipByKey(string key)
-    {
-        if (soundLibrary == null)
-        {
-            Debug.LogWarning("[AudioManager] SoundLibrary is not assigned.");
-            return null;
-        }
-
-        var clip = soundLibrary.GetClip(key);
-        if (clip == null)
-        {
-            Debug.LogWarning($"[AudioManager] Clip not found for key: {key}");
-            return null;
-        }
-
-        return clip;
+        Bounds b = new Bounds(pos, Vector3.one * radius * 2f);
+        return GeometryUtility.TestPlanesAABB(_frustumPlanes, b);
     }
 }

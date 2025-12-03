@@ -1,19 +1,29 @@
 using UnityEngine;
 
-public class HidingSpot : MonoBehaviour
+[RequireComponent(typeof(Collider2D))]
+public class HidingSpot : MonoBehaviour, IInteractable
 {
-    protected bool isPlayerInside = false;
+    [Header("Cooldown Settings")]
+    [SerializeField] private float exitCooldown = 0.3f;
 
+    [System.NonSerialized]
+    protected float lastHideTime;
+
+    protected bool isPlayerInside = false;
     protected PlayerHiding player;
     protected Vector2 playerOriginalPosition;
+    private float lastHideStartTime;
 
     public bool IsPlayerInside => isPlayerInside;
 
     public virtual void OnEnterHiding(PlayerHiding player)
     {
+        if (isPlayerInside) return;
         isPlayerInside = true;
+
         this.player = player;
         playerOriginalPosition = player.transform.position;
+        lastHideStartTime = Time.time;
 
         player.EnterHiding(this);
         PlayHidingAnimation(true);
@@ -21,6 +31,12 @@ public class HidingSpot : MonoBehaviour
 
     public virtual void OnExitHiding(PlayerHiding player)
     {
+        if (player == null) return;
+        if (!isPlayerInside) return;
+
+        if (Time.time < lastHideStartTime + exitCooldown)
+            return;
+
         isPlayerInside = false;
         this.player = null;
 
@@ -35,7 +51,7 @@ public class HidingSpot : MonoBehaviour
 
     public virtual Vector2 GetExitPosition()
     {
-        return playerOriginalPosition;
+        return (Vector2)transform.position + Vector2.up * 0.15f;
     }
 
     protected virtual void PlayHidingAnimation(bool isHiding) { }
@@ -43,24 +59,44 @@ public class HidingSpot : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
-        {
-            PlayerHiding playerHiding = other.GetComponent<PlayerHiding>();
-            if (playerHiding != null)
-            {
-                playerHiding.SetHidingSpot(this);
-            }
-        }
+            other.GetComponent<PlayerHiding>()?.SetHidingSpot(this);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
+            other.GetComponent<PlayerHiding>()?.ClearHidingSpot(this);
+    }
+
+    public virtual Transform GetPromptPoint()
+    {
+        return transform;
+    }
+
+    public virtual float GetInteractRadius()
+    {
+        return 1.0f;
+    }
+
+    public virtual void Interact()
+    {
+        if (PlayerHiding.Instance.IsHidingInContainer)
         {
-            PlayerHiding playerHiding = other.GetComponent<PlayerHiding>();
-            if (playerHiding != null)
-            {
-                playerHiding.ClearHidingSpot(this);
-            }
+            OnExitHiding(PlayerHiding.Instance);
+        }
+        else
+        {
+            OnEnterHiding(PlayerHiding.Instance);
         }
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(GetHidingPosition(), 0.1f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(GetExitPosition(), 0.1f);
+    }
+#endif
 }

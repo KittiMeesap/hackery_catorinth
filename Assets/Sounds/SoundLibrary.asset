@@ -57,3 +57,27 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 9263ef99786161f4fb5cfbdb6e6506dd, type: 3}
   - key: BGM_ROOM1
     clip: {fileID: 8300000, guid: 4fb45f330b52f094d8647678614ff4e5, type: 3}
+  - key: Hack_Open
+    clip: {fileID: 8300000, guid: 6791d3ffb71897e45948b131a30581e1, type: 3}
+  - key: Hack_Fail
+    clip: {fileID: 8300000, guid: f222c27289aa8fc4e8dfe91a2da3726b, type: 3}
+  - key: Hack_Input
+    clip: {fileID: 8300000, guid: 388c0763f60e34e41a87aff0119c1c0e, type: 3}
+  - key: SFX_PageFlip
+    clip: {fileID: 8300000, guid: b525c5d9da0857740a411a7af0f514ea, type: 3}
+  - key: BGM_Cutscene
+    clip: {fileID: 8300000, guid: bddaa977a9a5ac1459c7ff57abaab588, type: 3}
+  - key: BGM_Cutscene
+    clip: {fileID: 8300000, guid: bddaa977a9a5ac1459c7ff57abaab588, type: 3}
+  - key: SFX_TimerEnd
+    clip: {fileID: 8300000, guid: b254811e9ed020540ade32b5540930fa, type: 3}
+  - key: Hack_Success
+    clip: {fileID: 8300000, guid: 2b5ffeed2f7c6eb4ebcd97b73203fdcd, type: 3}
+  - key: SFX_SafeOpen
+    clip: {fileID: 8300000, guid: edd1c1fc7c8e781489babd6ef6db8460, type: 3}
+  - key: SFX_PaperFly
+    clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
+  - key: UI_Click
+    clip: {fileID: 8300000, guid: 9801dc0cefc0d15438a3aae1907023a8, type: 3}
+  - key: UI_Hover
+    clip: {fileID: 8300000, guid: e8c1bbfd5bc9bce44aeb67cc81583ca6, type: 3}

@@ -1,5 +1,6 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using TMPro;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,48 +9,73 @@ public class GameManager : MonoBehaviour
     [Header("Game States")]
     public bool IsPhoneOut { get; private set; } = false;
     public bool IsInHackingMode { get; private set; } = false;
-    public float time = 0;
 
-    [Header("Mission")]
+    [Header("Mission Settings")]
     public MissionSetSO missionSetForScene;
+    public TextMeshProUGUI missionText;
 
-    private PlayerInput playerInput;
-    private InputAction exitAction;
+    [Header("External References")]
+    public CountdownTimer countdownManager;
+
+    [Header("Screen Fade")]
+    public ScreenFader screenFader;
+
+    [Header("Checkpoint System")]
+    public Transform currentCheckpoint;
+    public float savedCountdownTime = 0f;
+
+    [Header("Door Unlock Persistence")]
+    public HashSet<string> unlockedDoors = new HashSet<string>();
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
+            Destroy(gameObject);
+            return;
         }
 
-        playerInput = GetComponent<PlayerInput>();
-        if (playerInput != null)
-        {
-            exitAction = playerInput.actions["ExitGame"];
-        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
-    private void OnEnable()
+    private void Start()
     {
-        if (exitAction != null)
-            exitAction.performed += OnExitPressed;
+        if (screenFader != null)
+            StartCoroutine(screenFader.FadeIn());
     }
 
-    private void OnDisable()
+    public void ToggleHackingMode(bool isActive)
     {
-        if (exitAction != null)
-            exitAction.performed -= OnExitPressed;
+        IsInHackingMode = isActive;
     }
 
-    private void Update()
+    public void SetPhoneOut(bool isOut)
     {
-        time += Time.deltaTime;
+        IsPhoneOut = isOut;
     }
 
-    private void OnExitPressed(InputAction.CallbackContext context)
+    public void SetCheckpoint(Transform point)
     {
-        QuitGame();
+        currentCheckpoint = point;
+
+        if (countdownManager != null)
+            savedCountdownTime = countdownManager.GetCurrentTime();
+
+        Debug.Log($"Checkpoint Saved at {point.name} | Time Left = {savedCountdownTime}");
+    }
+
+    public void RespawnPlayer(GameObject player)
+    {
+        if (player == null) return;
+
+        if (currentCheckpoint != null)
+            player.transform.position = currentCheckpoint.position;
+
+        if (countdownManager != null)
+            countdownManager.SetTime(savedCountdownTime);
+
+        Debug.Log($"Respawned | Restored Countdown = {savedCountdownTime}");
     }
 
     public void QuitGame()
@@ -61,13 +87,21 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
-    public void SetPhoneOut(bool isOut)
+    public void FreezeGame(bool freeze)
     {
-        IsPhoneOut = isOut;
-    }
+        if (freeze)
+        {
+            Time.timeScale = 0f;
 
-    public void ToggleHackingMode(bool isActive)
-    {
-        IsInHackingMode = isActive;
+            if (GameFreezeManager.Instance != null)
+                GameFreezeManager.Instance.FreezeGame();
+        }
+        else
+        {
+            Time.timeScale = 1f;
+
+            if (GameFreezeManager.Instance != null)
+                GameFreezeManager.Instance.UnfreezeGame();
+        }
     }
 }

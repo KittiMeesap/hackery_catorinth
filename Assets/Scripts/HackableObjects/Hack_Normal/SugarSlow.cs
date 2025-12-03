@@ -1,174 +1,147 @@
-using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class SugarSlow : MonoBehaviour, IHeatable, IFreezable
 {
-    [Header("Slow Settings")]
-    [Range(0.01f, 1f)]
-    [SerializeField] private float slowMultiplier = 0.5f;
-
-    [Header("Initial State")]
-    [SerializeField] private bool startFrozen = false;
-
-    [Header("Animator (Triggers)")]
+    [Header("Animation")]
     [SerializeField] private Animator animator;
-    [SerializeField] private string trigFreeze = "Freeze";
-    [SerializeField] private string trigMelt = "Melt";
 
-    [Header("Audio")]
-    [SerializeField] private string sfxFreezeKey = "SFX_SugarFreeze";
-    [SerializeField] private string sfxMeltKey = "SFX_SugarMelt";
-    [SerializeField] private AudioSource loopAudio;
+    [Header("Slow Effect")]
+    [SerializeField, Range(0f, 1f)] private float slowMultiplier = 0.4f;
 
-    [Header("State Change Threshold")]
-    [SerializeField] private float meltThreshold = 2f;
-    [SerializeField] private float freezeThreshold = -2f;
+    [Header("Heat & Cold Thresholds")]
+    [SerializeField] private float freezeColdThreshold = -1f;
+    [SerializeField] private float meltHeatThreshold = 0.5f;
 
-    [Header("Layer Settings")]
-    [SerializeField] private string physicsLayerWhenMelt = "ObjectHack";
-    [SerializeField] private string physicsLayerWhenFreeze = "Pillars";
+    [Header("Transition Settings")]
+    [SerializeField] private float heatDecayRate = 1f;
+    [SerializeField] private float coldDecayRate = 1f;
 
-    [Header("Sorting Layer Settings")]
-    [SerializeField] private string sortingLayerWhenMelt = "HackObj";
-    [SerializeField] private string sortingLayerWhenFreeze = "Pillars";
+    [Header("Audio Keys (from SoundLibrary)")]
+    [SerializeField] private string freezeSFXKey = "SFX_SugarFreeze";
+    [SerializeField] private string meltSFXKey = "SFX_SugarMelt";
 
-    private readonly HashSet<Collider2D> inside = new();
-    private float temperature = 0f;
-    private bool isFrozen;
-    public float CurrentTemperature => temperature;
+    private bool isFrozen = false;
+    private bool isMelted = true;
+    private float heatLevel;
+    private bool initialized = false;
 
-    private void Awake()
+    private PlayerController affectedPlayer;
+
+    private void Start()
     {
-        if (!animator) animator = GetComponentInChildren<Animator>();
-        if (!loopAudio) loopAudio = GetComponent<AudioSource>();
-
-        isFrozen = startFrozen;
-        UpdateLoopAudioImmediate();
-        ApplyLayerState();
+        heatLevel = meltHeatThreshold + 0.1f;
+        SetMelted(true);
+        StartCoroutine(InitializeAfterFrame());
     }
 
-    private void OnEnable() => ReapplyAll();
-
-    private void OnDisable()
+    private System.Collections.IEnumerator InitializeAfterFrame()
     {
-        foreach (var c in inside) TryRemoveSlow(c);
-        inside.Clear();
+        yield return null;
+        initialized = true;
     }
 
     private void Update()
     {
-        if (temperature >= meltThreshold && isFrozen)
+        if (!initialized) return;
+
+        if (Mathf.Abs(heatLevel) > 0.01f)
         {
-            SetFrozen(false, true, true);
-            temperature = 0f;
+            heatLevel = Mathf.MoveTowards(
+                heatLevel,
+                0f,
+                Time.deltaTime * (heatLevel > 0 ? heatDecayRate : coldDecayRate)
+            );
         }
-        else if (temperature <= freezeThreshold && !isFrozen)
+
+        ApplyStateByTemperature();
+        UpdatePlayerSlowEffect();
+    }
+
+    private void ApplyStateByTemperature()
+    {
+        // ========== FREEZE ==========
+        if (heatLevel <= freezeColdThreshold && !isFrozen)
         {
-            SetFrozen(true, true, true);
-            temperature = 0f;
+            SetFrozen(true);
+            PlayFreezeSFX();
+        }
+        // ========== MELT ==========
+        else if (heatLevel >= meltHeatThreshold && !isMelted)
+        {
+            SetMelted(true);
+            PlayMeltSFX();
         }
     }
 
+    private void PlayFreezeSFX()
+    {
+        if (AudioManager.Instance != null && !string.IsNullOrWhiteSpace(freezeSFXKey))
+        {
+            
+            AudioManager.Instance.PlaySFXAt(freezeSFXKey, transform.position, false);
+        }
+    }
+
+    private void PlayMeltSFX()
+    {
+        if (AudioManager.Instance != null && !string.IsNullOrWhiteSpace(meltSFXKey))
+        {
+            AudioManager.Instance.PlaySFXAt(meltSFXKey, transform.position, false);
+        }
+    }
+
+    private void UpdatePlayerSlowEffect()
+    {
+        if (affectedPlayer == null) return;
+
+        if (isMelted)
+            affectedPlayer.SetSpeedModifier(this, slowMultiplier);
+        else
+            affectedPlayer.RemoveSpeedModifier(this);
+    }
+
+    private void SetMelted(bool melted)
+    {
+        isMelted = melted;
+        isFrozen = !melted;
+
+        if (animator)
+        {
+            animator.SetBool("IsMelted", melted);
+            animator.SetBool("IsFrozen", !melted);
+        }
+    }
+
+    private void SetFrozen(bool frozen)
+    {
+        isFrozen = frozen;
+        isMelted = !frozen;
+
+        if (animator)
+        {
+            animator.SetBool("IsFrozen", frozen);
+            animator.SetBool("IsMelted", !frozen);
+        }
+    }
+
+    public void ApplyHeat(float delta) => heatLevel += delta;
+    public void ApplyCold(float delta) => heatLevel -= delta;
+    public void CoolDown(float delta) =>
+        heatLevel = Mathf.MoveTowards(heatLevel, 0f, delta);
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        inside.Add(other);
-        if (!isFrozen) TryApplySlow(other);
+        if (other.CompareTag("Player"))
+            affectedPlayer = other.GetComponent<PlayerController>();
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        inside.Remove(other);
-        TryRemoveSlow(other);
-    }
-
-    // ----- Temperature System -----
-    public void ApplyHeat(float delta) => temperature += delta;
-    public void ApplyCold(float delta) => temperature -= delta;
-    public void CoolDown(float delta) => temperature = Mathf.MoveTowards(temperature, 0f, delta);
-
-    // ----- Freeze / Melt -----
-    private void SetFrozen(bool frozen, bool playSfx, bool playAnim)
-    {
-        if (isFrozen == frozen)
+        if (other.CompareTag("Player"))
         {
-            ReapplyAll();
-            return;
+            affectedPlayer?.RemoveSpeedModifier(this);
+            affectedPlayer = null;
         }
-
-        isFrozen = frozen;
-
-        if (playAnim && animator)
-            animator.SetTrigger(isFrozen ? trigFreeze : trigMelt);
-
-        if (playSfx && AudioManager.Instance != null)
-        {
-            if (isFrozen && !string.IsNullOrEmpty(sfxFreezeKey))
-                AudioManager.Instance.PlaySFX(sfxFreezeKey);
-            if (!isFrozen && !string.IsNullOrEmpty(sfxMeltKey))
-                AudioManager.Instance.PlaySFX(sfxMeltKey);
-        }
-
-        UpdateLoopAudio();
-        ApplyLayerState();
-        ReapplyAll();
-    }
-
-    // ---------- Layer System ----------
-    private void ApplyLayerState()
-    {
-        // ?? Physics Layer
-        int targetPhysicsLayer = LayerMask.NameToLayer(isFrozen ? physicsLayerWhenFreeze : physicsLayerWhenMelt);
-        SetLayerRecursively(gameObject, targetPhysicsLayer);
-
-        // ?? Sorting Layer (Sprite Renderer)
-        string targetSortingLayer = isFrozen ? sortingLayerWhenFreeze : sortingLayerWhenMelt;
-        foreach (var sr in GetComponentsInChildren<SpriteRenderer>(true))
-            sr.sortingLayerName = targetSortingLayer;
-    }
-
-    private void SetLayerRecursively(GameObject obj, int newLayer)
-    {
-        obj.layer = newLayer;
-        foreach (Transform child in obj.transform)
-            SetLayerRecursively(child.gameObject, newLayer);
-    }
-
-    // ---------- Slow Effect ----------
-    private void TryApplySlow(Collider2D col)
-    {
-        var pc = col.GetComponentInParent<PlayerController>();
-        if (pc != null) pc.SetSpeedModifier(this, slowMultiplier);
-
-        var ec = col.GetComponentInParent<EnemyController>();
-        if (ec != null) ec.SetSpeedModifier(this, slowMultiplier);
-    }
-
-    private void TryRemoveSlow(Collider2D col)
-    {
-        var pc = col.GetComponentInParent<PlayerController>();
-        if (pc != null) pc.RemoveSpeedModifier(this);
-
-        var ec = col.GetComponentInParent<EnemyController>();
-        if (ec != null) ec.RemoveSpeedModifier(this);
-    }
-
-    private void ReapplyAll()
-    {
-        foreach (var c in inside) TryRemoveSlow(c);
-        if (!isFrozen) foreach (var c in inside) TryApplySlow(c);
-    }
-
-    private void UpdateLoopAudioImmediate()
-    {
-        if (!loopAudio) return;
-        if (isFrozen && loopAudio.isPlaying) loopAudio.Stop();
-        if (!isFrozen && !loopAudio.isPlaying) loopAudio.Play();
-    }
-
-    private void UpdateLoopAudio()
-    {
-        if (!loopAudio) return;
-        if (isFrozen && loopAudio.isPlaying) loopAudio.Stop();
-        if (!isFrozen && !loopAudio.isPlaying) loopAudio.Play();
     }
 }

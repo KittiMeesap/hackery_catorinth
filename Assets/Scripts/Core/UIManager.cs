@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -19,20 +20,40 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI missionText;
 
     private IInteractable currentPromptTarget;
-    private Transform promptFollowTarget;
+    private Camera mainCam;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
+            return;
         }
+
+        mainCam = Camera.main;
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        mainCam = Camera.main;
+
+        if (screenFader == null)
+            screenFader = FindFirstObjectByType<ScreenFader>();
+    }
+
+    private void Update()
+    {
+        UpdatePromptFollow();
+    }
+
+    // INTERACT PROMPT
     public void ShowInteractPrompt(IInteractable target)
     {
         if (promptUI == null) return;
@@ -40,30 +61,34 @@ public class UIManager : MonoBehaviour
         currentPromptTarget = target;
         promptUI.SetActive(true);
 
-        Transform followPoint = target.GetPromptPoint();
-        if (followPoint != null)
-        {
-            promptUI.transform.position = followPoint.position + Vector3.up * 0.5f;
-            promptUI.transform.rotation = Quaternion.identity;
-        }
+        UpdatePromptFollow();
     }
 
     public void HideInteractPrompt(IInteractable target)
     {
-        if (currentPromptTarget == target && promptUI != null)
-        {
+        if (promptUI != null)
             promptUI.SetActive(false);
-            currentPromptTarget = null;
-        }
+
+        currentPromptTarget = null;
     }
 
-
-
-    public void ShowLockedMessage()
+    private void UpdatePromptFollow()
     {
-        Debug.Log("Object is locked.");
+        if (currentPromptTarget == null || promptUI == null) return;
+
+        Transform followPoint = currentPromptTarget.GetPromptPoint();
+        if (followPoint == null) return;
+
+        if (mainCam == null)
+            mainCam = Camera.main;
+
+        Vector3 screenPos = mainCam.WorldToScreenPoint(followPoint.position);
+        promptUI.transform.position = screenPos;
     }
 
+    public void ShowLockedMessage() { }
+
+    // HACKING UI
     public void StartMultiOptionHack(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onOptionSelected)
     {
         hackingUI?.ShowMultiOptionUI(options, worldTarget, onOptionSelected);

@@ -10,7 +10,6 @@ public class PlayerHiding : MonoBehaviour
 
     private int smokeStack = 0;
     public bool IsHiddenBySmoke => smokeStack > 0;
-
     public bool IsHidden => IsHidingInContainer || IsHiddenBySmoke;
 
     public static PlayerHiding Instance { get; private set; }
@@ -26,22 +25,31 @@ public class PlayerHiding : MonoBehaviour
 
     public void ClearHidingSpot(HidingSpot spot)
     {
-        if (currentSpot == spot) currentSpot = null;
+        if (currentSpot == spot)
+            currentSpot = null;
     }
 
     public void EnterHiding(HidingSpot spot)
     {
         if (IsHidingInContainer) return;
         IsHidingInContainer = true;
-        if (spriteRenderer) spriteRenderer.enabled = false;
+
+        // invisible player
+        if (spriteRenderer)
+            spriteRenderer.enabled = false;
+
+        // freeze player
         if (playerController)
         {
             playerController.SetFrozen(true);
             playerController.SetPhoneOut(false);
+            playerController.ClearInputAndVelocity();
         }
+
         transform.position = spot.GetHidingPosition();
         currentSpot = spot;
 
+        // disable hacking completely
         GetComponent<PlayerHacking>()?.SetHackingDisabled(true);
     }
 
@@ -49,22 +57,24 @@ public class PlayerHiding : MonoBehaviour
     {
         if (!IsHidingInContainer) return;
         if (currentSpot != spot) return;
+
         IsHidingInContainer = false;
-        if (spriteRenderer) spriteRenderer.enabled = true;
-        if (playerController) playerController.SetFrozen(false);
+
+        if (spriteRenderer)
+            spriteRenderer.enabled = true;
+
+        if (playerController)
+        {
+            playerController.ClearInputAndVelocity();
+            playerController.SetFrozen(false);
+        }
+
         transform.position = spot.GetExitPosition();
         currentSpot = null;
 
         GetComponent<PlayerHacking>()?.SetHackingDisabled(false);
     }
 
-    public void EnterSmoke()
-    {
-        smokeStack++;
-    }
-
-    public void ExitSmoke()
-    {
-        smokeStack = Mathf.Max(0, smokeStack - 1);
-    }
+    public void EnterSmoke() => smokeStack++;
+    public void ExitSmoke() => smokeStack = Mathf.Max(0, smokeStack - 1);
 }

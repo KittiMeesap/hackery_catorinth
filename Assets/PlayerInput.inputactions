@@ -32,15 +32,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "ExitGame",
-                    "type": "Button",
-                    "id": "f409dd4b-22ae-47c0-bf08-0b60151db53e",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -58,7 +49,7 @@
                 {
                     "name": "",
                     "id": "15b9564a-298b-452e-802a-64f6e53c073b",
-                    "path": "<Gamepad>/buttonNorth",
+                    "path": "<Gamepad>/buttonWest",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -261,28 +252,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Hack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e1133de1-37d8-47a8-b36f-6365c98a6435",
-                    "path": "<Keyboard>/escape",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "ExitGame",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e8d428de-8478-40ff-afff-d72262023634",
-                    "path": "<Gamepad>/homeButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "ExitGame",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

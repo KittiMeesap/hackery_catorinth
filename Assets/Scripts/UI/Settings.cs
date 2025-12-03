@@ -152,35 +152,6 @@ public class Settings : MonoBehaviour
         sfxText.text = sfxVol.ToString();
     }
 
-    // SETTINGS BUTTON EVENTS
-    public void DisplayLeft()
-    {
-        displayIndex--;
-        if (displayIndex < 0) displayIndex = displayModes.Length - 1;
-        displayModeText.text = displayModes[displayIndex];
-    }
-
-    public void DisplayRight()
-    {
-        displayIndex++;
-        if (displayIndex >= displayModes.Length) displayIndex = 0;
-        displayModeText.text = displayModes[displayIndex];
-    }
-
-    public void ResolutionLeft()
-    {
-        resolutionIndex--;
-        if (resolutionIndex < 0) resolutionIndex = resolutions.Length - 1;
-        resolutionText.text = resolutions[resolutionIndex];
-    }
-
-    public void ResolutionRight()
-    {
-        resolutionIndex++;
-        if (resolutionIndex >= resolutions.Length) resolutionIndex = 0;
-        resolutionText.text = resolutions[resolutionIndex];
-    }
-
     private int ClampVol(int v) => Mathf.Clamp(v, 0, 100);
 
     public void MasterInc() { masterVol = ClampVol(masterVol + 1); masterText.text = masterVol.ToString(); }

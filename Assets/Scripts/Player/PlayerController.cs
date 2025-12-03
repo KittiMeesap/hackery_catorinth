@@ -578,6 +578,50 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
+    public void ResetStateAfterRespawn()
+    {
+        rb.linearVelocity = Vector2.zero;
+        moveInput = Vector2.zero;
+
+        temperature = 0f;
+        visualTemp = 0f;
+
+        if (sprites != null)
+        {
+            foreach (var sr in sprites)
+                sr.color = Color.white;
+        }
+
+        isFrozen = false;
+        IsPhoneOut = false;
+
+        isSleeping = false;
+        isPreparingSleep = false;
+        isAFKTriggered = false;
+        isWaking = false;
+        idleTimer = 0f;
+
+        if (anim != null)
+        {
+            anim.SetBool("IsIdle", true);
+            anim.SetBool("IsWalking", false);
+            anim.SetBool("IsPickupPhone", false);
+            anim.SetBool("IsHacking", false);
+
+            anim.ResetTrigger("AFK");
+            anim.ResetTrigger("Wake");
+
+            anim.Play("Idle", 0, 0f);
+        }
+
+        CurrentInteractable = null;
+        currentInteractable = null;
+        RefreshNearbyHackables();
+
+        speedModifiers.Clear();
+    }
+
+
 
     public Vector2 GetMoveInput() => moveInput;
 

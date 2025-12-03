@@ -453,6 +453,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_Name
       value: Locker
@@ -5699,6 +5703,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1966407671}
     m_Modifications:
+    - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
+      propertyPath: interactRadius
+      value: 5.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1690365576948878778, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
       propertyPath: m_Name
       value: Fridge
@@ -6607,6 +6615,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_Name
       value: Locker (2)
@@ -7209,6 +7221,10 @@ PrefabInstance:
     - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_Name
@@ -8163,6 +8179,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2086233613}
     m_Modifications:
+    - target: {fileID: 1392345796118226519, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
+      propertyPath: interactRadius
+      value: 5.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1690365576948878778, guid: 228fe018da663d547b8c82cbaee1fb4d, type: 3}
       propertyPath: m_Name
       value: Fridge
@@ -13628,6 +13648,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_Name
       value: Locker (1)
@@ -16623,6 +16647,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_Name
       value: Locker (1)
@@ -16925,6 +16953,10 @@ PrefabInstance:
     - target: {fileID: 4367190613791250403, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_Name
@@ -18082,6 +18114,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7358914006008464916, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
+      propertyPath: interactRadius
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8797258014040986356, guid: 03b39beff81d5914395ef6157dd08471, type: 3}
       propertyPath: m_Name
       value: Locker
@@ -18466,7 +18502,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
       propertyPath: interactRadius
-      value: 3.5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7875224135263865799, guid: 197247f053f316b42b4d2aecbf0d7542, type: 3}
       propertyPath: useHackOptions

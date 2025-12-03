@@ -4,40 +4,6 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes:
-  - enabled: 1
-    path: Assets/Scenes/MainMenu.unity
-    guid: 63f4d096aeab5ad4e97fcdf915148d5c
-  - enabled: 1
-<<<<<<< Updated upstream
-    path: Assets/Scenes/Map 0 Edit.unity
-    guid: 7cdae76d92d07a0469e6200ceded3356
-  - enabled: 1
-=======
-    path: Assets/Scenes/IntroCutscene.unity
-    guid: 9acc80ec05eccff45b9e4e39d6c5a2db
-  - enabled: 1
-    path: Assets/Scenes/Map 0.unity
-    guid: 56c3d0864efa2e547bbd5f55402f0b07
-  - enabled: 1
-    path: Assets/Scenes/Map 0-1.unity
-    guid: 3b8633840df3aa74cad53359adf64cd6
-  - enabled: 1
-    path: Assets/Scenes/Map 1.unity
-    guid: 646cf7dfeb1ac5d4bae1ef63c1b8b886
-  - enabled: 1
-    path: Assets/Scenes/Map 1-2.unity
-    guid: bfe29fd150b13ee42a6c843d46d6de1e
-  - enabled: 1
-    path: Assets/Scenes/Map 2.unity
-    guid: ef760f6bd37d04545ad08f98c062b5cd
-  - enabled: 1
->>>>>>> Stashed changes
-    path: Assets/Scenes/EndDemo.unity
-    guid: a1d67f93c1d123245930eeb6b946b37c
-  m_configObjects:
-    com.unity.addressableassets: {fileID: 11400000, guid: 95a41342c8379424ca82cddb65a0b451, type: 2}
-    com.unity.input.settings: {fileID: 11400000, guid: da0386e8de9b5a343b829e0e93510327, type: 2}
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 742c1733af453cf40b19b809db247eee, type: 3}
-    com.unity.localization.settings: {fileID: 11400000, guid: b9eaf3d66e7253740a97a6b4db1eded2, type: 2}
+  m_Scenes: []
+  m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

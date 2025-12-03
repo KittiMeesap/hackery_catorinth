@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using TMPro;
 
 public class GameManager : MonoBehaviour
@@ -12,8 +11,6 @@ public class GameManager : MonoBehaviour
 
     [Header("Mission Settings")]
     public MissionSetSO missionSetForScene;
-
-    [Header("UI References")]
     public TextMeshProUGUI missionText;
 
     [Header("External References")]
@@ -22,26 +19,19 @@ public class GameManager : MonoBehaviour
     [Header("Screen Fade")]
     public ScreenFader screenFader;
 
-    private PlayerInput playerInput;
-    private InputAction exitAction;
-
     [Header("Checkpoint System")]
     public Transform currentCheckpoint;
     public float savedCountdownTime = 0f;
 
     private void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        playerInput = GetComponent<PlayerInput>();
-        if (playerInput != null)
-            exitAction = playerInput.actions["ExitGame"];
+        Instance = this;
     }
 
     private void Start()
@@ -50,22 +40,11 @@ public class GameManager : MonoBehaviour
             StartCoroutine(screenFader.FadeIn());
     }
 
-    private void OnEnable()
-    {
-        if (exitAction != null)
-            exitAction.performed += OnExitPressed;
-    }
-
-    private void OnDisable()
-    {
-        if (exitAction != null)
-            exitAction.performed -= OnExitPressed;
-    }
-
     public void ToggleHackingMode(bool isActive)
     {
         IsInHackingMode = isActive;
     }
+
     public void SetPhoneOut(bool isOut)
     {
         IsPhoneOut = isOut;
@@ -76,27 +55,22 @@ public class GameManager : MonoBehaviour
         currentCheckpoint = point;
 
         if (countdownManager != null)
-        {
             savedCountdownTime = countdownManager.GetCurrentTime();
-        }
 
-        Debug.Log("Checkpoint Saved | Time Left = " + savedCountdownTime);
+        Debug.Log($"Checkpoint Saved at {point.name} | Time Left = {savedCountdownTime}");
     }
 
     public void RespawnPlayer(GameObject player)
     {
+        if (player == null) return;
+
         if (currentCheckpoint != null)
             player.transform.position = currentCheckpoint.position;
 
         if (countdownManager != null)
             countdownManager.SetTime(savedCountdownTime);
 
-        Debug.Log("Respawned | Restored Countdown = " + savedCountdownTime);
-    }
-
-    private void OnExitPressed(InputAction.CallbackContext context)
-    {
-        QuitGame();
+        Debug.Log($"Respawned | Restored Countdown = {savedCountdownTime}");
     }
 
     public void QuitGame()
@@ -113,12 +87,16 @@ public class GameManager : MonoBehaviour
         if (freeze)
         {
             Time.timeScale = 0f;
-            if (playerInput != null) playerInput.enabled = false;
+
+            if (GameFreezeManager.Instance != null)
+                GameFreezeManager.Instance.FreezeGame();
         }
         else
         {
             Time.timeScale = 1f;
-            if (playerInput != null) playerInput.enabled = true;
+
+            if (GameFreezeManager.Instance != null)
+                GameFreezeManager.Instance.UnfreezeGame();
         }
     }
 }

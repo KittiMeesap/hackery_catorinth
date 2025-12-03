@@ -48,6 +48,9 @@ public class Oven : HackableObject
     [Header("Highlight")]
     [SerializeField] private SpriteRenderer highlightSprite;
 
+    [Header("UI Radius Visual")]
+    [SerializeField] private SpriteRenderer uiRadiusSprite;
+
     private bool currentState;
     private float checkTimer;
     private AudioSource loopSource;
@@ -88,6 +91,7 @@ public class Oven : HackableObject
     private void Update()
     {
         RefreshHighlight();
+        RefreshUIRadius();
 
         if (!currentState) return;
 
@@ -187,6 +191,8 @@ public class Oven : HackableObject
         PlayerController.Instance.SetFrozen(true);
         GameManager.Instance.ToggleHackingMode(true);
 
+        RefreshUIRadius(); // hide during hacking
+
         var seq = selected.isRandom ?
                   GenerateRandomSequence(selected.randomLength) :
                   selected.sequence;
@@ -211,6 +217,8 @@ public class Oven : HackableObject
         Hack_TurnOn();
         StartAutoClose();
 
+        RefreshUIRadius();
+
         base.HandleHackOptionComplete(option);
     }
 
@@ -230,6 +238,7 @@ public class Oven : HackableObject
         ResetHack();
 
         RefreshHighlight();
+        RefreshUIRadius();
     }
 
     public void Hack_TurnOn() => SetActiveInternal(true, true);
@@ -242,6 +251,7 @@ public class Oven : HackableObject
         currentState = on;
         SetVisualState(on);
         RefreshHighlight();
+        RefreshUIRadius();
 
         if (on)
         {
@@ -324,11 +334,28 @@ public class Oven : HackableObject
     {
         isOnCooldown = true;
         RefreshHighlight();
+        RefreshUIRadius();
 
         yield return new WaitForSeconds(hackCooldown);
 
         isOnCooldown = false;
         RefreshHighlight();
+        RefreshUIRadius();
+    }
+
+    private void RefreshUIRadius()
+    {
+        if (uiRadiusSprite == null) return;
+
+        bool canShow =
+            !currentState &&
+            !isOnCooldown &&
+            !GameManager.Instance.IsInHackingMode &&
+            PlayerController.Instance != null &&
+            Vector2.Distance(PlayerController.Instance.transform.position, promptPoint.position)
+                <= interactRadius;
+
+        uiRadiusSprite.enabled = canShow;
     }
 
 #if UNITY_EDITOR

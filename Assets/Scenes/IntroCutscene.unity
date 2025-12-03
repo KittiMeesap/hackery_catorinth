@@ -1026,7 +1026,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2966200626249415253, guid: 463b7e5bdfa05b648b47699fe4c396de, type: 3}
+  m_Sprite: {fileID: 6962102001593081485, guid: 8e724fe01bd9d694885214e5049f0988, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1549,7 +1549,7 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: 0495dd68-01df-43a3-b6f8-a9afb993a6ab
+  m_DefaultActionMap: CutsceneControls
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!1 &1841931214
@@ -1850,7 +1850,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1959976662
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1890,7 +1890,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 6937817954938267909, guid: 7065657c5e690824db94a33b56d51fed, type: 3}
+  m_Sprite: {fileID: -940918954429636932, guid: 9e3843e07e60fbd4d916cb27bada54b5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

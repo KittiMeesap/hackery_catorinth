@@ -285,7 +285,7 @@ MonoBehaviour:
           m_CallState: 2
         - m_Target: {fileID: 7513793}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerEnter
+          m_MethodName: OnSelect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -301,7 +301,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 7513793}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerExit
+          m_MethodName: OnDeselect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -661,6 +661,8 @@ GameObject:
   - component: {fileID: 129796106}
   - component: {fileID: 129796105}
   - component: {fileID: 129796104}
+  - component: {fileID: 129796108}
+  - component: {fileID: 129796107}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -781,6 +783,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129796102}
   m_CullTransparentMesh: 1
+--- !u!114 &129796107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129796102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
+--- !u!114 &129796108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129796102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 129796107}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 129796107}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &150496547
 GameObject:
   m_ObjectHideFlags: 0
@@ -793,6 +853,8 @@ GameObject:
   - component: {fileID: 150496551}
   - component: {fileID: 150496550}
   - component: {fileID: 150496549}
+  - component: {fileID: 150496553}
+  - component: {fileID: 150496552}
   m_Layer: 5
   m_Name: NextButton
   m_TagString: Untagged
@@ -913,6 +975,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 150496547}
   m_CullTransparentMesh: 1
+--- !u!114 &150496552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 150496547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 150496553}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 150496553}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!114 &150496553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 150496547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
 --- !u!1 &186766332
 GameObject:
   m_ObjectHideFlags: 0
@@ -6055,6 +6175,8 @@ GameObject:
   - component: {fileID: 268744645}
   - component: {fileID: 268744644}
   - component: {fileID: 268744643}
+  - component: {fileID: 268744647}
+  - component: {fileID: 268744646}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -6175,6 +6297,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 268744641}
   m_CullTransparentMesh: 1
+--- !u!114 &268744646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268744641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 268744647}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 268744647}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!114 &268744647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268744641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
 --- !u!1 &269415508
 GameObject:
   m_ObjectHideFlags: 0
@@ -6667,6 +6847,8 @@ GameObject:
   - component: {fileID: 346240691}
   - component: {fileID: 346240690}
   - component: {fileID: 346240689}
+  - component: {fileID: 346240693}
+  - component: {fileID: 346240692}
   m_Layer: 5
   m_Name: PreButton
   m_TagString: Untagged
@@ -6787,6 +6969,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 346240687}
   m_CullTransparentMesh: 1
+--- !u!114 &346240692
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346240687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 346240693}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 346240693}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!114 &346240693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346240687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
 --- !u!1 &356472408
 GameObject:
   m_ObjectHideFlags: 0
@@ -7663,6 +7903,8 @@ GameObject:
   - component: {fileID: 666897972}
   - component: {fileID: 666897971}
   - component: {fileID: 666897970}
+  - component: {fileID: 666897974}
+  - component: {fileID: 666897973}
   m_Layer: 5
   m_Name: NextButton
   m_TagString: Untagged
@@ -7783,6 +8025,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 666897968}
   m_CullTransparentMesh: 1
+--- !u!114 &666897973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 666897968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
+--- !u!114 &666897974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 666897968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 666897970}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 666897970}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &675298804
 GameObject:
   m_ObjectHideFlags: 0
@@ -8021,6 +8321,8 @@ GameObject:
   - component: {fileID: 717010698}
   - component: {fileID: 717010697}
   - component: {fileID: 717010696}
+  - component: {fileID: 717010700}
+  - component: {fileID: 717010699}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -8141,6 +8443,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 717010694}
   m_CullTransparentMesh: 1
+--- !u!114 &717010699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 717010694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
+--- !u!114 &717010700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 717010694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 717010696}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 717010696}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &732591679
 GameObject:
   m_ObjectHideFlags: 0
@@ -8573,7 +8933,7 @@ MonoBehaviour:
           m_CallState: 2
         - m_Target: {fileID: 876187405}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerEnter
+          m_MethodName: OnSelect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -8589,7 +8949,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 876187405}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerExit
+          m_MethodName: OnDeselect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -8844,6 +9204,7 @@ GameObject:
   - component: {fileID: 959342911}
   - component: {fileID: 959342910}
   - component: {fileID: 959342909}
+  - component: {fileID: 959342912}
   m_Layer: 5
   m_Name: ApplyButton
   m_TagString: Untagged
@@ -8965,6 +9326,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 959342907}
   m_CullTransparentMesh: 1
+--- !u!114 &959342912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 959342907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 959342909}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 959342909}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &962009346
 GameObject:
   m_ObjectHideFlags: 0
@@ -9033,6 +9439,8 @@ GameObject:
   - component: {fileID: 1010239239}
   - component: {fileID: 1010239238}
   - component: {fileID: 1010239237}
+  - component: {fileID: 1010239241}
+  - component: {fileID: 1010239240}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -9153,6 +9561,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1010239235}
   m_CullTransparentMesh: 1
+--- !u!114 &1010239240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010239235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
+--- !u!114 &1010239241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010239235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1010239237}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1010239237}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1022655168
 GameObject:
   m_ObjectHideFlags: 0
@@ -9569,6 +10035,8 @@ GameObject:
   - component: {fileID: 1071452866}
   - component: {fileID: 1071452865}
   - component: {fileID: 1071452864}
+  - component: {fileID: 1071452868}
+  - component: {fileID: 1071452867}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -9690,6 +10158,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1071452862}
   m_CullTransparentMesh: 1
+--- !u!114 &1071452867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071452862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1071452868}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1071452868}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!114 &1071452868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071452862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
 --- !u!1 &1076648243
 GameObject:
   m_ObjectHideFlags: 0
@@ -9792,6 +10318,8 @@ GameObject:
   - component: {fileID: 1099998183}
   - component: {fileID: 1099998182}
   - component: {fileID: 1099998181}
+  - component: {fileID: 1099998185}
+  - component: {fileID: 1099998184}
   m_Layer: 5
   m_Name: PreButton
   m_TagString: Untagged
@@ -9912,6 +10440,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1099998179}
   m_CullTransparentMesh: 1
+--- !u!114 &1099998184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099998179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1099998185}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1099998185}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!114 &1099998185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099998179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
 --- !u!1 &1101801408
 GameObject:
   m_ObjectHideFlags: 0
@@ -17118,7 +17704,7 @@ MonoBehaviour:
           m_CallState: 2
         - m_Target: {fileID: 1766102529}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerEnter
+          m_MethodName: OnSelect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -17134,7 +17720,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 1766102529}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerExit
+          m_MethodName: OnDeselect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -17775,7 +18361,7 @@ MonoBehaviour:
           m_CallState: 2
         - m_Target: {fileID: 1872989286}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerEnter
+          m_MethodName: OnSelect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -17791,7 +18377,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 1872989286}
           m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
-          m_MethodName: OnPointerExit
+          m_MethodName: OnDeselect
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -23690,6 +24276,8 @@ GameObject:
   - component: {fileID: 2102190766}
   - component: {fileID: 2102190765}
   - component: {fileID: 2102190764}
+  - component: {fileID: 2102190768}
+  - component: {fileID: 2102190767}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -23810,6 +24398,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2102190762}
   m_CullTransparentMesh: 1
+--- !u!114 &2102190767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2102190762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2102190768}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnSelect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2102190768}
+          m_TargetAssemblyTypeName: ButtonScaleOnHover, Assembly-CSharp
+          m_MethodName: OnDeselect
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!114 &2102190768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2102190762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84137a4a6092a2a4f9650f7f2aa167b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonScaleOnHover
+  hoverScale: {x: 1.1, y: 1.1, z: 1}
 --- !u!1 &2114583376
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,6 +10,8 @@ public class ScreenFader : MonoBehaviour
 
     private void Awake()
     {
+        DontDestroyOnLoad(gameObject);
+
         if (fadeImage != null)
         {
             fadeImage.color = new Color(0, 0, 0, 1f);
@@ -38,9 +40,7 @@ public class ScreenFader : MonoBehaviour
         yield return FadeRoutine(1f, 0f);
 
         fadeImage.raycastTarget = false;
-
     }
-
 
     private IEnumerator FadeRoutine(float start, float end)
     {
@@ -51,7 +51,6 @@ public class ScreenFader : MonoBehaviour
             t += Time.unscaledDeltaTime;
 
             float p = Mathf.Clamp01(t / fadeDuration);
-
             p = p * p * (3f - 2f * p);
 
             float a = Mathf.Lerp(start, end, p);

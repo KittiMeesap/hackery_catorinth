@@ -1,5 +1,8 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Settings : MonoBehaviour
 {
@@ -9,6 +12,16 @@ public class Settings : MonoBehaviour
     public TextMeshProUGUI masterText;
     public TextMeshProUGUI musicText;
     public TextMeshProUGUI sfxText;
+
+    [Header("Input System")]
+    public InputActionReference submitAction;
+
+    [Header("Hold Settings")]
+    public float initialDelay = 0.3f;
+    public float repeatRate = 0.05f;
+
+    private float holdTimer = 0f;
+    private bool isHolding = false;
 
     private string[] displayModes = { "Full screen", "Windowed" };
     private string[] resolutions =
@@ -31,8 +44,54 @@ public class Settings : MonoBehaviour
         ApplyToUI();
     }
 
-    // LOAD / SAVE
+    private void Update()
+    {
+        HandleHoldSystem();
+    }
 
+    // HOLD SYSTEM
+    private void HandleHoldSystem()
+    {
+        bool submitHeld = submitAction != null && submitAction.action.IsPressed();
+        bool mouseHeld = Mouse.current != null && Mouse.current.leftButton.isPressed;
+
+        GameObject currentButton = EventSystem.current.currentSelectedGameObject;
+
+        if (currentButton == null) return;
+
+        if (submitHeld || mouseHeld)
+        {
+            if (!isHolding)
+            {
+                isHolding = true;
+                holdTimer = 0f;
+                ActivateButton(currentButton);
+            }
+            else
+            {
+                holdTimer += Time.unscaledDeltaTime;
+
+                if (holdTimer >= initialDelay)
+                {
+                    ActivateButton(currentButton);
+                    holdTimer -= repeatRate;
+                }
+            }
+        }
+        else
+        {
+            isHolding = false;
+        }
+    }
+
+    private void ActivateButton(GameObject buttonObj)
+    {
+        Button b = buttonObj.GetComponent<Button>();
+        if (b != null)
+            b.onClick.Invoke();
+    }
+
+    // LOAD / SAVE
     public void LoadSettings()
     {
         displayIndex = PlayerPrefs.GetInt("DisplayMode", 0);
@@ -54,7 +113,6 @@ public class Settings : MonoBehaviour
 
         PlayerPrefs.Save();
 
-        // Refresh AudioManager
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.SetMasterVolume(masterVol / 100f);
@@ -65,8 +123,6 @@ public class Settings : MonoBehaviour
         ApplyDisplayMode();
         ApplyResolution();
     }
-
-    // APPLY TO GAME
 
     private void ApplyDisplayMode()
     {
@@ -86,7 +142,6 @@ public class Settings : MonoBehaviour
     }
 
     // UI UPDATE
-
     private void ApplyToUI()
     {
         displayModeText.text = displayModes[displayIndex];
@@ -97,8 +152,7 @@ public class Settings : MonoBehaviour
         sfxText.text = sfxVol.ToString();
     }
 
-    // BUTTON EVENTS
-
+    // SETTINGS BUTTON EVENTS
     public void DisplayLeft()
     {
         displayIndex--;
@@ -127,11 +181,7 @@ public class Settings : MonoBehaviour
         resolutionText.text = resolutions[resolutionIndex];
     }
 
-    // Volume Buttons
-    private int ClampVol(int v)
-    {
-        return Mathf.Clamp(v, 0, 100);
-    }
+    private int ClampVol(int v) => Mathf.Clamp(v, 0, 100);
 
     public void MasterInc() { masterVol = ClampVol(masterVol + 1); masterText.text = masterVol.ToString(); }
     public void MasterDec() { masterVol = ClampVol(masterVol - 1); masterText.text = masterVol.ToString(); }

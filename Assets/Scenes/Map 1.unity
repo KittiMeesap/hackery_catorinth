@@ -4554,7 +4554,6 @@ GameObject:
   - component: {fileID: 324392762}
   - component: {fileID: 324392761}
   - component: {fileID: 324392760}
-  - component: {fileID: 324392759}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -4582,20 +4581,6 @@ RectTransform:
   m_AnchoredPosition: {x: 245.125, y: -45}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &324392759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 324392757}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!114 &324392760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4640,7 +4625,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: MusicDec
         m_Mode: 1
@@ -10278,7 +10263,6 @@ GameObject:
   - component: {fileID: 669103115}
   - component: {fileID: 669103114}
   - component: {fileID: 669103113}
-  - component: {fileID: 669103112}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -10306,20 +10290,6 @@ RectTransform:
   m_AnchoredPosition: {x: 245.125, y: -45}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &669103112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 669103110}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!114 &669103113
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10364,7 +10334,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: SFXDec
         m_Mode: 1
@@ -12474,7 +12444,6 @@ GameObject:
   - component: {fileID: 838044521}
   - component: {fileID: 838044520}
   - component: {fileID: 838044519}
-  - component: {fileID: 838044518}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -12502,20 +12471,6 @@ RectTransform:
   m_AnchoredPosition: {x: 754.875, y: -45}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &838044518
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 838044516}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!114 &838044519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12560,7 +12515,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: MasterInc
         m_Mode: 1
@@ -13343,7 +13298,6 @@ GameObject:
   - component: {fileID: 895837192}
   - component: {fileID: 895837191}
   - component: {fileID: 895837190}
-  - component: {fileID: 895837189}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -13371,20 +13325,6 @@ RectTransform:
   m_AnchoredPosition: {x: 245.125, y: -45}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &895837189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 895837187}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!114 &895837190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13429,7 +13369,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: MasterDec
         m_Mode: 1
@@ -13900,6 +13840,9 @@ MonoBehaviour:
   masterText: {fileID: 1729206185}
   musicText: {fileID: 126283100}
   sfxText: {fileID: 2026439315}
+  submitAction: {fileID: 4381287996181175007, guid: 742c1733af453cf40b19b809db247eee, type: 3}
+  initialDelay: 0.3
+  repeatRate: 0.05
 --- !u!114 &923381832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15307,7 +15250,6 @@ GameObject:
   - component: {fileID: 1013322839}
   - component: {fileID: 1013322838}
   - component: {fileID: 1013322837}
-  - component: {fileID: 1013322836}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -15335,20 +15277,6 @@ RectTransform:
   m_AnchoredPosition: {x: 754.875, y: -45}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1013322836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1013322834}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!114 &1013322837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15393,7 +15321,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: SFXInc
         m_Mode: 1
@@ -17355,7 +17283,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: DisplayLeft
         m_Mode: 1
@@ -20724,7 +20652,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: ResolutionLeft
         m_Mode: 1
@@ -21038,7 +20966,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Save
+  m_text: Apply
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0af0f1b3df5aebf4ba22eb76cb1d95a3, type: 2}
   m_sharedMaterial: {fileID: 1191402542205414742, guid: 0af0f1b3df5aebf4ba22eb76cb1d95a3, type: 2}
@@ -21377,7 +21305,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: ResolutionRight
         m_Mode: 1
@@ -22998,7 +22926,6 @@ GameObject:
   - component: {fileID: 1574872190}
   - component: {fileID: 1574872189}
   - component: {fileID: 1574872188}
-  - component: {fileID: 1574872187}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -23026,20 +22953,6 @@ RectTransform:
   m_AnchoredPosition: {x: 754.875, y: -45}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1574872187
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1574872185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!114 &1574872188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23084,7 +22997,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: MusicInc
         m_Mode: 1
@@ -24337,7 +24250,7 @@ GameObject:
   - component: {fileID: 1645820677}
   - component: {fileID: 1645820676}
   m_Layer: 5
-  m_Name: SaveButton
+  m_Name: ApplyButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30468,7 +30381,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 923381831}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: DisplayRight
         m_Mode: 1

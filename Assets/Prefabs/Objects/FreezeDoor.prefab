@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4, y: 1.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3543989020443756596}
@@ -170,7 +170,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2053661893334955414}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: afd439913fb2f6a40a6698956bfa0dad, type: 3}
   m_Name: 
@@ -180,6 +180,7 @@ MonoBehaviour:
   exitPoint: {fileID: 3543989020443756596}
   targetSceneName: 
   waitForSceneLoaded: 1
+  isCheckpointDoor: 0
   animator: {fileID: 1008762106172896202}
   freezeParam: isLock
   unfreezeParam: isUnlock
@@ -190,9 +191,8 @@ MonoBehaviour:
   sfxCloseKey: SFX_DoorSugarClosing
   startFrozen: 1
   meltThreshold: 2
-  openToTeleportDelay: 0.1
+  teleportDelay: 0.1
   reuseCooldown: 0.5
-  promptPoint: {fileID: 6283008260067192087}
 --- !u!1 &2939414395647053666
 GameObject:
   m_ObjectHideFlags: 0

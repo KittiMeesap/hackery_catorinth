@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4, y: 1.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9160339026335358254}
@@ -86,7 +86,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_Sprite: {fileID: -8219795074091318121, guid: 3011855cf8323cf4194af6e9b7a19f2b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1.9375}
@@ -175,20 +175,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1d5f29d0262c514a82d7cd90c819af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  openMode: 0
+  openMode: 1
   connectedDoor: {fileID: 0}
   exitPoint: {fileID: 9160339026335358254}
   targetSceneName: 
   waitForSceneLoaded: 1
+  isCheckpointDoor: 0
   animator: {fileID: 8706912946873399626}
   meltParam: IsBreak
   sfxMeltKey: SFX_ChocolateDoor_Break
   sfxOpenKey: SFX_DoorSugarOpening
   startLocked: 1
   meltThreshold: 2
-  openToTeleportDelay: 0.1
+  teleportDelay: 0.1
   reuseCooldown: 0.5
-  promptPoint: {fileID: 902799288364578543}
 --- !u!1 &2380184883252832162
 GameObject:
   m_ObjectHideFlags: 0

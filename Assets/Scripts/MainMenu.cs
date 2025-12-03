@@ -11,10 +11,9 @@ public class MainMenu : MonoBehaviour
     public GameObject SettingPanel;
     public GameObject creditPanel;
 
-    [Header("Sound")]
-    public AudioSource audioSource;
-    public AudioClip clickSound;
-    public AudioClip hoverSound;
+    [Header("UI Sound Keys (SoundLibrary)")]
+    [SerializeField] private string uiClickKey = "UI_Click";
+    [SerializeField] private string uiHoverKey = "UI_Hover";
 
     [Header("Fade Overlay")]
     public Image fadeOverlay;
@@ -45,10 +44,13 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    // ============================================================
+    // START GAME
+    // ============================================================
     public void PlayGame()
     {
         if (isFading) return;
-        PlayClickSound();
+        PlayClick();
         StartCoroutine(FadeOutAndLoad("IntroCutscene"));
     }
 
@@ -79,10 +81,16 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
+<<<<<<< Updated upstream
     // OPEN SETTINGS
+=======
+    // ============================================================
+    // SETTINGS
+    // ============================================================
+>>>>>>> Stashed changes
     public void Setting()
     {
-        PlayClickSound();
+        PlayClick();
         SettingPanel.SetActive(true);
 
         SetMainMenuButtonsInteractable(false);
@@ -99,12 +107,16 @@ public class MainMenu : MonoBehaviour
     // CLOSE SETTINGS
     public void BackToSetting()
     {
+<<<<<<< Updated upstream
         PlayClickSound();
         StartCoroutine(BackToSettingRoutine());
     }
 
     private IEnumerator BackToSettingRoutine()
     {
+=======
+        PlayClick();
+>>>>>>> Stashed changes
         SettingPanel.SetActive(false);
 
         yield return null;
@@ -116,12 +128,22 @@ public class MainMenu : MonoBehaviour
         var input = FindFirstObjectByType<PlayerInput>();
         if (input != null)
             input.SwitchCurrentActionMap("UI");
+<<<<<<< Updated upstream
     }
 
     // CREDIT PANEL
+=======
+
+        EventSystem.current.SetSelectedGameObject(firstSelected);
+    }
+
+    // ============================================================
+    // CREDIT
+    // ============================================================
+>>>>>>> Stashed changes
     public void ShowCredit()
     {
-        PlayClickSound();
+        PlayClick();
         creditPanel.SetActive(true);
 
         SetMainMenuButtonsInteractable(false);
@@ -133,7 +155,7 @@ public class MainMenu : MonoBehaviour
 
     public void BackFromCredit()
     {
-        PlayClickSound();
+        PlayClick();
         creditPanel.SetActive(false);
 
         SetMainMenuButtonsInteractable(true);
@@ -141,6 +163,7 @@ public class MainMenu : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(firstSelected);
     }
 
+<<<<<<< Updated upstream
     // DISABLE / ENABLE MAIN MENU BUTTONS
     private void SetMainMenuButtonsInteractable(bool value)
     {
@@ -159,15 +182,29 @@ public class MainMenu : MonoBehaviour
     }
 
     // AUDIO
-    public void OnHover()
+=======
+    // ============================================================
+    // QUIT GAME
+    // ============================================================
+    public void QuitGame()
     {
-        if (hoverSound != null && audioSource != null)
-            audioSource.PlayOneShot(hoverSound);
+        PlayClick();
+        Application.Quit();
     }
 
-    private void PlayClickSound()
+    // ============================================================
+    // UI SOUND EVENTS
+    // ============================================================
+>>>>>>> Stashed changes
+    public void OnHover()
     {
-        if (clickSound != null && audioSource != null)
-            audioSource.PlayOneShot(clickSound);
+        if (!string.IsNullOrEmpty(uiHoverKey))
+            AudioManager.Instance?.PlayUI(uiHoverKey);
+    }
+
+    private void PlayClick()
+    {
+        if (!string.IsNullOrEmpty(uiClickKey))
+            AudioManager.Instance?.PlayUI(uiClickKey);
     }
 }

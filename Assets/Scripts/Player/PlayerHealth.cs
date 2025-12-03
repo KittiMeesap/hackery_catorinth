@@ -205,7 +205,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         StartCoroutine(DeathRoutine());
     }
 
-
     private IEnumerator DeathRoutine()
     {
         yield return new WaitForSeconds(0.5f);
@@ -235,5 +234,16 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         ph.knockbackForce = knockForce;
         ph.TakeDamage(amount, damageSource);
+    }
+
+    public void ResetHealth()
+    {
+        isDead = false;
+        isInvincible = false;
+
+        currentHearts = maxHearts;
+        OnHealthChanged?.Invoke(currentHearts, maxHearts);
+
+        SetFlashOff();
     }
 }

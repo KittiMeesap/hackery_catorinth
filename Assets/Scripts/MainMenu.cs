@@ -11,9 +11,10 @@ public class MainMenu : MonoBehaviour
     public GameObject SettingPanel;
     public GameObject creditPanel;
 
-    [Header("UI Sound Keys (SoundLibrary)")]
-    [SerializeField] private string uiClickKey = "UI_Click";
-    [SerializeField] private string uiHoverKey = "UI_Hover";
+    [Header("Sound")]
+    public AudioSource audioSource;
+    public AudioClip clickSound;
+    public AudioClip hoverSound;
 
     [Header("Fade Overlay")]
     public Image fadeOverlay;
@@ -44,13 +45,10 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    // ============================================================
-    // START GAME
-    // ============================================================
     public void PlayGame()
     {
         if (isFading) return;
-        PlayClick();
+        PlayClickSound();
         StartCoroutine(FadeOutAndLoad("IntroCutscene"));
     }
 
@@ -81,22 +79,10 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     // OPEN SETTINGS
-=======
-    // ============================================================
-    // SETTINGS
-    // ============================================================
->>>>>>> Stashed changes
-=======
-    // ============================================================
-    // SETTINGS
-    // ============================================================
->>>>>>> Stashed changes
     public void Setting()
     {
-        PlayClick();
+        PlayClickSound();
         SettingPanel.SetActive(true);
 
         SetMainMenuButtonsInteractable(false);
@@ -113,20 +99,12 @@ public class MainMenu : MonoBehaviour
     // CLOSE SETTINGS
     public void BackToSetting()
     {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
         PlayClickSound();
         StartCoroutine(BackToSettingRoutine());
     }
 
     private IEnumerator BackToSettingRoutine()
     {
-=======
-        PlayClick();
->>>>>>> Stashed changes
-=======
-        PlayClick();
->>>>>>> Stashed changes
         SettingPanel.SetActive(false);
 
         yield return null;
@@ -138,25 +116,12 @@ public class MainMenu : MonoBehaviour
         var input = FindFirstObjectByType<PlayerInput>();
         if (input != null)
             input.SwitchCurrentActionMap("UI");
-<<<<<<< Updated upstream
     }
 
     // CREDIT PANEL
-=======
-
-        EventSystem.current.SetSelectedGameObject(firstSelected);
-    }
-
-    // ============================================================
-    // CREDIT
-    // ============================================================
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     public void ShowCredit()
     {
-        PlayClick();
+        PlayClickSound();
         creditPanel.SetActive(true);
 
         SetMainMenuButtonsInteractable(false);
@@ -168,7 +133,7 @@ public class MainMenu : MonoBehaviour
 
     public void BackFromCredit()
     {
-        PlayClick();
+        PlayClickSound();
         creditPanel.SetActive(false);
 
         SetMainMenuButtonsInteractable(true);
@@ -176,8 +141,6 @@ public class MainMenu : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(firstSelected);
     }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     // DISABLE / ENABLE MAIN MENU BUTTONS
     private void SetMainMenuButtonsInteractable(bool value)
     {
@@ -196,34 +159,15 @@ public class MainMenu : MonoBehaviour
     }
 
     // AUDIO
-=======
-=======
->>>>>>> Stashed changes
-    // ============================================================
-    // QUIT GAME
-    // ============================================================
-    public void QuitGame()
-    {
-        PlayClick();
-        Application.Quit();
-    }
-
-    // ============================================================
-    // UI SOUND EVENTS
-    // ============================================================
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     public void OnHover()
     {
-        if (!string.IsNullOrEmpty(uiHoverKey))
-            AudioManager.Instance?.PlayUI(uiHoverKey);
+        if (hoverSound != null && audioSource != null)
+            audioSource.PlayOneShot(hoverSound);
     }
 
-    private void PlayClick()
+    private void PlayClickSound()
     {
-        if (!string.IsNullOrEmpty(uiClickKey))
-            AudioManager.Instance?.PlayUI(uiClickKey);
+        if (clickSound != null && audioSource != null)
+            audioSource.PlayOneShot(clickSound);
     }
 }

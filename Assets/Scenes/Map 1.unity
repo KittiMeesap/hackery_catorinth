@@ -4009,6 +4009,7 @@ GameObject:
   - component: {fileID: 323713271}
   - component: {fileID: 323713270}
   - component: {fileID: 323713269}
+  - component: {fileID: 323713280}
   m_Layer: 5
   m_Name: CanvasUI
   m_TagString: Untagged
@@ -4273,6 +4274,36 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &323713280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 323713267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 742c1733af453cf40b19b809db247eee, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 2062586026}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: 340be23e-fd5b-4f1d-93d4-a0df8ef3be5e
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!4 &324617297 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2619573095480863585, guid: 48daed9018fc8164db6de66246087f1c, type: 3}
@@ -11151,8 +11182,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1eea80d0c2a9d2a4b910ad51fe495ddb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeImage: {fileID: 781777801}
-  fadeDuration: 0.5
 --- !u!114 &781777801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15615,7 +15644,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2073717265506570534, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
       propertyPath: targetSceneName
-      value: Map 2
+      value: Map 1-2
       objectReference: {fileID: 0}
     - target: {fileID: 2073717265506570534, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
       propertyPath: defaultHackOption

@@ -9,9 +9,6 @@ public class EnemySweeper : MonoBehaviour
     public float moveSpeed = 2f;
     public bool moveRight = true;
 
-    [Header("End Settings")]
-    public string endTag = "SweeperEnd";
-
     [Header("Damage Settings")]
     public LayerMask playerLayer;
     public int instantKillDamage = 9999;
@@ -96,12 +93,6 @@ public class EnemySweeper : MonoBehaviour
         var heat = other.GetComponentInParent<IHeatable>();
         if (heat != null)
             heat.ApplyHeat(999f);
-
-        if (!string.IsNullOrEmpty(endTag) && other.CompareTag(endTag))
-        {
-            DestroySelf();
-            return;
-        }
 
         var chocoDoor = other.GetComponentInParent<ChocolateDoor>();
         if (chocoDoor != null)

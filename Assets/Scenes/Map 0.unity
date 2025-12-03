@@ -21769,6 +21769,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: FreezeDoor (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.94
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.28
+      objectReference: {fileID: 0}
     - target: {fileID: 4342160231955554658, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
       propertyPath: m_FlipX
       value: 1
@@ -51579,6 +51587,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: FreezeDoor (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.23
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.42
+      objectReference: {fileID: 0}
     - target: {fileID: 5577620393653717879, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
       propertyPath: connectedDoor
       value: 
@@ -57092,6 +57108,14 @@ PrefabInstance:
     - target: {fileID: 2053661893334955414, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
       propertyPath: m_Name
       value: FreezeDoor
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.941
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.109
       objectReference: {fileID: 0}
     - target: {fileID: 5577620393653717879, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
       propertyPath: startFrozen
@@ -72664,6 +72688,14 @@ PrefabInstance:
     - target: {fileID: 2053661893334955414, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
       propertyPath: m_Name
       value: FreezeDoor (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.96
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543989020443756596, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.29
       objectReference: {fileID: 0}
     - target: {fileID: 4342160231955554658, guid: f688bdebaa529e240bfe9beb2d74ff1f, type: 3}
       propertyPath: m_FlipX

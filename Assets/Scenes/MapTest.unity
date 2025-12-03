@@ -18603,9 +18603,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
-        m_MethodName: BackToSetting
+      - m_Target: {fileID: 1036731101}
+        m_TargetAssemblyTypeName: PauseMenuUI, Assembly-CSharp
+        m_MethodName: CloseSettings
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -24831,9 +24831,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1036731101}
         m_TargetAssemblyTypeName: PauseMenuUI, Assembly-CSharp
-        m_MethodName: ResetGame
+        m_MethodName: OpenSettings
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -26826,6 +26826,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6435635400476904506, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9147224424928353384, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.018191
+      objectReference: {fileID: 0}
+    - target: {fileID: 9147224424928353384, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.018191
+      objectReference: {fileID: 0}
+    - target: {fileID: 9147224424928353384, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -29336,6 +29348,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9147224424928353384, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.0150393
+      objectReference: {fileID: 0}
+    - target: {fileID: 9147224424928353384, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.22024441
+      objectReference: {fileID: 0}
+    - target: {fileID: 9147224424928353384, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.79
+      objectReference: {fileID: 0}
+    - target: {fileID: 9147224424928353384, guid: 756d1009000b55f44974a73b7b080fa5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -30027,6 +30055,7 @@ GameObject:
   - component: {fileID: 1036731098}
   - component: {fileID: 1036731099}
   - component: {fileID: 1036731101}
+  - component: {fileID: 1036731102}
   m_Layer: 5
   m_Name: CanvasUI
   m_TagString: Untagged
@@ -30083,7 +30112,7 @@ Canvas:
   m_GameObject: {fileID: 1036731090}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 661818492}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -30271,6 +30300,23 @@ MonoBehaviour:
   defaultSettingButton: {fileID: 2007253945}
   homeSceneName: MainMenu
   pauseAction: {fileID: -7933011945050117503, guid: 742c1733af453cf40b19b809db247eee, type: 3}
+--- !u!114 &1036731102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1036731090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aced0567afc96d04c89b353e4cba0581, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Settings
+  displayModeText: {fileID: 1359965150}
+  resolutionText: {fileID: 1131492979}
+  masterText: {fileID: 86660390}
+  musicText: {fileID: 1135731603}
+  sfxText: {fileID: 694456261}
 --- !u!21 &1038598863
 Material:
   serializedVersion: 8
@@ -48436,7 +48482,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1036731101}
         m_TargetAssemblyTypeName: PauseMenuUI, Assembly-CSharp
         m_MethodName: ResumeGame
         m_Mode: 1
@@ -72948,7 +72994,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1036731102}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: SaveSettings
         m_Mode: 1
@@ -79864,7 +79910,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1036731101}
         m_TargetAssemblyTypeName: PauseMenuUI, Assembly-CSharp
         m_MethodName: GoHome
         m_Mode: 1
@@ -81640,6 +81686,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 661818492}
+    - target: {fileID: 2406146102767485511, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
+      propertyPath: m_UIInputModule
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 2501551089953630458, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: missionText
       value: 

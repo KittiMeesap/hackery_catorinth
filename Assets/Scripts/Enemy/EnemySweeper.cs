@@ -92,17 +92,14 @@ public class EnemySweeper : MonoBehaviour
             if (door == null)
                 door = target.GetComponentInParent<IOpenableDoor>();
 
-            if (door != null && door.CanOpenFor(gameObject))
+            if (door != null && door != lastDoorUsed && !isDead)
             {
-                if (door != lastDoorUsed)
-                {
-                    door.OpenForEntity(gameObject);
+                door.OpenForSweeper(gameObject);
 
-                    laneY = transform.position.y;
+                laneY = transform.position.y;
+                lastDoorUsed = door;
 
-                    lastDoorUsed = door;
-                    yield return new WaitForSeconds(0.25f);
-                }
+                yield return new WaitForSeconds(0.25f);
             }
 
             currentIndex++;

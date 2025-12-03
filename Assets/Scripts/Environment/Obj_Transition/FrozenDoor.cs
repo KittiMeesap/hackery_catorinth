@@ -101,7 +101,7 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
         if (!other.CompareTag("Player"))
             return;
 
-        // กัน Sweeper ไม่ให้ใช้ FrozenDoor
+        // กัน Sweeper ไม่ให้ใช้ workflow ประตูแบบผู้เล่น
         if (entity.CompareTag("Sweeper"))
             return;
 
@@ -160,6 +160,7 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
         if (isCheckpointDoor && entity.CompareTag("Player"))
             GameManager.Instance.SetCheckpoint(targetExit);
+
         var openable = connectedDoor.GetComponent<IOpenableDoor>();
         openable?.MarkRecentlyTeleported(entity);
         openable?.DisableInteractionTemporarily(reuseCooldown);
@@ -189,6 +190,16 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
             return;
 
         StartCoroutine(TeleportRoutine(entity));
+    }
+
+    public void OpenForSweeper(GameObject entity)
+    {
+        if (entity == null) return;
+
+        if (isFrozen)
+            MeltDoor();
+
+        WarpEntity(entity);
     }
 
     public void DisableInteractionTemporarily(float delay)

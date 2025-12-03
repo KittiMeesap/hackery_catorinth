@@ -192,6 +192,16 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         StartCoroutine(TeleportRoutine(entity));
     }
 
+    public void OpenForSweeper(GameObject entity)
+    {
+        if (entity == null) return;
+
+        if (isLocked && !hasMelted)
+            MeltDoor();
+
+        WarpEntity(entity);
+    }
+
     public void DisableInteractionTemporarily(float delay)
     {
         StartCoroutine(CoDisable(delay));

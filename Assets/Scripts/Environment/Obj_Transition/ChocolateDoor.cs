@@ -232,4 +232,16 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         if (triggerCol == null) return false;
         return triggerCol.bounds.Contains(entity.transform.position);
     }
+
+    public void UnlockDoorFromSafe()
+    {
+        isLocked = false;
+        hasMelted = true;
+
+        ApplyLockState(false);
+
+        if (!string.IsNullOrEmpty(sfxMeltKey))
+            AudioManager.Instance?.PlaySFX(sfxMeltKey);
+    }
+
 }

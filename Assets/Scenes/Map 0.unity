@@ -12978,6 +12978,7 @@ GameObject:
   - component: {fileID: 484665438}
   - component: {fileID: 484665435}
   - component: {fileID: 484665436}
+  - component: {fileID: 484665445}
   m_Layer: 5
   m_Name: CanvasUI
   m_TagString: Untagged
@@ -13146,7 +13147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc3d333c1fec78448b66cfdd72a169aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hackingUI: {fileID: 0}
+  hackingUI: {fileID: 484665445}
   screenFader: {fileID: 1798499086}
   promptUI: {fileID: 1433067533}
   missionText: {fileID: 1192793897}
@@ -13213,6 +13214,35 @@ Canvas:
   m_SortingLayerID: -1591475917
   m_SortingOrder: 1
   m_TargetDisplay: 0
+--- !u!114 &484665445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 484665433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4be7b3c54065806479e97e1a3ee8242e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HackingUI
+  hackPanel: {fileID: 1287551820}
+  multiOptionParent: {fileID: 1027448879}
+  hackOptionUIPrefab: {fileID: 4317529843521161674, guid: 8e3039a882a45834a802e7a75e8bfa42, type: 3}
+  hackTimerSlider: {fileID: 573164217}
+  arrowUpPrefab: {fileID: 4062521740420822897, guid: 01b875468bda4e54ab94872290c2917c, type: 3}
+  arrowDownPrefab: {fileID: 4062521740420822897, guid: b36fa2e61ce4f7140a0f2ad69e53ecd3, type: 3}
+  arrowLeftPrefab: {fileID: 4062521740420822897, guid: 4a849feff68e7e941af910a41a84368e, type: 3}
+  arrowRightPrefab: {fileID: 4062521740420822897, guid: c495d0cd780214643a593ef86b9f4ce9, type: 3}
+  sfxOpenUI: Hack_Open
+  sfxSuccess: Hack_Success
+  sfxFail: Hack_Fail
+  sfxInput: Hack_Input
+  panelPopDuration: 0.4
+  arrowPopScale: 1.15
+  shakeIntensity: 2
+  shakeDuration: 0.25
+  arrowPulseScale: 1.25
 --- !u!4 &490041559 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 691911462782347946, guid: 2909a2c982d546545968371f2894f49a, type: 3}

@@ -175,7 +175,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -223,7 +223,6 @@ MonoBehaviour:
   boomRadius: 1.5
   boomDamageHearts: 2
   boomKnockbackForce: 8
-  boomDelay: 0.15
   heatStunTime: 0.25
   flashSpeed: 20
   flashColor: {r: 1, g: 0, b: 0, a: 1}

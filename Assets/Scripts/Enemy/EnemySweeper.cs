@@ -5,17 +5,16 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class EnemySweeper : MonoBehaviour
 {
-    [Header("Movement Settings")]
     public float moveSpeed = 2f;
     public Transform[] doorTargets;
     public float stopDistanceToDoor = 0.4f;
 
-    [Header("Behaviour Settings")]
     public bool destroyOnFinish = true;
 
-    [Header("Damage Settings")]
     public LayerMask playerLayer;
     public int instantKillDamage = 9999;
+
+    public GameObject uiPointerPrefab;
 
     private int currentIndex = 0;
     private Rigidbody2D rb;
@@ -24,8 +23,9 @@ public class EnemySweeper : MonoBehaviour
     private bool isDead = false;
 
     private IOpenableDoor lastDoorUsed = null;
-
     private float laneY;
+
+    private UIEnemyPointer pointerUI;
 
     private void Awake()
     {
@@ -45,6 +45,13 @@ public class EnemySweeper : MonoBehaviour
     public void StartSweeping()
     {
         canMove = true;
+
+        if (uiPointerPrefab != null && UIManager.Instance != null)
+        {
+            GameObject ui = Instantiate(uiPointerPrefab, UIManager.Instance.transform);
+            pointerUI = ui.GetComponent<UIEnemyPointer>();
+            pointerUI.enemyTarget = transform;
+        }
     }
 
     private IEnumerator SweepRoutine()
@@ -128,6 +135,12 @@ public class EnemySweeper : MonoBehaviour
 
         if (other.CompareTag("Transition"))
             return;
+    }
+
+    private void OnDestroy()
+    {
+        if (pointerUI != null)
+            Destroy(pointerUI.gameObject);
     }
 
     public void ShakeCamera()

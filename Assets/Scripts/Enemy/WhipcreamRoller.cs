@@ -49,10 +49,6 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Animator animator;
 
-    [Header("Debug")]
-    [SerializeField] private bool drawVisionGizmo = true;
-    [SerializeField] private bool drawBoomGizmo = true;
-
     private Rigidbody2D rb;
     private Transform player;
 
@@ -72,7 +68,6 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
 
     public float CurrentTemperature => currentTemperature;
 
-    // INITIALIZATION
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -101,7 +96,6 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
         ChangeState(State.Idle);
     }
 
-    // STATE MACHINE
     private void ChangeState(State next)
     {
         if (isFrozen && next != State.Idle) return;
@@ -218,7 +212,6 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
                 yield break;
             }
 
-            // PATROL MODE
             if (!attackMode)
             {
                 float x = rb.position.x;
@@ -273,14 +266,15 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
 
         AudioManager.Instance?.PlaySFX(sfxBoom);
 
-        yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(0.1f);
 
         DoExplosionDamage();
+
+        yield return new WaitForSeconds(0.25f);
 
         Destroy(gameObject);
     }
 
-    // FLASH EFFECT
     private void FlashRed(float duration)
     {
         if (flashRoutine != null)
@@ -305,7 +299,6 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
         spriteRenderer.color = Color.white;
     }
 
-    // TEMPERATURE SYSTEM
     public void ApplyCold(float delta)
     {
         if (isDead) return;
@@ -345,7 +338,6 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
             currentTemperature = 0;
     }
 
-    // VISION & COLLISION
     private void EnsurePlayerRef()
     {
         if (player != null) return;
@@ -363,7 +355,7 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
 
         if (dist > visionRadius) return false;
 
-        float angle = Vector2.Angle(new Vector2(facingSign, 0f), dir.normalized);
+        float angle = Vector2.Angle(new Vector2(facingSign, 0), dir.normalized);
         if (angle > visionAngle * 0.5f) return false;
 
         var hit = Physics2D.Raycast(origin, dir.normalized, dist, obstacleLayers);
@@ -379,8 +371,7 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
 
     private bool HitObstacleAhead()
     {
-        Vector2 origin = rb.position;
-        return Physics2D.Raycast(origin, new Vector2(facingSign, 0), 0.25f, obstacleLayers);
+        return Physics2D.Raycast(rb.position, new Vector2(facingSign, 0), 0.25f, obstacleLayers);
     }
 
     private void DoExplosionDamage()
@@ -404,20 +395,5 @@ public class WhipcreamRoller : MonoBehaviour, ITemperatureAffectable
         animator.SetBool("IsIdle", state == State.Idle);
         animator.SetBool("IsMove", state == State.Move);
         animator.SetBool("IsSpin", state == State.Spin);
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (drawVisionGizmo)
-        {
-            Gizmos.color = new Color(0, 1, 1, 0.25f);
-            Gizmos.DrawWireSphere(transform.position + new Vector3(0, visionYOffset), visionRadius);
-        }
-
-        if (drawBoomGizmo)
-        {
-            Gizmos.color = new Color(1, 0.4f, 0, 0.25f);
-            Gizmos.DrawWireSphere(transform.position, boomRadius);
-        }
     }
 }

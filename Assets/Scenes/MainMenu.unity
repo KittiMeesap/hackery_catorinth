@@ -933,7 +933,6 @@ GameObject:
   - component: {fileID: 129796106}
   - component: {fileID: 129796105}
   - component: {fileID: 129796104}
-  - component: {fileID: 129796107}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -1055,20 +1054,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129796102}
   m_CullTransparentMesh: 1
---- !u!114 &129796107
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 129796102}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!1 &150496547
 GameObject:
   m_ObjectHideFlags: 0
@@ -6344,7 +6329,6 @@ GameObject:
   - component: {fileID: 268744645}
   - component: {fileID: 268744644}
   - component: {fileID: 268744643}
-  - component: {fileID: 268744646}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -6466,20 +6450,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 268744641}
   m_CullTransparentMesh: 1
---- !u!114 &268744646
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268744641}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!1 &269415508
 GameObject:
   m_ObjectHideFlags: 0
@@ -7541,7 +7511,6 @@ GameObject:
   - component: {fileID: 532354285}
   - component: {fileID: 532354284}
   - component: {fileID: 532354283}
-  - component: {fileID: 532354286}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -7663,20 +7632,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 532354281}
   m_CullTransparentMesh: 1
---- !u!114 &532354286
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 532354281}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!1 &532510559
 GameObject:
   m_ObjectHideFlags: 0
@@ -8344,7 +8299,6 @@ GameObject:
   - component: {fileID: 717010698}
   - component: {fileID: 717010697}
   - component: {fileID: 717010696}
-  - component: {fileID: 717010699}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -8466,20 +8420,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 717010694}
   m_CullTransparentMesh: 1
---- !u!114 &717010699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 717010694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!1 &732591679
 GameObject:
   m_ObjectHideFlags: 0
@@ -9184,7 +9124,7 @@ GameObject:
   - component: {fileID: 959342910}
   - component: {fileID: 959342909}
   m_Layer: 5
-  m_Name: SaveButton
+  m_Name: ApplyButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9372,7 +9312,6 @@ GameObject:
   - component: {fileID: 1010239239}
   - component: {fileID: 1010239238}
   - component: {fileID: 1010239237}
-  - component: {fileID: 1010239240}
   m_Layer: 5
   m_Name: UpButton
   m_TagString: Untagged
@@ -9494,20 +9433,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1010239235}
   m_CullTransparentMesh: 1
---- !u!114 &1010239240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1010239235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!1 &1022655168
 GameObject:
   m_ObjectHideFlags: 0
@@ -9697,7 +9622,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Save
+  m_text: Apply
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0af0f1b3df5aebf4ba22eb76cb1d95a3, type: 2}
   m_sharedMaterial: {fileID: 1191402542205414742, guid: 0af0f1b3df5aebf4ba22eb76cb1d95a3, type: 2}
@@ -25134,7 +25059,6 @@ GameObject:
   - component: {fileID: 2102190766}
   - component: {fileID: 2102190765}
   - component: {fileID: 2102190764}
-  - component: {fileID: 2102190767}
   m_Layer: 5
   m_Name: DownButton
   m_TagString: Untagged
@@ -25256,20 +25180,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2102190762}
   m_CullTransparentMesh: 1
---- !u!114 &2102190767
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2102190762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f95709ce4e74641b24a46e73109329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
-  initialDelay: 0.3
-  repeatRate: 0.05
 --- !u!1 &2114583376
 GameObject:
   m_ObjectHideFlags: 0
@@ -25284,7 +25194,6 @@ GameObject:
   - component: {fileID: 2114583377}
   - component: {fileID: 2114583381}
   - component: {fileID: 2114583382}
-  - component: {fileID: 2114583383}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -25417,24 +25326,9 @@ MonoBehaviour:
   masterText: {fileID: 1435679292}
   musicText: {fileID: 675298806}
   sfxText: {fileID: 401313321}
---- !u!114 &2114583383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2114583376}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6945bec1aeaac0c4d8b579a5a5605e7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SettingsController
-  rows:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  submitAction: {fileID: 4381287996181175007, guid: 742c1733af453cf40b19b809db247eee, type: 3}
+  initialDelay: 0.3
+  repeatRate: 0.05
 --- !u!1 &2114798158
 GameObject:
   m_ObjectHideFlags: 0

@@ -30059,7 +30059,6 @@ GameObject:
   - component: {fileID: 1036731099}
   - component: {fileID: 1036731101}
   - component: {fileID: 1036731102}
-  - component: {fileID: 1036731103}
   m_Layer: 5
   m_Name: CanvasUI
   m_TagString: Untagged
@@ -30292,23 +30291,6 @@ MonoBehaviour:
   masterText: {fileID: 86660390}
   musicText: {fileID: 1135731603}
   sfxText: {fileID: 694456261}
---- !u!114 &1036731103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1036731090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb5bc23c8e9f6de41b6dc0d12817b25b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIEnemyPointer
-  enemyTarget: {fileID: 95477893}
-  enemyIconUI: {fileID: 0}
-  arrowUI: {fileID: 0}
-  cam: {fileID: 661818492}
-  edgeOffset: 80
 --- !u!21 &1038598863
 Material:
   serializedVersion: 8

@@ -82,7 +82,13 @@ public class MainMenu : MonoBehaviour
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // OPEN SETTINGS
+=======
+    // ============================================================
+    // SETTINGS
+    // ============================================================
+>>>>>>> Stashed changes
 =======
     // ============================================================
     // SETTINGS
@@ -108,12 +114,16 @@ public class MainMenu : MonoBehaviour
     public void BackToSetting()
     {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         PlayClickSound();
         StartCoroutine(BackToSettingRoutine());
     }
 
     private IEnumerator BackToSettingRoutine()
     {
+=======
+        PlayClick();
+>>>>>>> Stashed changes
 =======
         PlayClick();
 >>>>>>> Stashed changes
@@ -140,6 +150,9 @@ public class MainMenu : MonoBehaviour
     // ============================================================
     // CREDIT
     // ============================================================
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     public void ShowCredit()
     {
@@ -164,6 +177,7 @@ public class MainMenu : MonoBehaviour
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // DISABLE / ENABLE MAIN MENU BUTTONS
     private void SetMainMenuButtonsInteractable(bool value)
     {
@@ -183,6 +197,8 @@ public class MainMenu : MonoBehaviour
 
     // AUDIO
 =======
+=======
+>>>>>>> Stashed changes
     // ============================================================
     // QUIT GAME
     // ============================================================
@@ -195,6 +211,9 @@ public class MainMenu : MonoBehaviour
     // ============================================================
     // UI SOUND EVENTS
     // ============================================================
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     public void OnHover()
     {

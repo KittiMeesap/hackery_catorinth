@@ -54,15 +54,24 @@ public class GameOverUI : MonoBehaviour
 
     private System.Collections.IEnumerator RespawnRoutine()
     {
+        // Fade out screen
         if (screenFader != null)
             yield return screenFader.FadeOut();
 
+        // Respawn Player
         var player = FindFirstObjectByType<PlayerController>();
 
         if (player != null)
+        {
             GameManager.Instance.RespawnPlayer(player.gameObject);
+            player.ResetStateAfterRespawn();
+        }
 
         GameManager.Instance.FreezeGame(false);
+
+        var input = FindFirstObjectByType<PlayerInput>();
+        if (input != null)
+            input.SwitchCurrentActionMap("Player");
 
         shown = false;
         panel.SetActive(false);
@@ -73,7 +82,9 @@ public class GameOverUI : MonoBehaviour
 
     private System.Collections.IEnumerator MainMenuRoutine()
     {
-        if (screenFader != null) yield return screenFader.FadeOut();
+        if (screenFader != null)
+            yield return screenFader.FadeOut();
+
         SceneManager.LoadScene(mainMenuSceneName);
     }
 }

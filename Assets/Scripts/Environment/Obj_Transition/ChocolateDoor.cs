@@ -13,7 +13,6 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
     [Header("Warp")]
     [SerializeField] private GameObject connectedDoor;
     [SerializeField] private Transform exitPoint;
-
     public Transform ExitPoint => exitPoint;
 
     [Header("Scene")]
@@ -54,8 +53,8 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
 
     private void Start()
     {
-        temperature = 0f;
         isLocked = startLocked;
+        temperature = 0f;
         ApplyLockState(isLocked);
     }
 
@@ -88,8 +87,7 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player"))
-            return;
+        if (!other.CompareTag("Player")) return;
 
         if (!isLocked)
             AudioManager.Instance?.PlaySFX(sfxOpenKey);
@@ -120,19 +118,22 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
 
         yield return new WaitForSeconds(teleportDelay);
 
-        var fader = UIManager.Instance?.screenFader;
-        if (fader != null) yield return fader.FadeOut();
+        ScreenFader fader = FindFirstObjectByType<ScreenFader>();
+        if (fader != null)
+            yield return fader.FadeOut();
 
         if (openMode == OpenMode.Warp)
         {
             WarpEntity(entity);
-            if (fader != null) yield return fader.FadeIn();
         }
         else
         {
             yield return LoadSceneRoutine();
-            if (fader != null) yield return fader.FadeIn();
         }
+
+        ScreenFader faderIn = FindFirstObjectByType<ScreenFader>();
+        if (faderIn != null)
+            yield return faderIn.FadeIn();
 
         yield return new WaitForSeconds(reuseCooldown);
         canUseDoor = true;
@@ -149,10 +150,10 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         if (targetExit == null) return;
 
         Vector3 oldPos = entity.transform.position;
-        Vector3 targetPos = targetExit.position;
-        Vector3 delta = targetPos - oldPos;
+        Vector3 newPos = targetExit.position;
+        Vector3 delta = newPos - oldPos;
 
-        entity.transform.position = targetPos;
+        entity.transform.position = newPos;
 
         var vcam = FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
         if (vcam != null)
@@ -161,9 +162,9 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         if (isCheckpointDoor && entity.CompareTag("Player"))
             GameManager.Instance.SetCheckpoint(targetExit);
 
-        var openable = connectedDoor.GetComponent<IOpenableDoor>();
-        openable?.MarkRecentlyTeleported(entity);
-        openable?.DisableInteractionTemporarily(reuseCooldown);
+        var otherDoor = connectedDoor.GetComponent<IOpenableDoor>();
+        otherDoor?.MarkRecentlyTeleported(entity);
+        otherDoor?.DisableInteractionTemporarily(reuseCooldown);
     }
 
     private IEnumerator LoadSceneRoutine()
@@ -180,8 +181,8 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         if (entity.CompareTag("Sweeper"))
             return false;
 
-        if (!canUseDoor) return false;
-        if (isLocked) return false;
+        if (isLocked || !canUseDoor)
+            return false;
 
         return connectedDoor != null && exitPoint != null;
     }
@@ -189,13 +190,13 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
     public void OpenForEntity(GameObject entity)
     {
         if (!CanOpenFor(entity)) return;
+
         StartCoroutine(TeleportRoutine(entity));
     }
 
     public void OpenForSweeper(GameObject entity)
     {
         if (entity == null) return;
-
         if (isLocked && !hasMelted)
             MeltDoor();
 
@@ -212,13 +213,6 @@ public class ChocolateDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPo
         canUseDoor = false;
         yield return new WaitForSeconds(delay);
         canUseDoor = true;
-    }
-
-    public void UnlockDoorFromSafe()
-    {
-        isLocked = false;
-        hasMelted = true;
-        ApplyLockState(false);
     }
 
     public void MarkRecentlyTeleported(GameObject entity)

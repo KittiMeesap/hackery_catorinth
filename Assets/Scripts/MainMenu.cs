@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
+using System.Collections;
 
 public class MainMenu : MonoBehaviour
 {
@@ -51,7 +52,7 @@ public class MainMenu : MonoBehaviour
         StartCoroutine(FadeOutAndLoad("IntroCutscene"));
     }
 
-    private System.Collections.IEnumerator FadeOutAndLoad(string sceneName)
+    private IEnumerator FadeOutAndLoad(string sceneName)
     {
         isFading = true;
 
@@ -78,10 +79,13 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
+    // OPEN SETTINGS
     public void Setting()
     {
         PlayClickSound();
         SettingPanel.SetActive(true);
+
+        SetMainMenuButtonsInteractable(false);
 
         var input = FindFirstObjectByType<PlayerInput>();
         if (input != null)
@@ -92,23 +96,35 @@ public class MainMenu : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(first.gameObject);
     }
 
+    // CLOSE SETTINGS
     public void BackToSetting()
     {
         PlayClickSound();
+        StartCoroutine(BackToSettingRoutine());
+    }
+
+    private IEnumerator BackToSettingRoutine()
+    {
         SettingPanel.SetActive(false);
+
+        yield return null;
+
+        SetMainMenuButtonsInteractable(true);
+
+        EventSystem.current.SetSelectedGameObject(firstSelected);
 
         var input = FindFirstObjectByType<PlayerInput>();
         if (input != null)
             input.SwitchCurrentActionMap("UI");
-
-        // RETURN FOCUS TO MAIN MENU
-        EventSystem.current.SetSelectedGameObject(firstSelected);
     }
 
+    // CREDIT PANEL
     public void ShowCredit()
     {
         PlayClickSound();
         creditPanel.SetActive(true);
+
+        SetMainMenuButtonsInteractable(false);
 
         var first = creditPanel.GetComponentInChildren<Button>();
         if (first != null)
@@ -120,15 +136,29 @@ public class MainMenu : MonoBehaviour
         PlayClickSound();
         creditPanel.SetActive(false);
 
+        SetMainMenuButtonsInteractable(true);
+
         EventSystem.current.SetSelectedGameObject(firstSelected);
     }
 
-    public void QuitGame()
+    // DISABLE / ENABLE MAIN MENU BUTTONS
+    private void SetMainMenuButtonsInteractable(bool value)
     {
-        PlayClickSound();
-        Application.Quit();
+        Button[] buttons = GetComponentsInChildren<Button>(includeInactive: true);
+
+        foreach (Button b in buttons)
+        {
+            if (SettingPanel != null && b.transform.IsChildOf(SettingPanel.transform))
+                continue;
+
+            if (creditPanel != null && b.transform.IsChildOf(creditPanel.transform))
+                continue;
+
+            b.interactable = value;
+        }
     }
 
+    // AUDIO
     public void OnHover()
     {
         if (hoverSound != null && audioSource != null)

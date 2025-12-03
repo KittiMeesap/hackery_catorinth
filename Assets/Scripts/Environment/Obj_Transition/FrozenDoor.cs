@@ -11,7 +11,6 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
     [SerializeField] private OpenMode openMode = OpenMode.Warp;
     [SerializeField] private GameObject connectedDoor;
     [SerializeField] private Transform exitPoint;
-
     public Transform ExitPoint => exitPoint;
 
     [Header("Scene Settings")]
@@ -78,8 +77,10 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
     private void ApplyFrozenState(bool frozen)
     {
-        animator?.SetBool(freezeParam, frozen);
-        animator?.SetBool(unfreezeParam, !frozen);
+        if (animator == null) return;
+
+        animator.SetBool(freezeParam, frozen);
+        animator.SetBool(unfreezeParam, !frozen);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -88,7 +89,12 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
             return;
 
         if (!isFrozen)
+        {
             animator?.SetBool(openParam, true);
+
+            if (!string.IsNullOrEmpty(sfxOpenKey))
+                AudioManager.Instance?.PlaySFX(sfxOpenKey);
+        }
     }
 
     private void OnTriggerStay2D(Collider2D other)
@@ -101,7 +107,6 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
         if (!other.CompareTag("Player"))
             return;
 
-        // กัน Sweeper ไม่ให้ใช้ workflow ประตูแบบผู้เล่น
         if (entity.CompareTag("Sweeper"))
             return;
 
@@ -114,8 +119,14 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
+
         if (!isFrozen)
+        {
             animator?.SetBool(openParam, false);
+
+            if (!string.IsNullOrEmpty(sfxCloseKey))
+                AudioManager.Instance?.PlaySFX(sfxCloseKey);
+        }
     }
 
     private IEnumerator TeleportRoutine(GameObject entity)
@@ -124,15 +135,22 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
         yield return new WaitForSeconds(teleportDelay);
 
-        var fader = UIManager.Instance?.screenFader;
-        if (fader != null) yield return fader.FadeOut();
+        ScreenFader fader = FindFirstObjectByType<ScreenFader>();
+        if (fader != null)
+            yield return fader.FadeOut();
 
         if (openMode == OpenMode.Warp)
+        {
             WarpEntity(entity);
+        }
         else
+        {
             yield return LoadSceneRoutine();
+        }
 
-        if (fader != null) yield return fader.FadeIn();
+        ScreenFader faderIn = FindFirstObjectByType<ScreenFader>();
+        if (faderIn != null)
+            yield return faderIn.FadeIn();
 
         yield return new WaitForSeconds(reuseCooldown);
         canUseDoor = true;

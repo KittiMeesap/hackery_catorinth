@@ -19,8 +19,11 @@ public class GameOverUI : MonoBehaviour
 
     private void Awake()
     {
-        if (panel != null) panel.SetActive(false);
-        if (screenFader == null) screenFader = FindFirstObjectByType<ScreenFader>();
+        if (panel != null)
+            panel.SetActive(false);
+
+        if (screenFader == null)
+            screenFader = FindFirstObjectByType<ScreenFader>();
     }
 
     public void Show()
@@ -63,12 +66,21 @@ public class GameOverUI : MonoBehaviour
 
         if (player != null)
         {
+            var hp = player.GetComponent<PlayerHealth>();
+            if (hp != null)
+                hp.ResetHealth();
+
+            // Restore position & countdown
             GameManager.Instance.RespawnPlayer(player.gameObject);
+
+            // Reset movement, animations, states
             player.ResetStateAfterRespawn();
         }
 
+        // Unfreeze game
         GameManager.Instance.FreezeGame(false);
 
+        // Switch back to gameplay input
         var input = FindFirstObjectByType<PlayerInput>();
         if (input != null)
             input.SwitchCurrentActionMap("Player");
@@ -76,6 +88,7 @@ public class GameOverUI : MonoBehaviour
         shown = false;
         panel.SetActive(false);
 
+        // Fade in again
         if (screenFader != null)
             yield return screenFader.FadeIn();
     }

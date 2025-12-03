@@ -690,6 +690,11 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &91758002 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2074495608360074342, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
+  m_PrefabInstance: {fileID: 1034855521}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &95477888
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3285,7 +3290,7 @@ Transform:
   m_GameObject: {fileID: 249995627}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -11, z: -10}
+  m_LocalPosition: {x: 0, y: -11.05, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4023,7 +4028,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2acbb16345b084045ba3289630ad791d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CountdownTimer
-  startTime: 210
+  startTime: 10
   timerText: {fileID: 661296810}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   warningColor: {r: 1, g: 0, b: 0, a: 1}
@@ -4032,7 +4037,7 @@ MonoBehaviour:
   blinkScale: 1.2
   warningSFXKey: SFX_TimerWarning
   timeOverSFXKey: SFX_TimerEnd
-  sweeperIntroDirector: {fileID: 0}
+  sweeperIntroDirector: {fileID: 1265816294}
 --- !u!114 &323713269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9592,7 +9597,7 @@ Transform:
   m_GameObject: {fileID: 661818490}
   serializedVersion: 2
   m_LocalRotation: {x: 4.6564877e-10, y: -0.000000029343937, z: 1.3663968e-17, w: 1}
-  m_LocalPosition: {x: 0.048439026, y: -11, z: -10}
+  m_LocalPosition: {x: 0.048439026, y: -11.049999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15727,19 +15732,34 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3901406070857153290, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2112370612}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2074495608360074342, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1034855526}
   m_SourcePrefab: {fileID: 100100000, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
 --- !u!114 &1034855522 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2073717265506570534, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
   m_PrefabInstance: {fileID: 1034855521}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 91758002}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1d5f29d0262c514a82d7cd90c819af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &1034855526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91758002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa7fa37608f776b4abe5fda150d741cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DoorDebug
 --- !u!1 &1034881867
 GameObject:
   m_ObjectHideFlags: 0
@@ -22696,7 +22716,7 @@ SpriteRenderer:
   m_SortingLayerID: -1334594335
   m_SortingLayer: 4
   m_SortingOrder: 4
-  m_Sprite: {fileID: 6012439291293984531, guid: 8e92548333c58f74783f1943f6e3d5e7, type: 3}
+  m_Sprite: {fileID: 8060275156937581448, guid: 8e92548333c58f74783f1943f6e3d5e7, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 0.5}
   m_FlipX: 0
   m_FlipY: 1
@@ -31025,7 +31045,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -13
+      value: -13.05
       objectReference: {fileID: 0}
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalPosition.z

@@ -25961,7 +25961,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2073717265506570534, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
       propertyPath: targetSceneName
-      value: M1
+      value: Map 1
       objectReference: {fileID: 0}
     - target: {fileID: 2073717265506570534, guid: ee7ef1436c3838a40bfad1f210a31715, type: 3}
       propertyPath: defaultHackOption

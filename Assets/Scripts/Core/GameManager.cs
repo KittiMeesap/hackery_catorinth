@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class GameManager : MonoBehaviour
     public Transform currentCheckpoint;
     public float savedCountdownTime = 0f;
 
+    [Header("Door Unlock Persistence")]
+    public HashSet<string> unlockedDoors = new HashSet<string>();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -32,6 +36,7 @@ public class GameManager : MonoBehaviour
         }
 
         Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()

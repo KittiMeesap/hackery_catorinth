@@ -13053,6 +13053,7 @@ GameObject:
   - component: {fileID: 484665435}
   - component: {fileID: 484665436}
   - component: {fileID: 484665445}
+  - component: {fileID: 484665446}
   m_Layer: 5
   m_Name: CanvasUI
   m_TagString: Untagged
@@ -13167,7 +13168,7 @@ MonoBehaviour:
   blinkScale: 1.2
   warningSFXKey: SFX_TimerWarning
   timeOverSFXKey: SFX_TimerEnd
-  sweeperIntroDirector: {fileID: 0}
+  sweeperIntroDirector: {fileID: 1265816294}
 --- !u!114 &484665439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13318,6 +13319,36 @@ MonoBehaviour:
   shakeIntensity: 2
   shakeDuration: 0.25
   arrowPulseScale: 1.25
+--- !u!114 &484665446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 484665433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 742c1733af453cf40b19b809db247eee, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 2062586026}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: 340be23e-fd5b-4f1d-93d4-a0df8ef3be5e
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!4 &490041559 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 691911462782347946, guid: 2909a2c982d546545968371f2894f49a, type: 3}

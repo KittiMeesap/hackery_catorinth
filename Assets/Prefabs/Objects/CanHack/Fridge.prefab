@@ -239,7 +239,6 @@ MonoBehaviour:
   sfxOffKey: SFX_FridgeOff
   sfxLoopKey: 
   ambientSoundGate: {fileID: 1844864913675655203}
-  startOn: 0
   hackCooldown: 2
   autoCloseDelay: 4
   highlightSprite: {fileID: 5446042493417274887}
@@ -357,7 +356,7 @@ MonoBehaviour:
   innerRadius: 5
   outerRadius: 3
   fadeSpeed: 0.5
-  maxVolume: 0.7
+  maxVolume: 0.005
   loopSound: 1
   player: {fileID: 0}
 --- !u!1 &3817084079648294678

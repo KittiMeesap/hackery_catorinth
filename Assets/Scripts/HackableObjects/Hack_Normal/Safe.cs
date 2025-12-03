@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -141,7 +141,6 @@ public class Safe : HackableObject
 
         yield return new WaitForSeconds(0.2f);
 
-        // Paper FX
         if (paperPrefab && paperSpawnPoint)
         {
             GameObject paper = Instantiate(
@@ -165,8 +164,9 @@ public class Safe : HackableObject
     {
         foreach (var door in doorsToUnlock)
         {
-            if (door != null)
-                door.UnlockDoorFromSafe();
+            if (door == null) continue;
+
+            door.UnlockDoorFromSafe();
         }
     }
 
@@ -224,5 +224,4 @@ public class Safe : HackableObject
         Gizmos.DrawWireSphere(center, interactRadius);
     }
 #endif
-
 }

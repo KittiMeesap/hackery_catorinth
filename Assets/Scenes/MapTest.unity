@@ -2308,6 +2308,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7845955853853312012, guid: 01ea97c40f83dda428220f2025db663b, type: 3}
+      propertyPath: uiPointerPrefab
+      value: 
+      objectReference: {fileID: 2787070349233026534, guid: a8e96314cd786c64bb973789efee280c, type: 3}
+    - target: {fileID: 7845955853853312012, guid: 01ea97c40f83dda428220f2025db663b, type: 3}
       propertyPath: doorTargets.Array.size
       value: 7
       objectReference: {fileID: 0}
@@ -30052,10 +30056,10 @@ GameObject:
   - component: {fileID: 1036731095}
   - component: {fileID: 1036731096}
   - component: {fileID: 1036731097}
-  - component: {fileID: 1036731098}
   - component: {fileID: 1036731099}
   - component: {fileID: 1036731101}
   - component: {fileID: 1036731102}
+  - component: {fileID: 1036731103}
   m_Layer: 5
   m_Name: CanvasUI
   m_TagString: Untagged
@@ -30215,35 +30219,6 @@ MonoBehaviour:
   fullHeart: {fileID: 21300000, guid: ee61da55a71ae334f8cb2c382ddf89d1, type: 3}
   usePooling: 0
   initialPoolSize: 3
---- !u!114 &1036731098
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1036731090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4be7b3c54065806479e97e1a3ee8242e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hackPanel: {fileID: 163042848}
-  multiOptionParent: {fileID: 1918485443}
-  hackOptionUIPrefab: {fileID: 4317529843521161674, guid: 8e3039a882a45834a802e7a75e8bfa42, type: 3}
-  hackTimerSlider: {fileID: 550179555}
-  arrowUpPrefab: {fileID: 4062521740420822897, guid: 01b875468bda4e54ab94872290c2917c, type: 3}
-  arrowDownPrefab: {fileID: 4062521740420822897, guid: b36fa2e61ce4f7140a0f2ad69e53ecd3, type: 3}
-  arrowLeftPrefab: {fileID: 4062521740420822897, guid: 4a849feff68e7e941af910a41a84368e, type: 3}
-  arrowRightPrefab: {fileID: 4062521740420822897, guid: c495d0cd780214643a593ef86b9f4ce9, type: 3}
-  sfxOpenUI: Hack_Open
-  sfxSuccess: Hack_Success
-  sfxFail: Hack_Fail
-  sfxInput: Hack_Input
-  panelPopDuration: 0.4
-  arrowPopScale: 1.15
-  shakeIntensity: 2
-  shakeDuration: 0.3
-  arrowPulseScale: 1.25
 --- !u!114 &1036731099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30278,7 +30253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc3d333c1fec78448b66cfdd72a169aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hackingUI: {fileID: 1036731098}
+  hackingUI: {fileID: 0}
   screenFader: {fileID: 717555286}
   promptUI: {fileID: 527719520}
   missionText: {fileID: 1417628164}
@@ -30317,6 +30292,23 @@ MonoBehaviour:
   masterText: {fileID: 86660390}
   musicText: {fileID: 1135731603}
   sfxText: {fileID: 694456261}
+--- !u!114 &1036731103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1036731090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb5bc23c8e9f6de41b6dc0d12817b25b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIEnemyPointer
+  enemyTarget: {fileID: 95477893}
+  enemyIconUI: {fileID: 0}
+  arrowUI: {fileID: 0}
+  cam: {fileID: 661818492}
+  edgeOffset: 80
 --- !u!21 &1038598863
 Material:
   serializedVersion: 8
@@ -81705,6 +81697,14 @@ PrefabInstance:
     - target: {fileID: 3336330316463316781, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: m_Name
       value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 6084727096742625702, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6084727096742625702, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6084727096742625702, guid: f7fb668d538128849a55775a1f05bc6d, type: 3}
       propertyPath: m_LocalPosition.x

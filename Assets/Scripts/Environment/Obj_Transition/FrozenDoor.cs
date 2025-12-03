@@ -1,21 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 {
-    public enum OpenMode { Warp, LoadScene }
-
-    [Header("Open Mode")]
-    [SerializeField] private OpenMode openMode = OpenMode.Warp;
+    [Header("Warp Settings")]
     [SerializeField] private GameObject connectedDoor;
     [SerializeField] private Transform exitPoint;
     public Transform ExitPoint => exitPoint;
-
-    [Header("Scene Settings")]
-    [SerializeField] private string targetSceneName = "";
-    [SerializeField] private bool waitForSceneLoaded = true;
 
     [Header("Checkpoint Settings")]
     [SerializeField] private bool isCheckpointDoor = false;
@@ -49,7 +41,8 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
     {
         animator ??= GetComponent<Animator>();
         triggerCol ??= GetComponent<Collider2D>();
-        if (triggerCol) triggerCol.isTrigger = true;
+        if (triggerCol != null)
+            triggerCol.isTrigger = true;
     }
 
     private void Start()
@@ -64,7 +57,11 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
             MeltDoor();
     }
 
-    public void ApplyHeat(float delta) => temperature += delta;
+    public void ApplyHeat(float delta)
+    {
+        temperature += delta;
+    }
+
     public void ApplyCold(float delta) { }
     public void CoolDown(float delta) { }
 
@@ -90,7 +87,8 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
         if (!isFrozen)
         {
-            animator?.SetBool(openParam, true);
+            if (animator != null)
+                animator.SetBool(openParam, true);
 
             if (!string.IsNullOrEmpty(sfxOpenKey))
                 AudioManager.Instance?.PlaySFX(sfxOpenKey);
@@ -101,28 +99,30 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
     {
         GameObject entity = other.gameObject;
 
-        if (recentlyTeleported.Contains(entity))
-            return;
-
         if (!other.CompareTag("Player"))
             return;
 
-        if (entity.CompareTag("Sweeper"))
+        if (recentlyTeleported.Contains(entity))
             return;
 
-        if (isFrozen || !canUseDoor) return;
-        if (!CanOpenFor(entity)) return;
+        if (isFrozen || !canUseDoor)
+            return;
+
+        if (!CanOpenFor(entity))
+            return;
 
         StartCoroutine(TeleportRoutine(entity));
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         if (!isFrozen)
         {
-            animator?.SetBool(openParam, false);
+            if (animator != null)
+                animator.SetBool(openParam, false);
 
             if (!string.IsNullOrEmpty(sfxCloseKey))
                 AudioManager.Instance?.PlaySFX(sfxCloseKey);
@@ -139,14 +139,7 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
         if (fader != null)
             yield return fader.FadeOut();
 
-        if (openMode == OpenMode.Warp)
-        {
-            WarpEntity(entity);
-        }
-        else
-        {
-            yield return LoadSceneRoutine();
-        }
+        WarpEntity(entity);
 
         ScreenFader faderIn = FindFirstObjectByType<ScreenFader>();
         if (faderIn != null)
@@ -158,13 +151,16 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
     public void WarpEntity(GameObject entity)
     {
-        if (entity == null || connectedDoor == null) return;
+        if (entity == null || connectedDoor == null)
+            return;
 
         var nextDoorExit = connectedDoor.GetComponent<IHasExitPoint>();
-        if (nextDoorExit == null) return;
+        if (nextDoorExit == null)
+            return;
 
         Transform targetExit = nextDoorExit.ExitPoint;
-        if (targetExit == null) return;
+        if (targetExit == null)
+            return;
 
         Vector3 oldPos = entity.transform.position;
         Vector3 targetPos = targetExit.position;
@@ -180,25 +176,24 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
             GameManager.Instance.SetCheckpoint(targetExit);
 
         var openable = connectedDoor.GetComponent<IOpenableDoor>();
-        openable?.MarkRecentlyTeleported(entity);
-        openable?.DisableInteractionTemporarily(reuseCooldown);
-    }
-
-    private IEnumerator LoadSceneRoutine()
-    {
-        AsyncOperation op = SceneManager.LoadSceneAsync(targetSceneName);
-        if (!waitForSceneLoaded) yield break;
-
-        while (!op.isDone)
-            yield return null;
+        if (openable != null)
+        {
+            openable.MarkRecentlyTeleported(entity);
+            openable.DisableInteractionTemporarily(reuseCooldown);
+        }
     }
 
     public bool CanOpenFor(GameObject entity)
     {
-        if (entity.CompareTag("Sweeper"))
+        if (entity == null)
             return false;
 
-        if (!canUseDoor || isFrozen) return false;
+        if (!entity.CompareTag("Player"))
+            return false;
+
+        if (!canUseDoor || isFrozen)
+            return false;
+
         return connectedDoor != null && exitPoint != null;
     }
 
@@ -212,7 +207,8 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
     public void OpenForSweeper(GameObject entity)
     {
-        if (entity == null) return;
+        if (entity == null)
+            return;
 
         if (isFrozen)
             MeltDoor();
@@ -234,19 +230,26 @@ public class FrozenDoor : MonoBehaviour, IHeatable, IOpenableDoor, IHasExitPoint
 
     public void MarkRecentlyTeleported(GameObject entity)
     {
+        if (entity == null)
+            return;
+
         recentlyTeleported.Add(entity);
         StartCoroutine(ClearRecentTeleport(entity));
     }
 
     private IEnumerator ClearRecentTeleport(GameObject entity)
     {
-        yield return new WaitUntil(() => !IsEntityInside(entity));
+        while (IsEntityInside(entity))
+            yield return null;
+
         recentlyTeleported.Remove(entity);
     }
 
     private bool IsEntityInside(GameObject entity)
     {
-        if (triggerCol == null) return false;
+        if (entity == null || triggerCol == null)
+            return false;
+
         return triggerCol.bounds.Contains(entity.transform.position);
     }
 }

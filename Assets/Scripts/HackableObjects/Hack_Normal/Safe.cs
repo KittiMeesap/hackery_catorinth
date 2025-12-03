@@ -124,7 +124,7 @@ public class Safe : HackableObject
 
         if (isOpened || isAnimating) return;
 
-        UnlockLinkedDoors(); 
+        UnlockLinkedDoors();
         StartCoroutine(OpenSafeSequence());
     }
 
@@ -164,12 +164,9 @@ public class Safe : HackableObject
     {
         foreach (var door in doorsToUnlock)
         {
-            if (door != null)
-            {
-                GameManager.Instance.unlockedDoors.Add(door.name);
+            if (door == null) continue;
 
-                door.UnlockDoorFromSafe();
-            }
+            door.UnlockDoorFromSafe();
         }
     }
 

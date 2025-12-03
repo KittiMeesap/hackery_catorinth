@@ -31967,6 +31967,8 @@ MonoBehaviour:
   popupPanel: {fileID: 1092387843}
   videoPlayer: {fileID: 1543041919}
   closeButton: {fileID: 784077562}
+  firstSelectedButton: {fileID: 0}
+  cancelAction: {fileID: 0}
 --- !u!114 &1092387846
 MonoBehaviour:
   m_ObjectHideFlags: 0

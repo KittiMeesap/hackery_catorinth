@@ -204,11 +204,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WhipcreamRoller
   rangeIsOffsetFromStart: 1
-  rangeLeft: -2
-  rangeRight: 2
+  rangeLeft: -8
+  rangeRight: 8
   idleWaitTime: 0.5
-  moveSpeed: 2
-  spinSpeed: 4
+  moveSpeed: 1
+  spinSpeed: 0.3
   stopSpinDistanceLeeway: 0.05
   playerLayer:
     serializedVersion: 2
@@ -234,8 +234,6 @@ MonoBehaviour:
   sfxHeatStun: SFX_WhipHeatStun
   spriteRenderer: {fileID: 6876511256430132359}
   animator: {fileID: 2586289172562378010}
-  drawVisionGizmo: 1
-  drawBoomGizmo: 1
 --- !u!1 &1516424532146303313
 GameObject:
   m_ObjectHideFlags: 0

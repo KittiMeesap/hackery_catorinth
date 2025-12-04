@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -31,6 +31,9 @@ public class GameOverUI : MonoBehaviour
         if (shown) return;
         shown = true;
 
+        // ปลด Freeze เพื่อให้ UI รับ input
+        GameManager.Instance.FreezeGame(false);
+
         if (panel != null)
             panel.SetActive(true);
 
@@ -38,6 +41,12 @@ public class GameOverUI : MonoBehaviour
         if (input != null)
             input.SwitchCurrentActionMap("UI");
 
+        StartCoroutine(SelectFirstButton());
+    }
+
+    private System.Collections.IEnumerator SelectFirstButton()
+    {
+        yield return null;
         if (firstSelectedButton != null && EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
@@ -57,11 +66,9 @@ public class GameOverUI : MonoBehaviour
 
     private System.Collections.IEnumerator RespawnRoutine()
     {
-        // Fade out screen
         if (screenFader != null)
             yield return screenFader.FadeOut();
 
-        // Respawn Player
         var player = FindFirstObjectByType<PlayerController>();
 
         if (player != null)
@@ -70,17 +77,12 @@ public class GameOverUI : MonoBehaviour
             if (hp != null)
                 hp.ResetHealth();
 
-            // Restore position & countdown
             GameManager.Instance.RespawnPlayer(player.gameObject);
-
-            // Reset movement, animations, states
             player.ResetStateAfterRespawn();
         }
 
-        // Unfreeze game
         GameManager.Instance.FreezeGame(false);
 
-        // Switch back to gameplay input
         var input = FindFirstObjectByType<PlayerInput>();
         if (input != null)
             input.SwitchCurrentActionMap("Player");
@@ -88,7 +90,6 @@ public class GameOverUI : MonoBehaviour
         shown = false;
         panel.SetActive(false);
 
-        // Fade in again
         if (screenFader != null)
             yield return screenFader.FadeIn();
     }

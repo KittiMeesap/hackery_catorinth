@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
@@ -26,25 +26,34 @@ public class PauseMenuUI : MonoBehaviour
 
     private void Awake()
     {
-        playerInput = GetComponent<PlayerInput>();
+        // ดึง PlayerInput จากผู้เล่น ไม่ต้องใส่ไว้บน UI
+        playerInput = FindFirstObjectByType<PlayerInput>();
+
         if (playerInput == null)
-            Debug.LogError("PlayerInput missing on PauseMenuUI.");
+            Debug.LogError("No PlayerInput found in the scene.");
     }
 
     private void OnEnable()
     {
-        pauseAction.action.performed += OnPausePressed;
-        pauseAction.action.Enable();
+        if (pauseAction != null)
+        {
+            pauseAction.action.performed += OnPausePressed;
+            pauseAction.action.Enable();
+        }
     }
 
     private void OnDisable()
     {
-        pauseAction.action.performed -= OnPausePressed;
-        pauseAction.action.Disable();
+        if (pauseAction != null)
+        {
+            pauseAction.action.performed -= OnPausePressed;
+            pauseAction.action.Disable();
+        }
     }
 
     private void OnPausePressed(InputAction.CallbackContext ctx)
     {
+        // ถ้าอยู่ในหน้า Settings ให้กลับไปหน้า Pause ก่อน
         if (settingsPanel.activeSelf)
         {
             CloseSettings();
@@ -57,7 +66,9 @@ public class PauseMenuUI : MonoBehaviour
             PauseGame();
     }
 
-    // PAUSE / RESUME
+    // -----------------------
+    // PAUSE / RESUME LOGIC
+    // -----------------------
     public void PauseGame()
     {
         Time.timeScale = 0f;
@@ -66,6 +77,7 @@ public class PauseMenuUI : MonoBehaviour
         pausePanel.SetActive(true);
         settingsPanel.SetActive(false);
 
+        // เปลี่ยน Action Map เป็น UI
         playerInput.SwitchCurrentActionMap(MAP_UI);
 
         StartCoroutine(SelectButtonNextFrame(defaultPauseButton));
@@ -79,10 +91,13 @@ public class PauseMenuUI : MonoBehaviour
         pausePanel.SetActive(false);
         settingsPanel.SetActive(false);
 
+        // กลับไป Action Map ของ Player
         playerInput.SwitchCurrentActionMap(MAP_GAMEPLAY);
     }
 
-    // SETTINGS
+    // -----------------------
+    // SETTINGS MENU
+    // -----------------------
     public void OpenSettings()
     {
         pausePanel.SetActive(false);
@@ -99,25 +114,36 @@ public class PauseMenuUI : MonoBehaviour
         StartCoroutine(SelectButtonNextFrame(defaultPauseButton));
     }
 
-    // BUTTONS
+    // -----------------------
+    // BUTTON EVENTS
+    // -----------------------
     public void ResetLevel()
     {
         Time.timeScale = 1f;
         isPaused = false;
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void GoHome()
     {
         Time.timeScale = 1f;
+        isPaused = false;
+
         SceneManager.LoadScene(homeSceneName);
     }
 
-    // UI Helper
+    // -----------------------
+    // UI SELECTOR (Controller Support)
+    // -----------------------
     private IEnumerator SelectButtonNextFrame(GameObject button)
     {
         yield return null;
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(button);
+
+        if (EventSystem.current != null && button != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(button);
+        }
     }
 }

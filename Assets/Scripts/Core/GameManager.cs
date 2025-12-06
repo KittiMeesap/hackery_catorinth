@@ -11,14 +11,8 @@ public class GameManager : MonoBehaviour
     public bool IsInHackingMode { get; private set; } = false;
     public float time = 0;
 
-    [Header("Mission Settings")]
-    public MissionSetSO missionSetForScene;
-
     [Header("UI References")]
     public TextMeshProUGUI missionText;
-
-    [Header("External References")]
-    public CountdownTimer countdownManager;
 
     [Header("Screen Fade")]
     public ScreenFader screenFader;
@@ -62,16 +56,6 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         time += Time.deltaTime;
-    }
-
-    public void StartCountdown()
-    {
-        countdownManager?.StartCountdown();
-    }
-
-    public void StopCountdown()
-    {
-        countdownManager?.StopCountdown();
     }
 
     private void OnExitPressed(InputAction.CallbackContext context)

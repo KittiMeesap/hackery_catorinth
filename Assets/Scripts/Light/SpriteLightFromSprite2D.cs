@@ -39,12 +39,10 @@ public class SpriteLightFromSprite2D : MonoBehaviour
 
     private SpriteRenderer source;
     private SpriteRenderer glow;
-    private PlayerHiding playerHiding;
 
     private void OnEnable()
     {
         source = GetComponent<SpriteRenderer>();
-        playerHiding = GetComponentInParent<PlayerHiding>();
         FindOrCreateLight();
         UpdateLight();
     }
@@ -55,12 +53,6 @@ public class SpriteLightFromSprite2D : MonoBehaviour
         {
             UpdateLight();
 
-            if (playerHiding != null)
-            {
-                bool shouldHide = playerHiding.IsHidingInContainer;
-                if (glow.enabled == shouldHide)
-                    glow.enabled = !shouldHide;
-            }
         }
     }
 

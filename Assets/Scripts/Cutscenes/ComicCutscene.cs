@@ -11,7 +11,6 @@ public class ComicCutscene : MonoBehaviour
     [Header("Cutscene Pages")]
     [SerializeField] private GameObject[] pageObjects;
 
-    // AUDIO
     [Header("Audio")]
     [SerializeField] private string bgmCutsceneKey = "BGM_Cutscene";
     [SerializeField] private string sfxPageFlipKey = "SFX_PageFlip";
@@ -41,22 +40,18 @@ public class ComicCutscene : MonoBehaviour
     private bool allowNext = false;
     private bool isPlaying = false;
 
-    // multi-panel system
     private bool waitingForPanelClick = false;
     private List<Image> currentPanels;
 
     // INPUT SYSTEM
-    private PlayerInput playerInput;
+    private InputManager input;
     private InputAction continueAction;
-
 
     private void Awake()
     {
-        playerInput = FindAnyObjectByType<PlayerInput>();
+        input = new InputManager();
     }
 
-
-    // START
     private void Start()
     {
         PlayCutsceneBGM();
@@ -78,7 +73,6 @@ public class ComicCutscene : MonoBehaviour
             AudioManager.Instance?.PlayBGM(bgmCutsceneKey, true);
     }
 
-    // START CUTSCENE
     public void StartCutscene()
     {
         foreach (var page in pageObjects)
@@ -90,9 +84,9 @@ public class ComicCutscene : MonoBehaviour
         currentIndex = 0;
         isPlaying = true;
 
-        playerInput.SwitchCurrentActionMap("GameControls");
+        input.GameControls.Enable();
 
-        continueAction = playerInput.actions["Continue"];
+        continueAction = input.GameControls.Continue;
         continueAction.performed += OnContinuePerformed;
 
         StartCoroutine(DelayedStart());
@@ -104,12 +98,9 @@ public class ComicCutscene : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.20f);
 
         yield return FadeOverlaySmooth(1f, 0f, fadeDuration);
-
         yield return StartCoroutine(ShowPageRoutine());
     }
 
-
-    // INPUT CALLBACK
     private void OnContinuePerformed(InputAction.CallbackContext ctx)
     {
         if (!isPlaying)
@@ -127,8 +118,6 @@ public class ComicCutscene : MonoBehaviour
         NextPage();
     }
 
-
-    // MAIN PAGE ROUTINE
     IEnumerator ShowPageRoutine()
     {
         allowNext = false;
@@ -172,6 +161,7 @@ public class ComicCutscene : MonoBehaviour
             tmpSub.gameObject.SetActive(false);
         }
 
+        // Panel animation
         if (multiplePanels)
         {
             yield return FadeInPanel(currentPanels[0]);
@@ -180,20 +170,16 @@ public class ComicCutscene : MonoBehaviour
             for (int i = 1; i < currentPanels.Count; i++)
             {
                 waitingForPanelClick = true;
-
                 yield return new WaitUntil(() => waitingForPanelClick == false);
 
                 yield return FadeInPanel(currentPanels[i]);
                 PlayPanelSFX();
             }
         }
-        else
+        else if (currentPanels.Count == 1)
         {
-            if (currentPanels.Count == 1)
-            {
-                yield return FadeInPanel(currentPanels[0]);
-                PlayPanelSFX();
-            }
+            yield return FadeInPanel(currentPanels[0]);
+            PlayPanelSFX();
         }
 
         if (tmpSub != null)
@@ -205,132 +191,6 @@ public class ComicCutscene : MonoBehaviour
         allowNext = true;
     }
 
-
-    // AUDIO FUNCTIONS
-    private void PlayPageFlipSFX()
-    {
-        if (!string.IsNullOrEmpty(sfxPageFlipKey))
-            AudioManager.Instance?.PlaySFX(sfxPageFlipKey);
-    }
-
-    private void PlayPanelSFX()
-    {
-        if (!string.IsNullOrEmpty(sfxPanelRevealKey))
-            AudioManager.Instance?.PlaySFX(sfxPanelRevealKey);
-    }
-
-    private void PlayPageSFX(int index)
-    {
-        if (pageSFXKeys == null || index >= pageSFXKeys.Length) return;
-
-        string key = pageSFXKeys[index];
-        if (!string.IsNullOrEmpty(key))
-            AudioManager.Instance?.PlaySFX(key);
-    }
-
-
-    // HELPERS
-    void PreHidePagePanels(GameObject page)
-    {
-        foreach (Transform child in page.transform)
-        {
-            Image img = child.GetComponent<Image>();
-            if (img != null)
-            {
-                var c = img.color; c.a = 0;
-                img.color = c;
-            }
-        }
-
-        TextMeshProUGUI tmpSub =
-            page.GetComponentInChildren<TextMeshProUGUI>(true);
-
-        if (tmpSub != null)
-        {
-            var col = tmpSub.color; col.a = 0;
-            tmpSub.color = col;
-        }
-    }
-
-    bool PageShouldFade(int index)
-    {
-        if (pageUseFullFade == null || pageUseFullFade.Length == 0)
-            return true;
-
-        if (index >= pageUseFullFade.Length)
-            return true;
-
-        return pageUseFullFade[index];
-    }
-
-    IEnumerator FullPageTransitionFade()
-    {
-        yield return FadeOverlaySmooth(0f, 1f, pageFadeDuration);
-
-        foreach (var p in pageObjects)
-            p.SetActive(false);
-
-        PreHidePagePanels(pageObjects[currentIndex]);
-        pageObjects[currentIndex].SetActive(true);
-
-        yield return FadeOverlaySmooth(1f, 0f, pageFadeDuration);
-    }
-
-    IEnumerator FadeOverlaySmooth(float start, float end, float duration)
-    {
-        float t = 0f;
-
-        while (t < duration)
-        {
-            t += Time.unscaledDeltaTime;
-            float p = t / duration;
-            p = p * p * (3 - 2 * p);
-
-            float a = Mathf.Lerp(start, end, p);
-
-            var c = fadeOverlay.color;
-            c.a = a;
-            fadeOverlay.color = c;
-
-            yield return null;
-        }
-    }
-
-    IEnumerator FadeInPanel(Image panel)
-    {
-        float t = 0f;
-
-        while (t < panelFadeDuration)
-        {
-            t += Time.unscaledDeltaTime;
-            float p = t / panelFadeDuration;
-            p = p * p * (3 - 2 * p);
-
-            panel.color = new Color(1, 1, 1, p);
-            yield return null;
-        }
-    }
-
-    IEnumerator FadeInText(Graphic textObj)
-    {
-        float t = 0f;
-
-        while (t < subtitleFadeDuration)
-        {
-            t += Time.unscaledDeltaTime;
-            float p = t / subtitleFadeDuration;
-            p = p * p * (3 - 2 * p);
-
-            var col = textObj.color;
-            col.a = p;
-            textObj.color = col;
-
-            yield return null;
-        }
-    }
-
-
-    // PAGE CHANGE + END CUTSCENE
     void NextPage()
     {
         currentIndex++;
@@ -348,7 +208,7 @@ public class ComicCutscene : MonoBehaviour
         if (continueAction != null)
             continueAction.performed -= OnContinuePerformed;
 
-        playerInput.SwitchCurrentActionMap("Player");
+        input.GameControls.Disable();
 
         AudioManager.Instance?.StopBGM();
 
@@ -371,5 +231,123 @@ public class ComicCutscene : MonoBehaviour
             SceneManager.LoadScene(nextSceneName);
         else
             Destroy(gameObject);
+    }
+
+    bool PageShouldFade(int index)
+    {
+        if (pageUseFullFade == null || pageUseFullFade.Length == 0) return true;
+        if (index >= pageUseFullFade.Length) return true;
+        return pageUseFullFade[index];
+    }
+
+    void PlayPageFlipSFX()
+    {
+        if (!string.IsNullOrEmpty(sfxPageFlipKey))
+            AudioManager.Instance?.PlaySFX(sfxPageFlipKey);
+    }
+
+    void PlayPanelSFX()
+    {
+        if (!string.IsNullOrEmpty(sfxPanelRevealKey))
+            AudioManager.Instance?.PlaySFX(sfxPanelRevealKey);
+    }
+
+    void PlayPageSFX(int index)
+    {
+        if (pageSFXKeys == null || index >= pageSFXKeys.Length) return;
+
+        string key = pageSFXKeys[index];
+        if (!string.IsNullOrEmpty(key))
+            AudioManager.Instance?.PlaySFX(key);
+    }
+
+    void PreHidePagePanels(GameObject page)
+    {
+        foreach (Transform child in page.transform)
+        {
+            Image img = child.GetComponent<Image>();
+            if (img != null)
+            {
+                var c = img.color; c.a = 0;
+                img.color = c;
+            }
+        }
+
+        TextMeshProUGUI tmpSub =
+            page.GetComponentInChildren<TextMeshProUGUI>(true);
+
+        if (tmpSub != null)
+        {
+            var col = tmpSub.color; col.a = 0;
+            tmpSub.color = col;
+        }
+    }
+
+    IEnumerator FullPageTransitionFade()
+    {
+        yield return FadeOverlaySmooth(0f, 1f, pageFadeDuration);
+
+        foreach (var p in pageObjects)
+            p.SetActive(false);
+
+        PreHidePagePanels(pageObjects[currentIndex]);
+        pageObjects[currentIndex].SetActive(true);
+
+        yield return FadeOverlaySmooth(1f, 0f, pageFadeDuration);
+    }
+
+    IEnumerator FadeOverlaySmooth(float start, float end, float duration)
+    {
+        float t = 0f;
+
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+
+            float p = t / duration;
+            p = p * p * (3 - 2 * p);
+
+            float a = Mathf.Lerp(start, end, p);
+
+            var c = fadeOverlay.color;
+            fadeOverlay.color = new Color(c.r, c.g, c.b, a);
+
+            yield return null;
+        }
+    }
+
+    IEnumerator FadeInPanel(Image panel)
+    {
+        float t = 0f;
+
+        while (t < panelFadeDuration)
+        {
+            t += Time.unscaledDeltaTime;
+
+            float p = t / panelFadeDuration;
+            p = p * p * (3 - 2 * p);
+
+            panel.color = new Color(1, 1, 1, p);
+            yield return null;
+        }
+    }
+
+    IEnumerator FadeInText(Graphic textObj)
+    {
+        float t = 0f;
+
+        while (t < subtitleFadeDuration)
+        {
+            t += Time.unscaledDeltaTime;
+
+            float p = t / subtitleFadeDuration;
+            p = p * p * (3 - 2 * p);
+
+            var col = textObj.color;
+            col.a = p;
+            textObj.color = col;
+
+            yield return null;
+        }
     }
 }

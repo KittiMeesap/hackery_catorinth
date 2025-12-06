@@ -55,14 +55,6 @@ public class SoundAreaGate : MonoBehaviour
             return;
         }
 
-        if (player == null)
-        {
-            if (PlayerController.PlayerTransform != null)
-                player = PlayerController.PlayerTransform;
-            else
-                return;
-        }
-
         if (source.clip == null) return;
 
         float dist = Vector3.Distance(player.position, transform.position);

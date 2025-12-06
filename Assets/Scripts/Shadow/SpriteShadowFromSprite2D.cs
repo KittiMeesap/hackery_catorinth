@@ -39,12 +39,10 @@ public class SpriteShadowFromSprite2D : MonoBehaviour
 
     private SpriteRenderer source;
     private SpriteRenderer shadow;
-    private PlayerHiding playerHiding;
 
     private void OnEnable()
     {
         source = GetComponent<SpriteRenderer>();
-        playerHiding = GetComponentInParent<PlayerHiding>();
         FindOrCreateShadow();
         UpdateShadow();
     }
@@ -55,12 +53,6 @@ public class SpriteShadowFromSprite2D : MonoBehaviour
         {
             UpdateShadow();
 
-            if (playerHiding != null)
-            {
-                bool shouldHide = playerHiding.IsHidingInContainer;
-                if (shadow.enabled == shouldHide)
-                    shadow.enabled = !shouldHide;
-            }
         }
     }
 

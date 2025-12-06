@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8ceecfa4e6e4cb449852fabf064a21d5
+guid: a9c32f276ca102e428570dd885abe490
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6000111601195662724
-    second: BG_Cafe_Room1_01_0
+      213: 3109289202915743527
+    second: star_empty_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BG_Cafe_Room1_01_0
+      name: star_empty_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 128
-        height: 64
+        y: 1
+        width: 32
+        height: 31
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c724806e9425bbca0800000000000000
-      internalID: -6000111601195662724
+      spriteID: 72710cb6e0a662b20800000000000000
+      internalID: 3109289202915743527
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: daa41445ed6e0a148a4fd6bfc4d59538
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BG_Cafe_Room1_01_0: -6000111601195662724
+      star_empty_0: 3109289202915743527
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

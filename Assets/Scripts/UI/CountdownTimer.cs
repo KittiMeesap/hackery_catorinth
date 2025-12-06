@@ -29,7 +29,7 @@ public class CountdownTimer : MonoBehaviour
     private float currentTime;
     private bool isRunning = false;
     private bool warned = false;
-    private bool forceStopped = false;
+    private bool forceStopped = false;       // ?? NEW
     private Vector3 defaultScale;
 
     private void Start()
@@ -42,7 +42,7 @@ public class CountdownTimer : MonoBehaviour
 
     private void Update()
     {
-        if (!isRunning || forceStopped) return;
+        if (!isRunning || forceStopped) return;   // ?? NEW (Block update when forced stop)
 
         if (currentTime > 0)
         {
@@ -68,7 +68,7 @@ public class CountdownTimer : MonoBehaviour
         int seconds = Mathf.FloorToInt(currentTime % 60);
         timerText.text = $"{minutes:00}:{seconds:00}";
 
-        if (forceStopped) return;
+        if (forceStopped) return; // ?? NEW prevent blinking/sound after forced stop
 
         if (currentTime <= warningThreshold)
         {
@@ -116,7 +116,7 @@ public class CountdownTimer : MonoBehaviour
 
     private void OnTimeOver()
     {
-        if (forceStopped) return;
+        if (forceStopped) return;   // ?? NEW block timeOver sound
 
         CancelInvoke(nameof(PlayWarningBeep));
         AudioManager.Instance?.PlaySFX(timeOverSFXKey);
@@ -130,7 +130,7 @@ public class CountdownTimer : MonoBehaviour
         CancelInvoke(nameof(PlayWarningBeep));
         AudioManager.Instance?.StopAllSFX();
 
-        forceStopped = false;
+        forceStopped = false; // ?? NEW reset state
 
         currentTime = startTime;
         warned = false;
@@ -153,7 +153,7 @@ public class CountdownTimer : MonoBehaviour
 
     public void StartCountdown()
     {
-        forceStopped = false;
+        forceStopped = false;  // ?? NEW
         isRunning = true;
     }
 
@@ -164,6 +164,7 @@ public class CountdownTimer : MonoBehaviour
         isRunning = false;
     }
 
+    // ?? NEW — used by PauseMenuUI + GameOverUI
     public void ForceStopAllTimerAudio()
     {
         forceStopped = true;
@@ -174,7 +175,7 @@ public class CountdownTimer : MonoBehaviour
 
     public void PlayDamageFlash()
     {
-        if (timerText == null || forceStopped) return;
+        if (timerText == null || forceStopped) return; // ?? NEW
         StartCoroutine(DamageFlashRoutine());
     }
 
@@ -204,17 +205,4 @@ public class CountdownTimer : MonoBehaviour
         timerText.rectTransform.localPosition = originalPos;
         timerText.color = originalColor;
     }
-
-    public float GetCurrentTime()
-    {
-        return currentTime;
-    }
-
-    public void SetTime(float t)
-    {
-        currentTime = Mathf.Max(0, t);
-        UpdateTimerUI();
-    }
-
-
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
-public class HidingSpot : MonoBehaviour, IInteractable
+public class HidingSpot : MonoBehaviour
 {
     [Header("Cooldown Settings")]
     [SerializeField] private float exitCooldown = 0.3f;
@@ -66,28 +66,6 @@ public class HidingSpot : MonoBehaviour, IInteractable
     {
         if (other.CompareTag("Player"))
             other.GetComponent<PlayerHiding>()?.ClearHidingSpot(this);
-    }
-
-    public virtual Transform GetPromptPoint()
-    {
-        return transform;
-    }
-
-    public virtual float GetInteractRadius()
-    {
-        return 1.0f;
-    }
-
-    public virtual void Interact()
-    {
-        if (PlayerHiding.Instance.IsHidingInContainer)
-        {
-            OnExitHiding(PlayerHiding.Instance);
-        }
-        else
-        {
-            OnEnterHiding(PlayerHiding.Instance);
-        }
     }
 
 #if UNITY_EDITOR

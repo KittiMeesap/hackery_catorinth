@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 2306129602416075113}
   m_Layer: 8
   m_Name: Hotdog
-  m_TagString: Sweeper
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -215,7 +215,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   instantKillDamage: 9999
-  uiPointerPrefab: {fileID: 2787070349233026534, guid: a8e96314cd786c64bb973789efee280c, type: 3}
 --- !u!114 &703370984905429622
 MonoBehaviour:
   m_ObjectHideFlags: 0

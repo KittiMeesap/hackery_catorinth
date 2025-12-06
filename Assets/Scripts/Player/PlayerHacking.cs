@@ -5,9 +5,17 @@ using UnityEngine.InputSystem;
 public class PlayerHacking : MonoBehaviour
 {
     private PlayerInput playerInput;
+    private HackableObject currentHoverHackable;
     private HackableObject currentHackedObject;
+    private bool isUsingController;
+
+    [Header("Detection Settings")]
+    [SerializeField] private float gamepadDetectionRadius = 0.3f;
+    [SerializeField] private float clickCooldown = 0.25f;
 
     private bool hackingDisabled = false;
+    private bool isClickLocked = false;
+
     public void SetHackingDisabled(bool disabled) => hackingDisabled = disabled;
 
     private void Awake()
@@ -20,31 +28,157 @@ public class PlayerHacking : MonoBehaviour
         if (GameManager.Instance == null || UIManager.Instance == null) return;
         if (hackingDisabled) return;
 
-        if (GameManager.Instance.IsInHackingMode)
-        {
-            HandleArrowInput();
-            return;
-        }
-
         if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer)
             return;
 
         if (PlayerController.Instance != null)
         {
-            var pl = PlayerController.Instance;
+            var player = PlayerController.Instance;
 
-            bool isSleeping = (bool)typeof(PlayerController)
-                .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .GetValue(pl);
+            var sleepingField = typeof(PlayerController)
+                .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            bool isAFK = (bool)typeof(PlayerController)
-                .GetField("isAFKTriggered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .GetValue(pl);
-            if (!GameManager.Instance.IsInHackingMode && (isSleeping || isAFK))
+            var afkField = typeof(PlayerController)
+                .GetField("isAFKTriggered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            bool isSleeping = sleepingField != null && (bool)sleepingField.GetValue(player);
+            bool isAFK = afkField != null && (bool)afkField.GetValue(player);
+
+            if (isSleeping || isAFK)
                 return;
         }
 
+        if (PlayerHiding.Instance != null && PlayerHiding.Instance.IsHidingInContainer)
+            return;
+
+        isUsingController = playerInput.currentControlScheme == "Gamepad";
+
+        if (!GameManager.Instance.IsInHackingMode)
+        {
+            if (isUsingController)
+                DetectHackableNearby_Gamepad();
+            else
+                DetectHoverHackable_Mouse();
+        }
+
         HandleArrowInput();
+    }
+
+    private void DetectHoverHackable_Mouse()
+    {
+        if (PlayerController.Instance != null)
+        {
+            var sleepingField = typeof(PlayerController)
+                .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (sleepingField != null && (bool)sleepingField.GetValue(PlayerController.Instance))
+                return;
+        }
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        mouseWorldPos.z = 0f;
+
+        Collider2D[] hits = Physics2D.OverlapPointAll(mouseWorldPos);
+
+        HackableObject hovered = null;
+
+        foreach (var hit in hits)
+        {
+            if (!hit.CompareTag("CanHack")) continue;
+
+            var hackable = hit.GetComponentInParent<HackableObject>();
+            if (hackable != null && hackable.triggerType == HackableObject.HackTriggerType.MouseHover)
+            {
+                hovered = hackable;
+                break;
+            }
+        }
+
+        if (hovered == null) return;
+
+        if (Mouse.current.leftButton.wasPressedThisFrame && !isClickLocked)
+        {
+            StartCoroutine(ClickCooldownRoutine());
+
+            if (!UIManager.Instance.IsHacking)
+            {
+                PlayerController.Instance.SetFrozen(true);
+                PlayerController.Instance.SetPhoneOut(true);
+
+                hovered.OnEnterHackingMode();
+                currentHackedObject = hovered;
+            }
+            else
+            {
+                if (currentHackedObject != null)
+                {
+                    currentHackedObject.HideHackingUI();
+                    currentHackedObject = null;
+                }
+            }
+        }
+    }
+
+    private void DetectHackableNearby_Gamepad()
+    {
+        if (PlayerController.Instance != null)
+        {
+            var sleepingField = typeof(PlayerController)
+                .GetField("isSleeping", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (sleepingField != null && (bool)sleepingField.GetValue(PlayerController.Instance))
+                return;
+        }
+
+        Vector2 pos = PlayerController.Instance.transform.position;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(pos, gamepadDetectionRadius);
+
+        HackableObject nearest = null;
+        float nearestDist = float.MaxValue;
+
+        foreach (var hit in hits)
+        {
+            if (!hit.CompareTag("CanHack")) continue;
+
+            var hackable = hit.GetComponentInParent<HackableObject>();
+            if (hackable != null && hackable.triggerType == HackableObject.HackTriggerType.ProximityInteract)
+            {
+                float dist = Vector2.Distance(pos, hackable.transform.position);
+                if (dist < nearestDist)
+                {
+                    nearestDist = dist;
+                    nearest = hackable;
+                }
+            }
+        }
+
+        currentHoverHackable = nearest;
+
+        if (nearest == null) return;
+
+        bool pressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+
+        if (pressed && !isClickLocked)
+        {
+            StartCoroutine(ClickCooldownRoutine());
+
+            if (!UIManager.Instance.IsHacking)
+            {
+                PlayerController.Instance.SetFrozen(true);
+                PlayerController.Instance.SetPhoneOut(true);
+
+                nearest.OnEnterHackingMode();
+                currentHackedObject = nearest;
+            }
+            else
+            {
+                if (currentHackedObject != null)
+                {
+                    currentHackedObject.HideHackingUI();
+                    currentHackedObject = null;
+                }
+            }
+        }
     }
 
     private void HandleArrowInput()
@@ -54,34 +188,31 @@ public class PlayerHacking : MonoBehaviour
 
         ArrowUI.Direction? input = null;
 
-        // Keyboard Arrows
         if (Keyboard.current != null)
         {
-            if (Keyboard.current.upArrowKey.wasPressedThisFrame)
-                input = ArrowUI.Direction.Up;
-            else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
-                input = ArrowUI.Direction.Down;
-            else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
-                input = ArrowUI.Direction.Left;
-            else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
-                input = ArrowUI.Direction.Right;
+            if (Keyboard.current.wKey.wasPressedThisFrame) input = ArrowUI.Direction.Up;
+            else if (Keyboard.current.sKey.wasPressedThisFrame) input = ArrowUI.Direction.Down;
+            else if (Keyboard.current.aKey.wasPressedThisFrame) input = ArrowUI.Direction.Left;
+            else if (Keyboard.current.dKey.wasPressedThisFrame) input = ArrowUI.Direction.Right;
         }
 
-        // Gamepad D-Pad
         if (Gamepad.current != null)
         {
-            if (Gamepad.current.dpad.up.wasPressedThisFrame)
-                input = ArrowUI.Direction.Up;
-            else if (Gamepad.current.dpad.down.wasPressedThisFrame)
-                input = ArrowUI.Direction.Down;
-            else if (Gamepad.current.dpad.left.wasPressedThisFrame)
-                input = ArrowUI.Direction.Left;
-            else if (Gamepad.current.dpad.right.wasPressedThisFrame)
-                input = ArrowUI.Direction.Right;
+            if (Gamepad.current.dpad.up.wasPressedThisFrame) input = ArrowUI.Direction.Up;
+            else if (Gamepad.current.dpad.down.wasPressedThisFrame) input = ArrowUI.Direction.Down;
+            else if (Gamepad.current.dpad.left.wasPressedThisFrame) input = ArrowUI.Direction.Left;
+            else if (Gamepad.current.dpad.right.wasPressedThisFrame) input = ArrowUI.Direction.Right;
         }
 
         if (input.HasValue)
             UIManager.Instance.SubmitArrow(input.Value);
+    }
+
+    private IEnumerator ClickCooldownRoutine()
+    {
+        isClickLocked = true;
+        yield return new WaitForSeconds(clickCooldown);
+        isClickLocked = false;
     }
 
     public void SetCurrentHackedObject(HackableObject obj)

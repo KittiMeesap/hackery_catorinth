@@ -2,65 +2,73 @@ using System.Collections;
 using UnityEngine;
 using Unity.Cinemachine;
 
-public class BoxHide : HidingSpot
+public class BoxHide : HidingSpot, IInteractable
 {
+    public enum PlayerState { Idle, Walk }
+
     [Header("Animator")]
     [SerializeField] private Animator anim;
+    [SerializeField] private string idleStateName = "Box_PlayerIdle";
+    [SerializeField] private string walkStateName = "Box_PlayerWalk";
     [SerializeField] private string getInTrigger = "GetIn";
     [SerializeField] private string getOutTrigger = "GetOut";
-    [SerializeField] private float enterAnimTime = 0.35f;
-    [SerializeField] private float exitAnimTime = 0.35f;
+    [SerializeField] private string isWalkingBool = "IsWalking";
+
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 2f;
 
     [Header("Prompt UI")]
     [SerializeField] private Transform promptPoint;
-
-    [Header("Highlight")]
-    [SerializeField] private SpriteRenderer highlightSprite;
+    [SerializeField] private float promptMarginY = 0.2f;
 
     [Header("Audio")]
     [SerializeField] private string sfxOpenKey = "SFX_BoxOpen";
     [SerializeField] private string sfxCloseKey = "SFX_BoxClose";
 
-    [Header("Cooldown")]
-    [SerializeField] private float hideCooldown = 0.75f;
+    [Header("Highlight")]
+    [SerializeField] private SpriteRenderer highlightSprite;
 
-    [Header("Interact Radius")]
-    [SerializeField] private float interactRadius = 0.9f;
-
-    private bool isPlayerNear = false;
     private bool isInside = false;
     private bool isBusy = false;
+    private bool isPlayerNear = false;
 
-    private PlayerHiding currentPlayer;
-    private PlayerController controller;
-
-    private Vector2 cachedPlayerPosition;
-    private SpriteRenderer sr;
+    private Rigidbody2D rb;
+    private PlayerController playerController;
     private SpriteRenderer[] playerSprites;
+    private SpriteRenderer sr;
 
     private CinemachineCamera cineCam;
     private Transform originalCameraFollow;
 
-    private int hashGetIn, hashGetOut;
+    private int hashIdle, hashWalk, hashGetIn, hashGetOut, hashIsWalking;
+    private Vector3 defaultScale;
+    private Vector2 moveInput;
 
     private void Awake()
     {
-        if (anim == null) anim = GetComponent<Animator>();
-        hashGetIn = Animator.StringToHash(getInTrigger);
-        hashGetOut = Animator.StringToHash(getOutTrigger);
+        rb = GetComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0;
+        rb.freezeRotation = true;
 
         sr = GetComponentInChildren<SpriteRenderer>();
+        defaultScale = transform.localScale;
 
+        // ANIM HASH
+        if (anim == null) anim = GetComponent<Animator>();
+        hashIdle = Animator.StringToHash(idleStateName);
+        hashWalk = Animator.StringToHash(walkStateName);
+        hashGetIn = Animator.StringToHash(getInTrigger);
+        hashGetOut = Animator.StringToHash(getOutTrigger);
+        hashIsWalking = Animator.StringToHash(isWalkingBool);
+
+        // PROMPT POINT
         if (promptPoint == null)
         {
-            GameObject go = new GameObject("PromptPoint");
+            var go = new GameObject("PromptPoint");
             go.transform.SetParent(transform);
-            go.transform.localPosition = Vector3.zero;
             promptPoint = go.transform;
         }
-
-        if (highlightSprite != null)
-            highlightSprite.enabled = false;
 
         cineCam = FindFirstObjectByType<CinemachineCamera>();
         if (cineCam != null)
@@ -69,115 +77,96 @@ public class BoxHide : HidingSpot
 
     private void Update()
     {
-        if (!isInside)
-            UpdatePromptPoint();
+        if (isInside)
+        {
+            return;
+        }
+        UpdatePromptPointPosition();
     }
 
-    //--------------------------------------------------
-    //  OVERRIDE GET INTERACT RADIUS
-    //--------------------------------------------------
-    public override float GetInteractRadius() => interactRadius;
-
-    //--------------------------------------------------
-    //  OVERRIDE GET PROMPT POINT
-    //--------------------------------------------------
-    public override Transform GetPromptPoint()
-        => promptPoint != null ? promptPoint : transform;
-
-    //--------------------------------------------------
-    //  OVERRIDE INTERACT
-    //--------------------------------------------------
-    public override void Interact()
+    // ------------------ INTERACT ----------------------
+    public void Interact()
     {
         if (isBusy) return;
-        if (Time.time < lastHideTime + hideCooldown) return;
-        if (!isPlayerNear && !isInside) return;
-        if (currentPlayer == null) return;
 
         if (!isInside)
-            StartCoroutine(EnterRoutine(currentPlayer));
+            StartCoroutine(EnterRoutine());
         else
-            StartCoroutine(ExitRoutine(currentPlayer));
-
-        lastHideTime = Time.time;
+            StartCoroutine(ExitRoutine());
     }
 
-    private IEnumerator EnterRoutine(PlayerHiding p)
+    private IEnumerator EnterRoutine()
     {
         isBusy = true;
         isInside = true;
 
         UIManager.Instance?.HideInteractPrompt(this);
-        RefreshHighlight();
+        isPlayerNear = false;
 
-        controller = p.GetComponent<PlayerController>();
-        cachedPlayerPosition = p.transform.position;
+        if (highlightSprite) highlightSprite.enabled = false;
 
-        if (controller)
-        {
-            controller.SetFrozen(true);
-            controller.ClearInputAndVelocity();
-        }
+        AudioManager.Instance?.PlaySFX(sfxOpenKey);
+        anim.SetTrigger(hashGetIn);
 
-        p.EnterHiding(this);
+        playerController = PlayerController.Instance;
 
-        if (anim) anim.SetTrigger(hashGetIn);
-
-        if (!string.IsNullOrEmpty(sfxOpenKey))
-            AudioManager.Instance?.PlaySFX(sfxOpenKey);
-
-        playerSprites = controller.GetComponentsInChildren<SpriteRenderer>();
+        // Hide player
+        playerSprites = playerController.GetComponentsInChildren<SpriteRenderer>();
         foreach (var s in playerSprites) s.enabled = false;
 
-        if (cineCam) cineCam.Follow = this.transform;
+        playerController.ClearInputAndVelocity();
+        PlayerHiding.Instance.EnterHiding(this);
 
-        yield return new WaitForSeconds(enterAnimTime);
+        if (cineCam != null)
+            cineCam.Follow = this.transform;
 
-        if (controller) controller.SetFrozen(false);
+        yield return new WaitForSeconds(0.3f);
+
         isBusy = false;
     }
 
-    private IEnumerator ExitRoutine(PlayerHiding p)
+    private IEnumerator ExitRoutine()
     {
         isBusy = true;
 
-        if (anim) anim.SetTrigger(hashGetOut);
+        AudioManager.Instance?.PlaySFX(sfxCloseKey);
+        anim.SetTrigger(hashGetOut);
 
-        if (!string.IsNullOrEmpty(sfxCloseKey))
-            AudioManager.Instance?.PlaySFX(sfxCloseKey);
+        yield return new WaitForSeconds(0.3f);
 
-        yield return new WaitForSeconds(exitAnimTime);
-
+        // Show player
         foreach (var s in playerSprites)
             if (s != null) s.enabled = true;
 
-        p.ExitHiding(this);
-        isInside = false;
+        PlayerHiding.Instance.ExitHiding(this);
 
-        if (cineCam && originalCameraFollow != null)
+        isInside = false;
+        isBusy = false;
+
+        if (cineCam != null && originalCameraFollow != null)
             cineCam.Follow = originalCameraFollow;
 
-        if (controller) controller.SetFrozen(false);
-
-        RefreshHighlight();
+        if (highlightSprite && isPlayerNear)
+            highlightSprite.enabled = true;
 
         if (isPlayerNear)
             UIManager.Instance?.ShowInteractPrompt(this);
-
-        isBusy = false;
     }
 
+    // ---------------- TRIGGERS ---------------------
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
 
         isPlayerNear = true;
-        currentPlayer = other.GetComponent<PlayerHiding>();
 
         if (!isInside)
+        {
             UIManager.Instance?.ShowInteractPrompt(this);
 
-        RefreshHighlight();
+            if (highlightSprite)
+                highlightSprite.enabled = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -185,31 +174,25 @@ public class BoxHide : HidingSpot
         if (!other.CompareTag("Player")) return;
 
         isPlayerNear = false;
-        if (!isInside)
-            currentPlayer = null;
 
         UIManager.Instance?.HideInteractPrompt(this);
-        RefreshHighlight();
+
+        if (highlightSprite)
+            highlightSprite.enabled = false;
     }
 
-    private void RefreshHighlight()
-    {
-        if (!highlightSprite) return;
-        highlightSprite.enabled = isPlayerNear && !isInside && !isBusy;
-    }
+    // ---------------- HELPERS ---------------------
+    public override Vector2 GetExitPosition()
+        => transform.position + Vector3.up * 0.25f;
 
-    private void UpdatePromptPoint()
+    public Transform GetPromptPoint()
+        => promptPoint != null ? promptPoint : transform;
+
+    private void UpdatePromptPointPosition()
     {
         if (promptPoint == null || sr == null) return;
-
         Bounds b = sr.bounds;
-        promptPoint.position =
-            new Vector3(b.center.x, b.max.y + 0.25f, transform.position.z);
+
+        promptPoint.position = new Vector3(b.center.x, b.max.y + promptMarginY, transform.position.z);
     }
-
-    public override Vector2 GetHidingPosition()
-        => cachedPlayerPosition;
-
-    public override Vector2 GetExitPosition()
-        => cachedPlayerPosition;
 }

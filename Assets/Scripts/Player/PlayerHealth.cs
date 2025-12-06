@@ -31,7 +31,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [SerializeField] private float flashKickFade = 0.15f;
 
     [Header("Damage Reaction")]
-    [SerializeField] public float knockbackForce = 5f;
+    [SerializeField] private float knockbackForce = 5f;
 
     [Header("Audio Keys")]
     [SerializeField] private string hurtSFXKey = "SFX_PlayerHurt";
@@ -94,6 +94,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         if (AudioManager.Instance != null && !string.IsNullOrEmpty(hurtSFXKey))
             AudioManager.Instance.PlaySFX(hurtSFXKey);
+        else
+            Debug.LogWarning("[PlayerHealth] Hurt sound key missing or AudioManager not found.");
 
         if (currentHearts <= 0)
         {
@@ -103,7 +105,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         if (rb != null)
         {
-            Vector2 knockDir = (Vector2)transform.position - damageSource;
+            Vector2 knockDir = ((Vector2)transform.position - damageSource);
             knockDir.y = 0;
             knockDir = knockDir.normalized;
 
@@ -115,6 +117,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         StartCoroutine(InvincibilityRoutine());
     }
+
 
     private IEnumerator InvincibilityRoutine()
     {
@@ -176,7 +179,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         float t = 0f;
         fade = Mathf.Max(0.0001f, fade);
-
         while (t < fade)
         {
             float a = t / fade;
@@ -194,12 +196,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (isDead) return;
         isDead = true;
 
-        GameFreezeManager.Instance?.FreezeGame();
-
-        FindFirstObjectByType<CountdownTimer>()?.ForceStopAllTimerAudio();
-
         if (AudioManager.Instance != null && !string.IsNullOrEmpty(deathSFXKey))
             AudioManager.Instance.PlaySFX(deathSFXKey);
+        else
+            Debug.LogWarning("[PlayerHealth] Death sound key missing or AudioManager not found.");
 
         PlayerController.Instance?.SetFrozen(true);
         StartCoroutine(DeathRoutine());
@@ -209,8 +209,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(0.5f);
 
-        if (gameOverUI != null)
-            gameOverUI.Show();
+        if (gameOverUI != null) gameOverUI.Show();
         else
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
@@ -225,25 +224,5 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         var ph = FindFirstObjectByType<PlayerHealth>();
         ph?.TakeDamage(amount, damageSource);
-    }
-
-    public static void TryDamagePlayer(int amount, Vector2 damageSource, float knockForce)
-    {
-        var ph = FindFirstObjectByType<PlayerHealth>();
-        if (ph == null) return;
-
-        ph.knockbackForce = knockForce;
-        ph.TakeDamage(amount, damageSource);
-    }
-
-    public void ResetHealth()
-    {
-        isDead = false;
-        isInvincible = false;
-
-        currentHearts = maxHearts;
-        OnHealthChanged?.Invoke(currentHearts, maxHearts);
-
-        SetFlashOff();
     }
 }

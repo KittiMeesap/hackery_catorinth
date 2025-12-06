@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -25,27 +24,11 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
-        }
         else
-        {
             Destroy(gameObject);
-            return;
-        }
 
         mainCam = Camera.main;
-
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        mainCam = Camera.main;
-
-        if (screenFader == null)
-            screenFader = FindFirstObjectByType<ScreenFader>();
     }
 
     private void Update()
@@ -53,7 +36,7 @@ public class UIManager : MonoBehaviour
         UpdatePromptFollow();
     }
 
-    // INTERACT PROMPT
+    //INTERACT PROMPT
     public void ShowInteractPrompt(IInteractable target)
     {
         if (promptUI == null) return;
@@ -83,12 +66,14 @@ public class UIManager : MonoBehaviour
             mainCam = Camera.main;
 
         Vector3 screenPos = mainCam.WorldToScreenPoint(followPoint.position);
+
         promptUI.transform.position = screenPos;
+        promptUI.transform.rotation = Quaternion.identity;
     }
 
     public void ShowLockedMessage() { }
 
-    // HACKING UI
+    //HACKING UI
     public void StartMultiOptionHack(List<HackOptionSO> options, Transform worldTarget, System.Action<HackOptionSO> onOptionSelected)
     {
         hackingUI?.ShowMultiOptionUI(options, worldTarget, onOptionSelected);

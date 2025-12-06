@@ -18,6 +18,7 @@ public class HackingUI : MonoBehaviour
     [SerializeField] private GameObject arrowLeftPrefab;
     [SerializeField] private GameObject arrowRightPrefab;
 
+    
     [Header("SFX Keys (SoundLibrary keys)")]
     [SerializeField] private string sfxOpenUI = "Hack_Open";
     [SerializeField] private string sfxSuccess = "Hack_Success";
@@ -64,6 +65,7 @@ public class HackingUI : MonoBehaviour
             hackTimerSlider.gameObject.SetActive(false);
     }
 
+    
     private List<ArrowUI.Direction> GenerateRandomSequence(int length)
     {
         var dirs = new List<ArrowUI.Direction>
@@ -81,8 +83,7 @@ public class HackingUI : MonoBehaviour
         return seq;
     }
 
-    // ---- MULTI OPTION UI ----
-
+    
     public void ShowMultiOptionUI(List<HackOptionSO> options, Transform target, System.Action<HackOptionSO> onSuccess)
     {
         ClearMultiOptions();
@@ -92,6 +93,7 @@ public class HackingUI : MonoBehaviour
         {
             hackPanel.SetActive(true);
 
+            
             AudioManager.Instance?.PlayUI(sfxOpenUI);
 
             StartCoroutine(PopInPanelRoutine());
@@ -142,6 +144,7 @@ public class HackingUI : MonoBehaviour
         UpdateTimerPosition();
     }
 
+    
     public void ShowMultiOptionUI(
         List<HackOptionSO> options,
         Transform worldTarget,
@@ -157,6 +160,7 @@ public class HackingUI : MonoBehaviour
             StopHackTimer();
     }
 
+    
     public void ShowSingleOptionSequence(
         List<ArrowUI.Direction> sequence,
         Transform worldTarget,
@@ -181,12 +185,12 @@ public class HackingUI : MonoBehaviour
             StartHackTimer(timerDuration, onFail);
     }
 
-    // ---- INPUT ----
-
+    // INPUT
     public void SubmitInput(ArrowUI.Direction input)
     {
         currentInput.Add(input);
 
+        
         AudioManager.Instance?.PlayUI(sfxInput);
 
         bool matchedPrefix = false;
@@ -207,7 +211,9 @@ public class HackingUI : MonoBehaviour
 
         if (fullMatch != null)
         {
+            
             AudioManager.Instance?.PlayUI(sfxSuccess);
+
             StartCoroutine(SuccessFlash());
             onOptionSelected?.Invoke(fullMatch.optionData);
             HideHackingUI();
@@ -216,14 +222,18 @@ public class HackingUI : MonoBehaviour
 
         if (!matchedPrefix)
         {
+           
             AudioManager.Instance?.PlayUI(sfxFail);
+
             StartCoroutine(ShakePanelRoutine());
             FlashIncorrectAll();
 
-            currentInput.Clear();
-            return;
+            if (currentHackTarget != null)
+            {
+                var timer = FindFirstObjectByType<CountdownTimer>();
+                timer?.ReduceTime(currentHackTarget.reduceTimeOnFail);
+            }
         }
-
     }
 
     private bool IsPrefixMatch(List<ArrowUI.Direction> seq, List<ArrowUI.Direction> input)
@@ -234,8 +244,7 @@ public class HackingUI : MonoBehaviour
         return true;
     }
 
-    // ---- TIMER ----
-
+    // TIMER
     private void UpdateTimerPosition()
     {
         if (!hackTimerSlider || !hackTimerSlider.gameObject.activeSelf) return;
@@ -288,7 +297,7 @@ public class HackingUI : MonoBehaviour
             hackTimerSlider.gameObject.SetActive(false);
     }
 
-    // ---- EFFECTS ----
+    // EFFECTS
     private IEnumerator PopInPanelRoutine()
     {
         hackPanel.transform.localScale = Vector3.zero;
@@ -363,7 +372,7 @@ public class HackingUI : MonoBehaviour
         cg.alpha = 1f;
     }
 
-    // ---- CLEANUP ----
+    // CLEANUP
     private void FlashIncorrectAll()
     {
         foreach (var opt in activeOptions)

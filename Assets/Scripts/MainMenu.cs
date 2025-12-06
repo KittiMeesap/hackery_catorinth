@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
-using UnityEngine.EventSystems;
-using System.Collections;
 
 public class MainMenu : MonoBehaviour
 {
@@ -21,18 +18,14 @@ public class MainMenu : MonoBehaviour
     public float fadeDuration = 0.6f;
 
     [Header("First Selected")]
-    public GameObject firstSelected;
+    public Button firstSelected;
 
     private bool isFading = false;
 
     private void Start()
     {
-        var input = FindFirstObjectByType<PlayerInput>();
-        if (input != null)
-            input.SwitchCurrentActionMap("UI");
-
         if (firstSelected != null)
-            EventSystem.current.SetSelectedGameObject(firstSelected);
+            firstSelected.Select();
 
         if (fadeOverlay != null)
         {
@@ -48,11 +41,12 @@ public class MainMenu : MonoBehaviour
     public void PlayGame()
     {
         if (isFading) return;
+
         PlayClickSound();
         StartCoroutine(FadeOutAndLoad("IntroCutscene"));
     }
 
-    private IEnumerator FadeOutAndLoad(string sceneName)
+    private System.Collections.IEnumerator FadeOutAndLoad(string sceneName)
     {
         isFading = true;
 
@@ -79,56 +73,30 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
-    // OPEN SETTINGS
     public void Setting()
     {
         PlayClickSound();
         SettingPanel.SetActive(true);
 
-        SetMainMenuButtonsInteractable(false);
-
-        var input = FindFirstObjectByType<PlayerInput>();
-        if (input != null)
-            input.SwitchCurrentActionMap("UI");
-
-        var first = SettingPanel.GetComponentInChildren<Button>();
-        if (first != null)
-            EventSystem.current.SetSelectedGameObject(first.gameObject);
+        var btn = SettingPanel.GetComponentInChildren<Button>();
+        if (btn != null) btn.Select();
     }
 
-    // CLOSE SETTINGS
     public void BackToSetting()
     {
         PlayClickSound();
-        StartCoroutine(BackToSettingRoutine());
-    }
-
-    private IEnumerator BackToSettingRoutine()
-    {
         SettingPanel.SetActive(false);
 
-        yield return null;
-
-        SetMainMenuButtonsInteractable(true);
-
-        EventSystem.current.SetSelectedGameObject(firstSelected);
-
-        var input = FindFirstObjectByType<PlayerInput>();
-        if (input != null)
-            input.SwitchCurrentActionMap("UI");
+        if (firstSelected != null) firstSelected.Select();
     }
 
-    // CREDIT PANEL
     public void ShowCredit()
     {
         PlayClickSound();
         creditPanel.SetActive(true);
 
-        SetMainMenuButtonsInteractable(false);
-
-        var first = creditPanel.GetComponentInChildren<Button>();
-        if (first != null)
-            EventSystem.current.SetSelectedGameObject(first.gameObject);
+        var btn = creditPanel.GetComponentInChildren<Button>();
+        if (btn != null) btn.Select();
     }
 
     public void BackFromCredit()
@@ -136,29 +104,30 @@ public class MainMenu : MonoBehaviour
         PlayClickSound();
         creditPanel.SetActive(false);
 
-        SetMainMenuButtonsInteractable(true);
-
-        EventSystem.current.SetSelectedGameObject(firstSelected);
+        if (firstSelected != null) firstSelected.Select();
     }
 
-    // DISABLE / ENABLE MAIN MENU BUTTONS
-    private void SetMainMenuButtonsInteractable(bool value)
+    public void QuitGame()
     {
-        Button[] buttons = GetComponentsInChildren<Button>(includeInactive: true);
-
-        foreach (Button b in buttons)
-        {
-            if (SettingPanel != null && b.transform.IsChildOf(SettingPanel.transform))
-                continue;
-
-            if (creditPanel != null && b.transform.IsChildOf(creditPanel.transform))
-                continue;
-
-            b.interactable = value;
-        }
+        PlayClickSound();
+        Debug.Log("Quit Game");
+        Application.Quit();
     }
 
-    // AUDIO
+    public void ResetMainMenu()
+    {
+        if (audioSource == null)
+            audioSource = FindFirstObjectByType<AudioSource>();
+
+        if (SettingPanel != null)
+            SettingPanel.SetActive(false);
+        if (creditPanel != null)
+            creditPanel.SetActive(false);
+
+        if (firstSelected != null)
+            firstSelected.Select();
+    }
+
     public void OnHover()
     {
         if (hoverSound != null && audioSource != null)

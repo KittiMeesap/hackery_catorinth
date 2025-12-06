@@ -5,26 +5,27 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class EnemySweeper : MonoBehaviour
 {
-    [Header("Movement")]
+    [Header("Movement Settings")]
     public float moveSpeed = 2f;
-    public bool moveRight = true;
+    public Transform[] doorTargets;
+    public float stopDistanceToDoor = 0.4f;
+
+    [Header("Behaviour Settings")]
+    public bool destroyOnFinish = true;
 
     [Header("Damage Settings")]
     public LayerMask playerLayer;
     public int instantKillDamage = 9999;
 
-    [Header("UI Pointer")]
-    public GameObject uiPointerPrefab;
-
+    private int currentIndex = 0;
     private Rigidbody2D rb;
     private SpriteRenderer sprite;
     private bool canMove = false;
     private bool isDead = false;
 
-    private float laneY;
     private IOpenableDoor lastDoorUsed = null;
 
-    private UIEnemyPointer pointerUI;
+    private float laneY;
 
     private void Awake()
     {
@@ -38,50 +39,87 @@ public class EnemySweeper : MonoBehaviour
     private void OnEnable()
     {
         laneY = transform.position.y;
-    }
 
-    private void FixedUpdate()
-    {
-        if (!canMove || isDead)
-        {
-            rb.linearVelocity = Vector2.zero;
-            return;
-        }
-
-        Vector3 pos = transform.position;
-        pos.y = laneY;
-        transform.position = pos;
-
-        float dirX = moveRight ? 1f : -1f;
-        rb.linearVelocity = new Vector2(dirX * moveSpeed, 0f);
-
-        if (sprite != null)
-            sprite.flipX = dirX < 0;
+        StartCoroutine(SweepRoutine());
     }
 
     public void StartSweeping()
     {
         canMove = true;
-
-        if (uiPointerPrefab != null && UIManager.Instance != null)
-        {
-            GameObject ui = Instantiate(uiPointerPrefab, UIManager.Instance.transform);
-            pointerUI = ui.GetComponent<UIEnemyPointer>();
-            if (pointerUI != null)
-                pointerUI.enemyTarget = transform;
-        }
     }
 
-    public void StopSweeping()
+    private IEnumerator SweepRoutine()
     {
-        canMove = false;
+        yield return new WaitForSeconds(0.2f);
+
+        while (!canMove)
+            yield return null;
+
+        while (currentIndex < doorTargets.Length && !isDead)
+        {
+            Transform target = doorTargets[currentIndex];
+            if (target == null)
+            {
+                currentIndex++;
+                continue;
+            }
+
+            while (Vector2.Distance(new Vector2(transform.position.x, laneY),
+                                    new Vector2(target.position.x, laneY)) > stopDistanceToDoor
+                   && !isDead)
+            {
+                Vector3 pos = transform.position;
+                pos.y = laneY;
+                transform.position = pos;
+
+                float dx = target.position.x - transform.position.x;
+                Vector2 dir = new Vector2(Mathf.Sign(dx), 0f);
+
+                rb.linearVelocity = dir * moveSpeed;
+
+                if (sprite != null)
+                    sprite.flipX = dir.x < 0;
+
+                yield return null;
+            }
+
+            rb.linearVelocity = Vector2.zero;
+
+            // Trigger melting on door
+            var heatObj = target.GetComponentInParent<IHeatable>();
+            if (heatObj != null)
+                heatObj.ApplyHeat(999f);
+
+            // Check if door can open
+            var door = target.GetComponent<IOpenableDoor>();
+            if (door == null)
+                door = target.GetComponentInParent<IOpenableDoor>();
+
+            if (door != null && door.CanOpenFor(gameObject))
+            {
+                if (door != lastDoorUsed)
+                {
+                    door.OpenForEntity(gameObject);
+
+                    laneY = transform.position.y;
+
+                    lastDoorUsed = door;
+                    yield return new WaitForSeconds(0.25f);
+                }
+            }
+
+            currentIndex++;
+            yield return new WaitForSeconds(0.2f);
+        }
+
         rb.linearVelocity = Vector2.zero;
+
+        if (destroyOnFinish)
+            Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (isDead) return;
-
         if ((playerLayer.value & (1 << other.gameObject.layer)) != 0)
         {
             var dmg = other.GetComponentInParent<IDamageable>();
@@ -94,40 +132,8 @@ public class EnemySweeper : MonoBehaviour
         if (heat != null)
             heat.ApplyHeat(999f);
 
-        var chocoDoor = other.GetComponentInParent<ChocolateDoor>();
-        if (chocoDoor != null)
-        {
-            DestroySelf();
-            return;
-        }
-
         if (other.CompareTag("Transition"))
             return;
-
-        var door = other.GetComponent<IOpenableDoor>();
-        if (door == null)
-            door = other.GetComponentInParent<IOpenableDoor>();
-
-        if (door != null && door != lastDoorUsed)
-        {
-            door.OpenForSweeper(gameObject);
-            lastDoorUsed = door;
-
-            laneY = transform.position.y;
-        }
-    }
-
-    private void DestroySelf()
-    {
-        isDead = true;
-        rb.linearVelocity = Vector2.zero;
-        Destroy(gameObject);
-    }
-
-    private void OnDestroy()
-    {
-        if (pointerUI != null)
-            Destroy(pointerUI.gameObject);
     }
 
     public void ShakeCamera()

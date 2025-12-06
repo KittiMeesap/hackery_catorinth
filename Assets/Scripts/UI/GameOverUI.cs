@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 public class GameOverUI : MonoBehaviour
 {
@@ -10,7 +9,7 @@ public class GameOverUI : MonoBehaviour
 
     [Header("Optional")]
     public ScreenFader screenFader;
-    public string mainMenuSceneName = "MainMenu";
+    public string mainMenuSceneName = "UI - Menu";
 
     [Header("Controller Support")]
     public GameObject firstSelectedButton;
@@ -19,24 +18,15 @@ public class GameOverUI : MonoBehaviour
 
     private void Awake()
     {
-        if (panel != null)
-            panel.SetActive(false);
-
-        if (screenFader == null)
-            screenFader = FindFirstObjectByType<ScreenFader>();
+        if (panel != null) panel.SetActive(false);
+        if (screenFader == null) screenFader = FindFirstObjectByType<ScreenFader>();
     }
 
     public void Show()
     {
         if (shown) return;
         shown = true;
-
-        if (panel != null)
-            panel.SetActive(true);
-
-        var input = FindFirstObjectByType<PlayerInput>();
-        if (input != null)
-            input.SwitchCurrentActionMap("UI");
+        if (panel != null) panel.SetActive(true);
 
         if (firstSelectedButton != null && EventSystem.current != null)
         {
@@ -47,7 +37,7 @@ public class GameOverUI : MonoBehaviour
 
     public void OnClickRetry()
     {
-        StartCoroutine(RespawnRoutine());
+        StartCoroutine(RetryRoutine());
     }
 
     public void OnClickMainMenu()
@@ -55,49 +45,16 @@ public class GameOverUI : MonoBehaviour
         StartCoroutine(MainMenuRoutine());
     }
 
-    private System.Collections.IEnumerator RespawnRoutine()
+    private System.Collections.IEnumerator RetryRoutine()
     {
-        // Fade out screen
-        if (screenFader != null)
-            yield return screenFader.FadeOut();
-
-        // Respawn Player
-        var player = FindFirstObjectByType<PlayerController>();
-
-        if (player != null)
-        {
-            var hp = player.GetComponent<PlayerHealth>();
-            if (hp != null)
-                hp.ResetHealth();
-
-            // Restore position & countdown
-            GameManager.Instance.RespawnPlayer(player.gameObject);
-
-            // Reset movement, animations, states
-            player.ResetStateAfterRespawn();
-        }
-
-        // Unfreeze game
-        GameManager.Instance.FreezeGame(false);
-
-        // Switch back to gameplay input
-        var input = FindFirstObjectByType<PlayerInput>();
-        if (input != null)
-            input.SwitchCurrentActionMap("Player");
-
-        shown = false;
-        panel.SetActive(false);
-
-        // Fade in again
-        if (screenFader != null)
-            yield return screenFader.FadeIn();
+        if (screenFader != null) yield return screenFader.FadeOut();
+        Scene current = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(current.buildIndex);
     }
 
     private System.Collections.IEnumerator MainMenuRoutine()
     {
-        if (screenFader != null)
-            yield return screenFader.FadeOut();
-
+        if (screenFader != null) yield return screenFader.FadeOut();
         SceneManager.LoadScene(mainMenuSceneName);
     }
 }

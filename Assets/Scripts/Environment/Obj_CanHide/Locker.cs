@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class Locker : HidingSpot
+public class Locker : HidingSpot, IInteractable
 {
     [Header("Locker Visual")]
     [SerializeField] private Animator lockerAnimator;
@@ -31,9 +31,6 @@ public class Locker : HidingSpot
 
     [Header("Cooldown")]
     [SerializeField] private float hideCooldown = 0.75f;
-
-    [Header("Interact Radius")]
-    [SerializeField] private float interactRadius = 0.9f;
 
     private static int HashGetIn;
     private static int HashGetOut;
@@ -101,12 +98,7 @@ public class Locker : HidingSpot
         RefreshHighlight();
     }
 
-    public override float GetInteractRadius() => interactRadius;
-
-    public override Transform GetPromptPoint() =>
-        promptPoint != null ? promptPoint : transform;
-
-    public override void Interact()
+    public void Interact()
     {
         if (isBusy) return;
         if (Time.time < lastHideTime + hideCooldown) return;
@@ -190,7 +182,10 @@ public class Locker : HidingSpot
 
         var controller = p.GetComponent<PlayerController>();
         if (controller)
+        {
             controller.SetFrozen(false);
+            controller.TriggerMoveDelay(0.05f);
+        }
 
         OnExitHiding(p);
         currentPlayer = p;
@@ -201,10 +196,11 @@ public class Locker : HidingSpot
         isBusy = false;
     }
 
-    public override Vector2 GetHidingPosition() =>
-        currentPlayer ? currentPlayer.transform.position : transform.position;
-
+    // Required overrides
+    public override Vector2 GetHidingPosition() => currentPlayer ? currentPlayer.transform.position : transform.position;
     public override Vector2 GetExitPosition() => cachedPlayerPosition;
+
+    public Transform GetPromptPoint() => promptPoint != null ? promptPoint : transform;
 
     private void RefreshHighlight()
     {

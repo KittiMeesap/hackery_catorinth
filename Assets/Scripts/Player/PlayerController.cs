@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
 
     [Header("Movement")]
     public float walkSpeed = 2f;
+    [Range(0f, 1f)] public float hidingMoveMultiplier = 0.5f;
 
     [Header("Sound Effects")]
     public string footstepKey = "SFX_Footstep";
@@ -33,12 +34,11 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     [Header("Cold Slow")]
     [SerializeField] private float coldSlowThreshold = -1.5f;
 
+    [Header("Control Delay Settings")]
+    private float controlUnlockTime = 0f;
+
     [Header("Idle to Sleep Settings")]
     [SerializeField] private float afkDelay = 5f;
-
-    [Header("Interaction")]
-    [SerializeField] private float maxInteractScanRadius = 1.5f;
-    public float MaxInteractScanRadius => maxInteractScanRadius;
 
     private float temperature = 0f;
     private float visualTemp = 0f;
@@ -68,14 +68,12 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     public bool IsIdle => moveInput.sqrMagnitude < 0.0001f;
     public bool IsPhoneOut { get; private set; } = false;
 
-    public IInteractable CurrentInteractable { get; private set; }
-
     public static PlayerController Instance { get; private set; }
 
     private readonly Dictionary<object, float> speedModifiers = new();
 
 
-    // ---------------- TEMPERATURE ----------------
+    // --------------------- Temperature ---------------------
     public void ApplyHeat(float amt) => temperature = Mathf.Clamp(temperature + amt, -maxCold, maxHeat);
     public void ApplyCold(float amt) => temperature = Mathf.Clamp(temperature - amt, -maxCold, maxHeat);
 
@@ -85,29 +83,31 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
             temperature = Mathf.MoveTowards(temperature, 0, amt);
     }
 
-
     private void UpdateTemperature()
     {
         if (Mathf.Abs(temperature) > 0.01f)
         {
             float sign = Mathf.Sign(temperature);
             temperature -= sign * decayRate * Time.deltaTime;
-            if (Mathf.Sign(temperature) != sign)
-                temperature = 0;
+            if (Mathf.Sign(temperature) != sign) temperature = 0f;
         }
 
-        if (temperature >= maxHeat * damageHeatThreshold &&
-            Time.time > lastHeatDamageTime + overheatDamageInterval)
+        if (temperature >= maxHeat * damageHeatThreshold)
         {
-            PlayerHealth.TryDamagePlayer(overheatDamage, transform.position);
-            lastHeatDamageTime = Time.time;
+            if (Time.time > lastHeatDamageTime + overheatDamageInterval)
+            {
+                PlayerHealth.TryDamagePlayer(overheatDamage, transform.position);
+                lastHeatDamageTime = Time.time;
+            }
         }
 
-        if (temperature <= -maxCold * damageColdThreshold &&
-            Time.time > lastColdDamageTime + coldDamageInterval)
+        if (temperature <= -maxCold * damageColdThreshold)
         {
-            PlayerHealth.TryDamagePlayer(coldDamage, transform.position);
-            lastColdDamageTime = Time.time;
+            if (Time.time > lastColdDamageTime + coldDamageInterval)
+            {
+                PlayerHealth.TryDamagePlayer(coldDamage, transform.position);
+                lastColdDamageTime = Time.time;
+            }
         }
 
         UpdateTemperatureVisual();
@@ -158,7 +158,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     }
 
 
-    // ---------------- UNITY ----------------
+    // --------------------- Unity Lifecycle ---------------------
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -189,13 +189,12 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     }
 
 
-    // ---------------- UPDATE LOOP ----------------
+    // --------------------- Update Loop ---------------------
     private void Update()
     {
         UpdateTemperature();
 
-        // Hiding / Hack Freeze
-        if (isFrozen)
+        if (isFrozen || Time.time < controlUnlockTime)
         {
             StopMovement(true);
             return;
@@ -218,7 +217,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         else
             StopMovement(false);
 
-        UpdateInteractPromptPriority();  // <-- ใช้ Priority
+        UpdateInteractPrompt();
         FlipCharacter();
         HandleIdleSleepSystem();
     }
@@ -226,7 +225,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     private void LateUpdate() => UpdateAnimation();
 
 
-    // ---------------- ANIMATION ----------------
+    // --------------------- Animation ---------------------
     private void UpdateAnimation()
     {
         if (anim == null) return;
@@ -276,134 +275,54 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         anim.SetBool("IsWalking", moveInput.sqrMagnitude > 0.001f);
     }
 
-    // PRIORITY INTERACT
-    private int GetPriority(IInteractable obj)
+    // --------------------- Wake System ---------------------
+    private void WakeUp()
     {
-        if (obj is HidingSpot) return 1;
-        if (obj is HackableObject) return 2;
-        return 50;
+        if (!isSleeping || isWaking) return;
+
+        isSleeping = false;
+        isWaking = true;
+
+        anim.SetTrigger("Wake");
+        StartCoroutine(RestoreIdleAfterWake());
     }
 
-    private void UpdateInteractPromptPriority()
+    private IEnumerator RestoreIdleAfterWake()
     {
-        if (isFrozen)
-        {
-            UIManager.Instance?.HideInteractPrompt(currentInteractable);
-            currentInteractable = null;
-            CurrentInteractable = null;
-            RefreshNearbyHackables();
-            return;
-        }
+        rb.linearVelocity = Vector2.zero;
+        moveInput = Vector2.zero;
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, maxInteractScanRadius);
+        yield return new WaitForSeconds(1.2f);
 
-        HidingSpot bestHiding = null;
-        List<HackableObject> hackables = new();
+        isWaking = false;
+        isAFKTriggered = false;
+        idleTimer = 0f;
 
-        foreach (var h in hits)
-        {
-            if (h.TryGetComponent(out HidingSpot hide))
-            {
-                if (hide.GetComponent<Collider2D>().bounds.Intersects(
-                        GetComponent<Collider2D>().bounds))
-                {
-                    bestHiding = hide;
-                }
-            }
-            else if (h.TryGetComponent(out HackableObject hack))
-            {
-                float dist = Vector2.Distance(transform.position, hack.transform.position);
-                if (dist <= hack.GetInteractRadius())
-                    hackables.Add(hack);
-            }
-        }
-
-        // --- PRIORITY 1 : HidingSpot ---
-        if (bestHiding != null)
-        {
-            SetBestInteractable(bestHiding);
-            return;
-        }
-
-        // --- PRIORITY 2 : HackableObject ---
-        if (hackables.Count > 0)
-        {
-            HackableObject bestHack = ChooseBestHackable(hackables);
-            SetBestInteractable(bestHack);
-            return;
-        }
-
-        // --- NOTHING ---
-        if (currentInteractable != null)
-            UIManager.Instance.HideInteractPrompt(currentInteractable);
-
-        currentInteractable = null;
-        CurrentInteractable = null;
-        RefreshNearbyHackables();
+        anim.ResetTrigger("AFK");
+        anim.ResetTrigger("Wake");
+        anim.SetBool("IsIdle", true);
+        anim.SetBool("IsWalking", false);
     }
 
-    private HackableObject ChooseBestHackable(List<HackableObject> list)
+    // --------------------- Movement ---------------------
+    private void MoveCharacter()
     {
-        HackableObject best = null;
-        float bestDist = float.MaxValue;
+        Vector2 targetVel = moveInput.normalized * CurrentSpeed;
+        rb.linearVelocity = targetVel;
 
-        foreach (var h in list)
+        if (AudioManager.Instance != null
+            && targetVel.sqrMagnitude > 0.01f
+            && Time.time > lastFootstepTime + footstepInterval)
         {
-            float dist = Vector2.Distance(transform.position, h.GetPromptPoint().position);
-
-            if (dist < bestDist - 0.05f)
-            {
-                bestDist = dist;
-                best = h;
-            }
-            else if (Mathf.Abs(dist - bestDist) <= 0.05f)
-            {
-                float dirX = Mathf.Sign(transform.localScale.x);
-                float dot = Mathf.Sign(h.transform.position.x - transform.position.x);
-
-                if (dirX == dot)
-                    best = h;
-            }
-        }
-
-        return best;
-    }
-
-    private void SetBestInteractable(IInteractable obj)
-    {
-        if (obj != currentInteractable)
-        {
-            if (currentInteractable != null)
-                UIManager.Instance.HideInteractPrompt(currentInteractable);
-
-            currentInteractable = obj;
-            CurrentInteractable = obj;
-
-            RefreshNearbyHackables();
-
-            UIManager.Instance.ShowInteractPrompt(obj);
+            AudioManager.Instance.PlaySFX(footstepKey);
+            lastFootstepTime = Time.time;
         }
     }
 
     private void StopMovement(bool resetInput)
     {
         rb.linearVelocity = Vector2.zero;
-        if (resetInput)
-            moveInput = Vector2.zero;
-    }
-
-    private void MoveCharacter()
-    {
-        Vector2 targetVel = moveInput.normalized * CurrentSpeed;
-        rb.linearVelocity = targetVel;
-
-        if (AudioManager.Instance != null &&
-            targetVel.sqrMagnitude > 0.01f &&
-            Time.time > lastFootstepTime + footstepInterval)
-        {
-            AudioManager.Instance.PlaySFX(footstepKey);
-            lastFootstepTime = Time.time;
-        }
+        if (resetInput) moveInput = Vector2.zero;
     }
 
     private void FlipCharacter()
@@ -418,6 +337,44 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         }
     }
 
+
+    // --------------------- Input ---------------------
+    private void OnMovePerformed(InputAction.CallbackContext ctx)
+    {
+        if (isPreparingSleep)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
+        if (isSleeping && !isWaking)
+        {
+            WakeUp();
+            moveInput = Vector2.zero;
+            return;
+        }
+
+        if (isSleeping || isWaking)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
+        moveInput = ctx.ReadValue<Vector2>();
+    }
+
+
+    private void OnMoveCanceled(InputAction.CallbackContext ctx)
+    {
+        if (!isSleeping && !isWaking)
+            moveInput = Vector2.zero;
+    }
+
+    private void OnInteractPerformed(InputAction.CallbackContext ctx)
+        => currentInteractable?.Interact();
+
+
+    // --------------------- Sleep / AFK ---------------------
     private void HandleIdleSleepSystem()
     {
         if (isSleeping || isWaking || isPreparingSleep)
@@ -433,6 +390,7 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
                 anim.SetTrigger("AFK");
                 isAFKTriggered = true;
 
+                // ล๊อก input ทันที
                 rb.linearVelocity = Vector2.zero;
                 moveInput = Vector2.zero;
 
@@ -460,77 +418,39 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
         isPreparingSleep = false;
     }
 
-    private IEnumerator RestoreIdleAfterWake()
+    // --------------------- Interactable ---------------------
+    private void UpdateInteractPrompt()
     {
-        rb.linearVelocity = Vector2.zero;
-        moveInput = Vector2.zero;
-
-        yield return new WaitForSeconds(1.2f);
-
-        isWaking = false;
-        isAFKTriggered = false;
-        idleTimer = 0f;
-
-        anim.ResetTrigger("AFK");
-        anim.ResetTrigger("Wake");
-
-        anim.SetBool("IsIdle", true);
-        anim.SetBool("IsWalking", false);
-    }
-
-    private void WakeUp()
-    {
-        if (!isSleeping || isWaking) return;
-
-        isSleeping = false;
-        isWaking = true;
-
-        anim.SetTrigger("Wake");
-        StartCoroutine(RestoreIdleAfterWake());
-    }
-
-    // ---------------- INPUT ----------------
-    private void OnMovePerformed(InputAction.CallbackContext ctx)
-    {
-        if (isPreparingSleep)
-        {
-            moveInput = Vector2.zero;
-            return;
-        }
-
-        if (isSleeping && !isWaking)
-        {
-            WakeUp();
-            moveInput = Vector2.zero;
-            return;
-        }
-
-        if (isSleeping || isWaking)
-        {
-            moveInput = Vector2.zero;
-            return;
-        }
-
         if (isFrozen)
         {
-            moveInput = Vector2.zero;
+            UIManager.Instance?.HideInteractPrompt(currentInteractable);
+            currentInteractable = null;
             return;
         }
 
-        moveInput = ctx.ReadValue<Vector2>();
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.6f);
+        foreach (var hit in hits)
+        {
+            if (hit.TryGetComponent<IInteractable>(out var interactable))
+            {
+                if (currentInteractable != interactable)
+                {
+                    currentInteractable = interactable;
+                    UIManager.Instance?.ShowInteractPrompt(currentInteractable);
+                }
+                return;
+            }
+        }
+
+        if (currentInteractable != null)
+        {
+            UIManager.Instance?.HideInteractPrompt(currentInteractable);
+            currentInteractable = null;
+        }
     }
 
-    private void OnMoveCanceled(InputAction.CallbackContext ctx)
-    {
-        if (!isSleeping && !isWaking)
-            moveInput = Vector2.zero;
-    }
 
-    private void OnInteractPerformed(InputAction.CallbackContext ctx)
-        => currentInteractable?.Interact();
-
-
-    // ---------------- FREEZE ----------------
+    // --------------------- State (Frozen / Phone / Delay) ---------------------
     public void SetFrozen(bool frozen)
     {
         isFrozen = frozen;
@@ -547,81 +467,44 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     public void ClearInputAndVelocity()
     {
         moveInput = Vector2.zero;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+    }
+
+    public void TriggerMoveDelay(float delay)
+    {
+        controlUnlockTime = Time.time + delay;
+        ClearInputAndVelocity();
+    }
+
+    public void DisableMoveInputTemporarily(float duration = 0.2f)
+    {
+        StartCoroutine(DisableMoveInputRoutine(duration));
+    }
+
+    private IEnumerator DisableMoveInputRoutine(float duration)
+    {
+        playerInput.actions["Move"].performed -= OnMovePerformed;
+        playerInput.actions["Move"].canceled -= OnMoveCanceled;
+
+        moveInput = Vector2.zero;
         rb.linearVelocity = Vector2.zero;
+
+        yield return new WaitForSeconds(duration);
+
+        playerInput.actions["Move"].performed += OnMovePerformed;
+        playerInput.actions["Move"].canceled += OnMoveCanceled;
     }
 
 
-    // ---------------- DAMAGE & UTILITY ----------------
-    public void TakeDamage(int amount)
-        => PlayerHealth.TryDamagePlayer(amount, transform.position);
+    // --------------------- Damage & Utility ---------------------
+    public void TakeDamage(int amount) => PlayerHealth.TryDamagePlayer(amount, transform.position);
 
-    public void SetSpeedModifier(object key, float multiplier)
-        => speedModifiers[key] = multiplier;
+    public void SetSpeedModifier(object key, float multiplier) => speedModifiers[key] = multiplier;
 
     public void RemoveSpeedModifier(object key)
     {
-        if (speedModifiers.ContainsKey(key))
-            speedModifiers.Remove(key);
+        if (speedModifiers.ContainsKey(key)) speedModifiers.Remove(key);
     }
-
-    private void RefreshNearbyHackables()
-    {
-        float radius = 2f;
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, radius);
-
-        foreach (var h in hits)
-        {
-            if (h.TryGetComponent<HackableObject>(out var hackObj))
-            {
-                hackObj.RefreshHighlightExternal();
-            }
-        }
-    }
-
-    public void ResetStateAfterRespawn()
-    {
-        rb.linearVelocity = Vector2.zero;
-        moveInput = Vector2.zero;
-
-        temperature = 0f;
-        visualTemp = 0f;
-
-        if (sprites != null)
-        {
-            foreach (var sr in sprites)
-                sr.color = Color.white;
-        }
-
-        isFrozen = false;
-        IsPhoneOut = false;
-
-        isSleeping = false;
-        isPreparingSleep = false;
-        isAFKTriggered = false;
-        isWaking = false;
-        idleTimer = 0f;
-
-        if (anim != null)
-        {
-            anim.SetBool("IsIdle", true);
-            anim.SetBool("IsWalking", false);
-            anim.SetBool("IsPickupPhone", false);
-            anim.SetBool("IsHacking", false);
-
-            anim.ResetTrigger("AFK");
-            anim.ResetTrigger("Wake");
-
-            anim.Play("Idle", 0, 0f);
-        }
-
-        CurrentInteractable = null;
-        currentInteractable = null;
-        RefreshNearbyHackables();
-
-        speedModifiers.Clear();
-    }
-
-
 
     public Vector2 GetMoveInput() => moveInput;
 
@@ -630,13 +513,4 @@ public class PlayerController : MonoBehaviour, IDamageable, ITemperatureAffectab
     void IHeatable.CoolDown(float amt) => CoolDown(amt);
     void IFreezable.ApplyCold(float amt) => ApplyCold(amt);
     void IFreezable.CoolDown(float amt) => CoolDown(amt);
-
-#if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, maxInteractScanRadius);
-    }
-#endif
-
 }

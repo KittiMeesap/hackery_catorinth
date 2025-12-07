@@ -19,10 +19,6 @@ public class TutorialPopup : MonoBehaviour
     {
         popupPanel.SetActive(true);
 
-        
-        GameManager.Instance.FreezeGame(true);
-
-        
         videoPlayer.playbackSpeed = 1f;
         videoPlayer.time = 0f;
         videoPlayer.Play();
@@ -33,7 +29,5 @@ public class TutorialPopup : MonoBehaviour
         videoPlayer.Stop();
         popupPanel.SetActive(false);
 
-        
-        GameManager.Instance.FreezeGame(false);
     }
 }

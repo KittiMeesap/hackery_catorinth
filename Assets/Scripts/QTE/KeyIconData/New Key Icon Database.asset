@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 181b6fbe2a866bf40a9e6ecbfa4c2396, type: 3}
+  m_Name: New Key Icon Database
+  m_EditorClassIdentifier: Assembly-CSharp::KeyIconDatabase
+  key_Space: {fileID: 0}
+  key_Q: {fileID: 0}
+  key_E: {fileID: 0}
+  key_ArrowUp: {fileID: 0}
+  key_ArrowDown: {fileID: 0}
+  key_ArrowLeft: {fileID: 0}
+  key_ArrowRight: {fileID: 0}
+  xbox_A: {fileID: 0}
+  xbox_B: {fileID: 0}
+  xbox_X: {fileID: 0}
+  xbox_Y: {fileID: 0}
+  xbox_DpadUp: {fileID: 0}
+  xbox_DpadDown: {fileID: 0}
+  xbox_DpadLeft: {fileID: 0}
+  xbox_DpadRight: {fileID: 0}
+  ps_Cross: {fileID: 0}
+  ps_Circle: {fileID: 0}
+  ps_Square: {fileID: 0}
+  ps_Triangle: {fileID: 0}
+  ps_DpadUp: {fileID: 0}
+  ps_DpadDown: {fileID: 0}
+  ps_DpadLeft: {fileID: 0}
+  ps_DpadRight: {fileID: 0}
+  sw_B: {fileID: 0}
+  sw_A: {fileID: 0}
+  sw_X: {fileID: 0}
+  sw_Y: {fileID: 0}
+  sw_DpadUp: {fileID: 0}
+  sw_DpadDown: {fileID: 0}
+  sw_DpadLeft: {fileID: 0}
+  sw_DpadRight: {fileID: 0}

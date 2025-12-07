@@ -1,102 +1,151 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("Game States")]
-    public bool IsPhoneOut { get; private set; } = false;
-    public bool IsInHackingMode { get; private set; } = false;
-    public float time = 0;
+    [Header("References")]
+    public TimeOfDaySystem timeSystem;
+    public MichelinStarSystem starSystem;
+    public EndDayUI endDayUI;
+    public OrderGoalSystem orderGoalSystem;
+    public OrderUI orderUI;
 
-    [Header("UI References")]
-    public TextMeshProUGUI missionText;
+    [Header("HUD")]
+    public TextMeshProUGUI dayLabel;
 
-    [Header("Screen Fade")]
-    public ScreenFader screenFader;
-
-    private PlayerInput playerInput;
-    private InputAction exitAction;
+    private DayConfigSO currentDayConfig;
+    private bool dayRunning = false;
 
     private void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        playerInput = GetComponent<PlayerInput>();
-        if (playerInput != null)
-            exitAction = playerInput.actions["ExitGame"];
+        Instance = this;
     }
 
     private void Start()
     {
-        if (screenFader != null)
-            StartCoroutine(screenFader.FadeIn());
+        timeSystem.OnDayTimeFinished += OnDayTimeOver;
+        DayManager.Instance.StartFirstDay();
     }
 
-    private void OnEnable()
+    // ==========================
+    // START DAY
+    // ==========================
+    public void StartDay(DayConfigSO config)
     {
-        if (exitAction != null)
-            exitAction.performed += OnExitPressed;
+        currentDayConfig = config;
+        dayRunning = true;
+
+        // Reset stars
+        starSystem.ResetStars();
+
+        // Setup order goal
+        orderGoalSystem.Initialize(config.targetOrders);
+
+        // Setup UI
+        if (orderUI != null)
+            orderUI.Initialize(config.targetOrders);
+
+        // Reset time
+        timeSystem.StartDay(config.startHour24);
+
+        // HUD
+        dayLabel.text = $"Day: {config.dayIndex}";
+
+        endDayUI.HideImmediate();
+
+        // Input
+        QTEManager.Instance.input.Player.Enable();
+        QTEManager.Instance.input.UI.Disable();
     }
 
-    private void OnDisable()
+    // ==========================
+    // END DAY
+    // ==========================
+    private void EndDay(bool success, string reason)
     {
-        if (exitAction != null)
-            exitAction.performed -= OnExitPressed;
+        dayRunning = false;
+        timeSystem.StopDay();
+
+        QTEManager.Instance.input.Player.Disable();
+        QTEManager.Instance.input.UI.Enable();
+
+        bool hasNextDay = DayManager.Instance.HasNextDay();
+
+        endDayUI.ShowSummary(
+            success,
+            currentDayConfig.dayIndex,
+            orderGoalSystem.CompletedOrders,
+            orderGoalSystem.TargetOrders,
+            starSystem.CurrentStars,
+            starSystem.maxStars,
+            timeSystem.CurrentPlayedHours,
+            hasNextDay
+        );
     }
 
-    private void Update()
+    // ==========================
+    // EVENT: Time finished
+    // ==========================
+    private void OnDayTimeOver()
     {
-        time += Time.deltaTime;
+        if (!dayRunning) return;
+
+        if (orderGoalSystem.IsGoalReached())
+            EndDay(true, "Completed orders just in time!");
+        else
+            EndDay(false, "Out of time");
     }
 
-    private void OnExitPressed(InputAction.CallbackContext context)
+    // ==========================
+    // ORDER EVENTS
+    // ==========================
+    public void RegisterOrderSuccess()
     {
-        QuitGame();
+        if (!dayRunning) return;
+
+        orderGoalSystem.AddOrderSuccess();
+
+        if (orderUI != null)
+            orderUI.SetValue(orderGoalSystem.CompletedOrders);
+
+        if (orderGoalSystem.IsGoalReached())
+            EndDay(true, "All orders completed!");
     }
 
-    public void QuitGame()
+    public void RegisterOrderFail()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        if (!dayRunning) return;
+
+        starSystem.LoseStar(1);
+
+        if (starSystem.CurrentStars <= 0)
+            EndDay(false, "Lost all stars");
     }
 
-    public void SetPhoneOut(bool isOut)
+    // ==========================
+    // END DAY BUTTONS
+    // ==========================
+    public void OnEndDayNextButton()
     {
-        IsPhoneOut = isOut;
-    }
-
-    public void ToggleHackingMode(bool isActive)
-    {
-        IsInHackingMode = isActive;
-    }
-
-    public void FreezeGame(bool freeze)
-    {
-        if (freeze)
+        if (orderGoalSystem.IsGoalReached())
         {
-            Time.timeScale = 0f;
-
-            if (playerInput != null)
-                playerInput.enabled = false;
+            if (DayManager.Instance.HasNextDay())
+                DayManager.Instance.StartNextDay();
+            else
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
         else
         {
-            Time.timeScale = 1f;
-
-            if (playerInput != null)
-                playerInput.enabled = true;
+            DayManager.Instance.RestartCurrentDay();
         }
+    }
+
+    public void OnEndDayQuitButton()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

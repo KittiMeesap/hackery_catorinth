@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a7135a9424c515746b442084dbc62392
+guid: 82c7fb51b7359e44e901fe3e82147370
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8471041011469755767
-    second: UI_Tutorial_TextboxRight_0
+      213: 7076928125463241189
+    second: FoodTruck_03_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: UI_Tutorial_TextboxRight_0
+      name: FoodTruck_03_0
       rect:
         serializedVersion: 2
-        x: 28
-        y: 11
-        width: 199
-        height: 105
+        x: 41
+        y: 1
+        width: 72
+        height: 61
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 775ab6e1bee2f8570800000000000000
-      internalID: 8471041011469755767
+      spriteID: 5e1253b82ac463260800000000000000
+      internalID: 7076928125463241189
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 7d193264af61d824ea7643b21bf2270f
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      UI_Tutorial_TextboxRight_0: 8471041011469755767
+      FoodTruck_03_0: 7076928125463241189
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

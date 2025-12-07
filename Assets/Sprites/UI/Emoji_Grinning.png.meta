@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a42cc9196571540458008dbadce5c9bb
+guid: 981f5320e91c81d47b0fc8360d43cee7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4834475967129613504
-    second: UI_Tutorial_TextboxLeft_0
+      213: 8480586161506383086
+    second: Emoji_Grinning_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: UI_Tutorial_TextboxLeft_0
+      name: Emoji_Grinning_0
       rect:
         serializedVersion: 2
-        x: 39
-        y: 11
-        width: 199
-        height: 105
+        x: 4
+        y: 3
+        width: 25
+        height: 25
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04b8318d8bd78ecb0800000000000000
-      internalID: -4834475967129613504
+      spriteID: ee47eab8e2811b570800000000000000
+      internalID: 8480586161506383086
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: b0f2b4ed09b260b479d455c43856dfae
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      UI_Tutorial_TextboxLeft_0: -4834475967129613504
+      Emoji_Grinning_0: 8480586161506383086
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

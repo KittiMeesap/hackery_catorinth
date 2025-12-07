@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7ae07bd765916aa42bd2a2e2bcad0cd0
+guid: 0c1978d8d8c694349937a385e6c13f8a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7853246654999020860
-    second: UI_Enemy_Arrow_0
+      213: -8691869011954376256
+    second: Footpath_Foodtruck_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: UI_Enemy_Arrow_0
+      name: Footpath_Foodtruck_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 7
-        width: 11
-        height: 17
+        x: 0
+        y: 0
+        width: 128
+        height: 2
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c35cdb479365cfc60800000000000000
-      internalID: 7853246654999020860
+      spriteID: 0c1eb346f27406780800000000000000
+      internalID: -8691869011954376256
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 4a4851cfab0ac3543ab1cd7a23c025ec
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      UI_Enemy_Arrow_0: 7853246654999020860
+      Footpath_Foodtruck_0: -8691869011954376256
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

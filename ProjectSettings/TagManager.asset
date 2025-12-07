@@ -20,11 +20,11 @@ TagManager:
   - Water
   - UI
   - Player
-  - CamColider
-  - Enemy
-  - Smoke
-  - Obstacle
-  - Temp
+  - 
+  - 
+  - 
+  - 
+  - 
   - 
   - 
   - 
@@ -52,17 +52,14 @@ TagManager:
   - name: BG
     uniqueID: 859523107
     locked: 0
-  - name: Object
+  - name: Car
     uniqueID: 3305528363
     locked: 0
-  - name: HackObj
+  - name: Object
     uniqueID: 847930191
     locked: 0
   - name: Characters
     uniqueID: 2960372961
-    locked: 0
-  - name: Pillars
-    uniqueID: 3255268767
     locked: 0
   - name: Effect
     uniqueID: 1940518801

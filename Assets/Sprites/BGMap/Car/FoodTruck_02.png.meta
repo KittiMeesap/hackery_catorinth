@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 853df1fe0bd6ba8478eb90b495fac0c9
+guid: 924f90681887d5647971c3e888688d2b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8439759911276958963
-    second: UI_HackIcon_Close_0
+      213: -5650674973659100593
+    second: FoodTruck_02_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,45 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: UI_HackIcon_Close_0
+      name: FoodTruck_02_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 64
-        height: 64
+        x: 41
+        y: 6
+        width: 39
+        height: 11
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3f4de3d6cec002570800000000000000
-      internalID: 8439759911276958963
+      spriteID: f4a0cddcc05c491b0800000000000000
+      internalID: -5650674973659100593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FoodTruck_02_1
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 57
+        width: 39
+        height: 3
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d02712097d220b34985c090cf36a2cd0
+      internalID: -1448191460
       vertices: []
       indices: 
       edges: []
@@ -138,7 +160,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: f25bb2ddad87340449723c95384111a2
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +170,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      UI_HackIcon_Close_0: 8439759911276958963
+      FoodTruck_02_0: -5650674973659100593
+      FoodTruck_02_1: -1448191460
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

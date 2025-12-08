@@ -10,6 +10,20 @@ public class ContainerData
     public enum ContainerState { Empty, Mixing, Mixed, Baked, Cooling, Finished }
     public ContainerState state = ContainerState.Empty;
 
+    public bool AddIngredientSafe(IngredientItemSO ing)
+    {
+        if (contents.Count >= 4)
+            return false;
+
+        var allowed = RecipeManager.Instance.GetAllowedIngredients(contents);
+        if (allowed.Count > 0 && !allowed.Contains(ing))
+            return false;
+
+        contents.Add(ing);
+        state = ContainerState.Mixing;
+        return true;
+    }
+
     public void AddIngredient(IngredientItemSO ing)
     {
         contents.Add(ing);

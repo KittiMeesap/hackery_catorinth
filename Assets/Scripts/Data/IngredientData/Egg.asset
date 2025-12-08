@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: Egg
   m_EditorClassIdentifier: Assembly-CSharp::FoodItemSO
   id: ing_1
-  icon: {fileID: 0}
-  isContainer: 0
+  icon: {fileID: -4072622106568590741, guid: d716f8b8b832f4248b70d362b8f08eeb, type: 3}

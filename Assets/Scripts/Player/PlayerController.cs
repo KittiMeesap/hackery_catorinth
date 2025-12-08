@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private InputManager input;
+
     private float moveX;
     private float inactivityTimer;
 
@@ -22,34 +23,74 @@ public class PlayerController : MonoBehaviour
     private bool isSleeping;
     private bool isSnoring;
 
+    private bool movementEnabled = true;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        input = new InputManager();
+
+        if (QTEManager.Instance != null)
+            input = QTEManager.Instance.input;
+
+        ResetAnimatorParameters();
+    }
+
+    private void ResetAnimatorParameters()
+    {
+        animator.SetBool("IsWalking", false);
+        animator.SetBool("IsIdle", true);
+        animator.SetBool("IsCarryingContainer", false);
+        animator.SetBool("IsCarryingServeBox", false);
+        animator.SetBool("AFK", false);
     }
 
     private void OnEnable()
     {
+        if (input == null)
+        {
+            Debug.LogError("PlayerController: InputManager missing!");
+            return;
+        }
+
         input.Player.Enable();
+        input.UI.Disable();
 
         input.Player.Move.performed += OnMovePerformed;
         input.Player.Move.canceled += OnMoveCanceled;
-
         input.Player.Interact.performed += OnInteractPerformed;
     }
 
     private void OnDisable()
     {
+        if (input == null) return;
+
         input.Player.Move.performed -= OnMovePerformed;
         input.Player.Move.canceled -= OnMoveCanceled;
-
         input.Player.Interact.performed -= OnInteractPerformed;
 
         input.Player.Disable();
     }
 
+    public void DisableMovement()
+    {
+        movementEnabled = false;
+        moveX = 0;
+        rb.linearVelocity = Vector2.zero;
+    }
+
+    public void EnableMovement()
+    {
+        movementEnabled = true;
+    }
+
     private void OnMovePerformed(InputAction.CallbackContext ctx)
     {
+        if (!movementEnabled)
+        {
+            moveX = 0;
+            return;
+        }
+
         moveX = ctx.ReadValue<Vector2>().x;
         ResetAFK();
     }
@@ -62,11 +103,11 @@ public class PlayerController : MonoBehaviour
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
     {
         ResetAFK();
-        // TODO: Interact logic
     }
 
     private void FixedUpdate()
     {
+        if (!movementEnabled) return;
         if (isSleeping || isSnoring) return;
 
         rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
@@ -85,19 +126,19 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("IsWalking", walking);
         animator.SetBool("IsIdle", !walking);
 
-        // Flip sprite
         if (walking)
             spriteRenderer.flipX = moveX < 0;
 
-        // AFK system
         animator.SetBool("AFK", isAFK);
+    }
 
-        // Carry system
-        animator.SetBool("IsCarryingContainer", inventory.HasContainer);
-        animator.SetBool("IsCarryingServeBox", inventory.HasServeBox);
+    public void RefreshCarryAnimation()
+    {
+        bool hasBowl = inventory != null && inventory.HasBowl();
+        bool hasServe = inventory != null && inventory.HasServeBox();
 
-        // Cooking system — set
-        // animator.SetBool("IsCooking", isCooking);
+        animator.SetBool("IsCarryingContainer", hasBowl);
+        animator.SetBool("IsCarryingServeBox", hasServe);
     }
 
     private void HandleAFKTimer()
@@ -119,7 +160,6 @@ public class PlayerController : MonoBehaviour
         isSnoring = false;
     }
 
-    // Animation Event Hooks
     public void Anim_SleepStart() => isSleeping = true;
     public void Anim_SleepEnd() => isSleeping = false;
     public void Anim_SnoreStart() => isSnoring = true;

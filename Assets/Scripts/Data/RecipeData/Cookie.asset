@@ -17,3 +17,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2bbc2f89269a07841a664c7b5645149d, type: 2}
   - {fileID: 11400000, guid: 1cae6e1b6897ce440841a480aef9b85a, type: 2}
   - {fileID: 11400000, guid: aec81f460db5b9b4ba3d7b193011d917, type: 2}
+  mixedIcon: {fileID: 0}
+  outputIcon: {fileID: -7673252519464838879, guid: 45c91f84c6da13241acc0d7397b28988, type: 3}
+  cooledIcon: {fileID: 0}
+  requiresCooling: 0

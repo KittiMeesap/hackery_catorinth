@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: Flour
   m_EditorClassIdentifier: Assembly-CSharp::FoodItemSO
   id: ing_3
-  icon: {fileID: 0}
-  isContainer: 0
+  icon: {fileID: 9132784678072903462, guid: 08d83a35914f7454eb05eb725d4f9cf1, type: 3}

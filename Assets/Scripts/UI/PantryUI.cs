@@ -14,6 +14,8 @@ public class PantryUI : MonoBehaviour
     [Header("Grid of Items")]
     public Transform itemGridParent;
     public GameObject itemButtonPrefab;
+    public GridLayoutGroup gridLayout;
+    public ScrollRect scrollRect;
 
     [Header("Selected Icons (max 4)")]
     public Image[] selectedSlots;
@@ -21,13 +23,20 @@ public class PantryUI : MonoBehaviour
     private List<PantryButtonController> buttonControllers = new();
     private List<IngredientItemSO> pantryIngredients = new();
     private List<IngredientItemSO> selectedIngredients = new();
+
     private PlayerInventory currentPlayer;
+    private PlayerController playerController;
+    private InteractStation owner;
 
     private InputAction navigateAction;
     private InputAction submitAction;
     private InputAction cancelAction;
 
     private int currentIndex = 0;
+    private int columns = 3;
+
+    private float inputCooldown = 0.15f;
+    private float inputTimer = 0f;
 
     private void Awake()
     {
@@ -35,29 +44,44 @@ public class PantryUI : MonoBehaviour
         HideImmediate();
     }
 
-    // ===== OPEN UI =====
-    public void Open(IngredientItemSO[] ingredients, PlayerInventory player)
+    private void Start()
     {
+        if (gridLayout != null)
+            columns = Mathf.Max(1, gridLayout.constraintCount);
+    }
+
+    public void Open(IngredientItemSO[] items, PlayerInventory player, InteractStation station)
+    {
+        owner = station;
         currentPlayer = player;
+        playerController = player.GetComponent<PlayerController>();
 
-        pantryIngredients = new List<IngredientItemSO>(ingredients);
-        selectedIngredients.Clear();
+        if (currentPlayer.bowl == null)
+            currentPlayer.PickCup();
+
+        panelRoot.SetActive(true);
+
+        pantryIngredients = new List<IngredientItemSO>(items);
+        selectedIngredients = new List<IngredientItemSO>(currentPlayer.bowl.contents);
+
         RefreshSelectedIcons();
-
         BuildGrid();
         Show();
 
-        var ui = QTEManager.Instance.input.UI;
-        ui.Enable();
+        var input = QTEManager.Instance.input;
+        input.Player.Disable();
+        input.UI.Enable();
 
-        navigateAction = ui.Navigate;
-        submitAction = ui.Submit;
-        cancelAction = ui.Cancel;
+        playerController.DisableMovement();
+
+        navigateAction = input.UI.Navigate;
+        submitAction = input.UI.Submit;
+        cancelAction = input.UI.Cancel;
 
         submitAction.performed += OnSubmit;
         cancelAction.performed += OnCancel;
 
-        FocusButton(0);
+        FocusNearestUnlocked(0);
     }
 
     public void Close()
@@ -65,11 +89,16 @@ public class PantryUI : MonoBehaviour
         submitAction.performed -= OnSubmit;
         cancelAction.performed -= OnCancel;
 
-        QTEManager.Instance.input.UI.Disable();
+        var input = QTEManager.Instance.input;
+        input.UI.Disable();
+        input.Player.Enable();
+
+        playerController.EnableMovement();
+
         Hide();
+        owner.UnlockInteraction();
     }
 
-    // ===== BUILD GRID =====
     private void BuildGrid()
     {
         foreach (Transform c in itemGridParent)
@@ -89,40 +118,82 @@ public class PantryUI : MonoBehaviour
         RefreshFiltering();
     }
 
-    // ===== HIGHLIGHT + NAVIGATION =====
-    private void FocusButton(int index)
+    private void Update()
+    {
+        inputTimer -= Time.unscaledDeltaTime;
+        if (navigateAction == null || inputTimer > 0f) return;
+
+        Vector2 nav = navigateAction.ReadValue<Vector2>();
+
+        if (Mathf.Abs(nav.x) < 0.4f && Mathf.Abs(nav.y) < 0.4f)
+            return;
+
+        inputTimer = inputCooldown;
+
+        if (nav.y > 0.5f) MoveUp();
+        else if (nav.y < -0.5f) MoveDown();
+        else if (nav.x > 0.5f) MoveRight();
+        else if (nav.x < -0.5f) MoveLeft();
+    }
+
+    private void MoveUp() => FocusNearestUnlocked(currentIndex - columns);
+    private void MoveDown() => FocusNearestUnlocked(currentIndex + columns);
+
+    private void MoveLeft()
+    {
+        if (currentIndex % columns == 0) return;
+        FocusNearestUnlocked(currentIndex - 1);
+    }
+
+    private void MoveRight()
+    {
+        if (currentIndex % columns == columns - 1) return;
+        FocusNearestUnlocked(currentIndex + 1);
+    }
+
+    private void FocusNearestUnlocked(int index)
     {
         if (buttonControllers.Count == 0) return;
 
         int direction = index > currentIndex ? 1 : -1;
+        int i = index;
 
-        while (index >= 0 && index < buttonControllers.Count)
+        while (i >= 0 && i < buttonControllers.Count)
         {
-            if (!buttonControllers[index].IsLocked())
+            if (!buttonControllers[i].IsLocked())
             {
-                currentIndex = index;
-
-                for (int i = 0; i < buttonControllers.Count; i++)
-                    buttonControllers[i].SetHighlight(i == currentIndex);
-
+                currentIndex = i;
+                HighlightCurrent();
+                ScrollToButton(i);
                 return;
             }
-
-            index += direction;
+            i += direction;
         }
     }
 
-    private void Update()
+    private void HighlightCurrent()
     {
-        if (navigateAction == null) return;
-
-        Vector2 nav = navigateAction.ReadValue<Vector2>();
-
-        if (nav.y > 0.5f) FocusButton(currentIndex - 1);
-        if (nav.y < -0.5f) FocusButton(currentIndex + 1);
+        for (int i = 0; i < buttonControllers.Count; i++)
+            buttonControllers[i].SetHighlight(i == currentIndex);
     }
 
-    // ===== SELECT INGREDIENT =====
+    private void ScrollToButton(int index)
+    {
+        if (scrollRect == null) return;
+
+        RectTransform target = buttonControllers[index].GetComponent<RectTransform>();
+        RectTransform content = itemGridParent.GetComponent<RectTransform>();
+
+        Canvas.ForceUpdateCanvases();
+
+        float viewportHeight = scrollRect.viewport.rect.height;
+        float contentHeight = content.rect.height;
+        float itemPosY = Mathf.Abs(target.anchoredPosition.y);
+
+        float normalized = Mathf.Clamp01(itemPosY / (contentHeight - viewportHeight));
+        scrollRect.verticalNormalizedPosition = 1f - normalized;
+    }
+
     private void OnSubmit(InputAction.CallbackContext ctx)
     {
         if (buttonControllers.Count == 0) return;
@@ -135,24 +206,50 @@ public class PantryUI : MonoBehaviour
 
     private void OnCancel(InputAction.CallbackContext ctx)
     {
-        ApplySelectionToBowl();
+        currentPlayer.OnInventoryChanged?.Invoke();
         Close();
     }
 
     private void ToggleIngredient(IngredientItemSO item)
     {
+        if (currentPlayer.bowl == null)
+            currentPlayer.PickCup();
+
+        var bowl = currentPlayer.bowl;
+
+        // ---- Remove ingredient ----
         if (selectedIngredients.Contains(item))
+        {
             selectedIngredients.Remove(item);
+
+            // remove 1 instance from bowl
+            bowl.contents.Remove(item);
+
+            if (bowl.contents.Count == 0)
+                bowl.state = ContainerData.ContainerState.Empty;
+
+            currentPlayer.OnInventoryChanged?.Invoke();
+        }
         else
         {
-            if (selectedIngredients.Count >= 4)
+            // ---- Add ingredient ----
+            if (bowl.contents.Count >= 4)
                 return;
+
+            var allowed = RecipeManager.Instance.GetAllowedIngredients(selectedIngredients);
+            if (allowed.Count > 0 && !allowed.Contains(item))
+                return;
+
             selectedIngredients.Add(item);
+            bowl.contents.Add(item);
+
+            currentPlayer.OnInventoryChanged?.Invoke();
         }
 
         RefreshSelectedIcons();
         RefreshFiltering();
     }
+
 
     private void RefreshSelectedIcons()
     {
@@ -168,10 +265,10 @@ public class PantryUI : MonoBehaviour
         }
     }
 
-    // ===== FILTER ACCORDING TO RECIPE =====
     private void RefreshFiltering()
     {
         var allowed = RecipeManager.Instance.GetAllowedIngredients(selectedIngredients);
+        int currentCount = currentPlayer.bowl != null ? currentPlayer.bowl.contents.Count : 0;
 
         for (int i = 0; i < pantryIngredients.Count; i++)
         {
@@ -179,35 +276,40 @@ public class PantryUI : MonoBehaviour
             var ctrl = buttonControllers[i];
 
             bool isSelected = selectedIngredients.Contains(item);
-            bool canPick = allowed.Contains(item);
+
+            bool capacityFull = currentCount >= 4;
+            bool hasAllowedList = allowed.Count > 0;
+            bool canPickByRecipe = !hasAllowedList || allowed.Contains(item);
+
+            bool canPick = !isSelected && !capacityFull && canPickByRecipe;
 
             ctrl.SetSelected(isSelected);
-            ctrl.SetLocked(!isSelected && !canPick);
+            ctrl.SetLocked(!canPick && !isSelected);
         }
     }
 
-    // ===== APPLY SELECTED INGREDIENTS =====
-    private void ApplySelectionToBowl()
-    {
-        if (currentPlayer.bowl == null)
-            return;
-
-        foreach (var ing in selectedIngredients)
-            currentPlayer.bowl.AddIngredient(ing);
-
-        currentPlayer.OnInventoryChanged?.Invoke();
-    }
-
-    // ===== SHOW / HIDE =====
     private void Show()
     {
         panelRoot.SetActive(true);
-        StartCoroutine(FadeCanvas(0, 1, 0.15f));
+        StartCoroutine(ShowDelayed());
+    }
+
+    private System.Collections.IEnumerator ShowDelayed()
+    {
+        yield return null;
+        StartCoroutine(FadeCanvas(0, 1, 0.12f));
     }
 
     private void Hide()
     {
-        StartCoroutine(FadeCanvas(1, 0, 0.15f, () =>
+        StartCoroutine(HideDelayed());
+    }
+
+    private System.Collections.IEnumerator HideDelayed()
+    {
+        yield return null;
+
+        StartCoroutine(FadeCanvas(1, 0, 0.12f, () =>
         {
             panelRoot.SetActive(false);
         }));

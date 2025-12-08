@@ -32,17 +32,16 @@ public class QTEManager : MonoBehaviour
     [Header("Debug")]
     public bool logDebug = true;
 
-    // CURRENT STATE
     private QTEType currentType = QTEType.None;
     private bool isRunning = false;
 
     public InputManager input { get; private set; }
 
-    // CALLBACKS
     public Action<QTEResult> OnQTEFinished;
 
     private void Awake()
     {
+        // Singleton setup
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -50,15 +49,32 @@ public class QTEManager : MonoBehaviour
         }
         Instance = this;
 
+        // Create InputManager instance ONCE
         input = new InputManager();
+
+        // Disable all maps first — avoid accidental double input
+        input.Player.Disable();
+        input.UI.Disable();
+        input.QTE.Disable();
+        input.GameControls.Disable();
+
+        if (logDebug) Debug.Log("QTEManager: InputManager initialized & all maps disabled.");
     }
 
+    // ==========================
+    //       MASH START
+    // ==========================
     public void StartMashQTE(string logicalKey)
     {
         if (isRunning) return;
 
-        currentType = QTEType.Mash;
         isRunning = true;
+        currentType = QTEType.Mash;
+
+        // Enable only QTE map
+        input.Player.Disable();
+        input.UI.Disable();
+        input.QTE.Enable();
 
         mashUI.gameObject.SetActive(true);
         mashUI.Begin(
@@ -70,28 +86,45 @@ public class QTEManager : MonoBehaviour
         );
     }
 
+    // ==========================
+    //      TIMING START
+    // ==========================
     public void StartTimingQTE(float speed, float zoneSize)
     {
         if (isRunning) return;
 
-        currentType = QTEType.Timing;
         isRunning = true;
+        currentType = QTEType.Timing;
+
+        input.Player.Disable();
+        input.UI.Disable();
+        input.QTE.Enable();
 
         timingUI.gameObject.SetActive(true);
         timingUI.Begin(speed, zoneSize, OnTimingFinished);
     }
 
+    // ==========================
+    //      SEQUENCE START
+    // ==========================
     public void StartSequenceQTE(string[] sequence, float timePerKey = 2f)
     {
         if (isRunning) return;
 
-        currentType = QTEType.Sequence;
         isRunning = true;
+        currentType = QTEType.Sequence;
+
+        input.Player.Disable();
+        input.UI.Disable();
+        input.QTE.Enable();
 
         sequenceUI.gameObject.SetActive(true);
         sequenceUI.Begin(sequence, timePerKey, OnSequenceFinished);
     }
 
+    // ==========================
+    //         CANCEL
+    // ==========================
     public void CancelCurrentQTE()
     {
         if (!isRunning) return;
@@ -100,35 +133,42 @@ public class QTEManager : MonoBehaviour
         if (currentType == QTEType.Timing) timingUI.ForceStop();
         if (currentType == QTEType.Sequence) sequenceUI.ForceStop();
 
-        currentType = QTEType.None;
-        isRunning = false;
+        ResetState();
     }
 
-    // =============================================================
-    //  CALLBACKS FROM UIs
-    // =============================================================
+    private void ResetState()
+    {
+        isRunning = false;
+        currentType = QTEType.None;
+
+        // Return controls to Player mode
+        input.QTE.Disable();
+        input.UI.Disable();
+        input.Player.Enable();
+    }
+
+    // ==========================
+    //     CALLBACKS
+    // ==========================
 
     private void OnMashFinished(QTEResult result)
     {
         if (logDebug) Debug.Log($"Mash QTE: {result}");
-        currentType = QTEType.None;
-        isRunning = false;
+        ResetState();
         OnQTEFinished?.Invoke(result);
     }
 
     private void OnTimingFinished(QTEResult result)
     {
         if (logDebug) Debug.Log($"Timing QTE: {result}");
-        currentType = QTEType.None;
-        isRunning = false;
+        ResetState();
         OnQTEFinished?.Invoke(result);
     }
 
     private void OnSequenceFinished(QTEResult result)
     {
         if (logDebug) Debug.Log($"Sequence QTE: {result}");
-        currentType = QTEType.None;
-        isRunning = false;
+        ResetState();
         OnQTEFinished?.Invoke(result);
     }
 }

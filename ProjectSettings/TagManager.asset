@@ -4,14 +4,8 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - CanHack
-  - CanHide
   - Object
-  - Stair
-  - CamColider
-  - Transition
-  - Enemy
-  - Sweeper
+  - StationObj
   layers:
   - Default
   - TransparentFX
@@ -20,7 +14,7 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
+  - Interact
   - 
   - 
   - 

@@ -31,9 +31,7 @@ public class GameManager : MonoBehaviour
         DayManager.Instance.StartFirstDay();
     }
 
-    // ==========================
     // START DAY
-    // ==========================
     public void StartDay(DayConfigSO config)
     {
         currentDayConfig = config;
@@ -62,9 +60,7 @@ public class GameManager : MonoBehaviour
         QTEManager.Instance.input.UI.Disable();
     }
 
-    // ==========================
     // END DAY
-    // ==========================
     private void EndDay(bool success, string reason)
     {
         dayRunning = false;
@@ -87,9 +83,7 @@ public class GameManager : MonoBehaviour
         );
     }
 
-    // ==========================
     // EVENT: Time finished
-    // ==========================
     private void OnDayTimeOver()
     {
         if (!dayRunning) return;
@@ -100,9 +94,7 @@ public class GameManager : MonoBehaviour
             EndDay(false, "Out of time");
     }
 
-    // ==========================
     // ORDER EVENTS
-    // ==========================
     public void RegisterOrderSuccess()
     {
         if (!dayRunning) return;
@@ -126,21 +118,21 @@ public class GameManager : MonoBehaviour
             EndDay(false, "Lost all stars");
     }
 
-    // ==========================
     // END DAY BUTTONS
-    // ==========================
     public void OnEndDayNextButton()
     {
-        if (orderGoalSystem.IsGoalReached())
+        bool success = orderGoalSystem.IsGoalReached();
+
+        if (success)
         {
             if (DayManager.Instance.HasNextDay())
                 DayManager.Instance.StartNextDay();
             else
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // finish
         }
         else
         {
-            DayManager.Instance.RestartCurrentDay();
+            DayManager.Instance.RestartCurrentDay(); // retry same day
         }
     }
 

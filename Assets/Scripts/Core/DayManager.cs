@@ -24,8 +24,14 @@ public class DayManager : MonoBehaviour
 
     public void StartFirstDay()
     {
-        currentDayIndex = 0;
-        GameManager.Instance.StartDay(CurrentDay);
+        UnlockSaveManager.Instance.Load();
+
+        int dayToLoad = UnlockSaveManager.Instance.Data.lastUnlockedDay;
+        currentDayIndex = dayToLoad - 1;
+
+        UnlockManager.Instance.ApplyUnlocksForDay(dayToLoad);
+
+        GameManager.Instance.StartDay(dayConfigs[currentDayIndex]);
     }
 
     public void StartNextDay()
@@ -33,12 +39,19 @@ public class DayManager : MonoBehaviour
         if (currentDayIndex + 1 < dayConfigs.Length)
         {
             currentDayIndex++;
+
+            UnlockManager.Instance.ApplyUnlocksForDay(CurrentDay.dayIndex);
             GameManager.Instance.StartDay(CurrentDay);
         }
         else
         {
-            Debug.Log("No next day. Game completed.");
+            Debug.Log("Game completed.");
         }
+    }
+
+    public void RestartCurrentDay()
+    {
+        GameManager.Instance.StartDay(CurrentDay);
     }
 
     public bool HasNextDay()
@@ -46,8 +59,8 @@ public class DayManager : MonoBehaviour
         return currentDayIndex + 1 < dayConfigs.Length;
     }
 
-    public void RestartCurrentDay()
+    public int GetNextDayIndex()
     {
-        GameManager.Instance.StartDay(CurrentDay);
+        return HasNextDay() ? dayConfigs[currentDayIndex + 1].dayIndex : CurrentDay.dayIndex;
     }
 }

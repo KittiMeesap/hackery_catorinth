@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using TMPro;
 
 public class PantryUI : MonoBehaviour
 {
@@ -20,11 +19,10 @@ public class PantryUI : MonoBehaviour
     public Image[] selectedSlots;
 
     private List<PantryButtonController> buttonControllers = new();
-    private List<FoodItemSO> pantryIngredients = new();
-    private List<FoodItemSO> selectedIngredients = new();
+    private List<IngredientItemSO> pantryIngredients = new();
+    private List<IngredientItemSO> selectedIngredients = new();
     private PlayerInventory currentPlayer;
 
-    // Input
     private InputAction navigateAction;
     private InputAction submitAction;
     private InputAction cancelAction;
@@ -38,11 +36,11 @@ public class PantryUI : MonoBehaviour
     }
 
     // ===== OPEN UI =====
-    public void Open(FoodItemSO[] ingredients, PlayerInventory player)
+    public void Open(IngredientItemSO[] ingredients, PlayerInventory player)
     {
         currentPlayer = player;
 
-        pantryIngredients = new List<FoodItemSO>(ingredients);
+        pantryIngredients = new List<IngredientItemSO>(ingredients);
         selectedIngredients.Clear();
         RefreshSelectedIcons();
 
@@ -124,7 +122,7 @@ public class PantryUI : MonoBehaviour
         if (nav.y < -0.5f) FocusButton(currentIndex + 1);
     }
 
-    // ===== CLICK / SUBMIT =====
+    // ===== SELECT INGREDIENT =====
     private void OnSubmit(InputAction.CallbackContext ctx)
     {
         if (buttonControllers.Count == 0) return;
@@ -141,8 +139,7 @@ public class PantryUI : MonoBehaviour
         Close();
     }
 
-    // ===== SELECT / DESELECT INGREDIENT =====
-    private void ToggleIngredient(FoodItemSO item)
+    private void ToggleIngredient(IngredientItemSO item)
     {
         if (selectedIngredients.Contains(item))
             selectedIngredients.Remove(item);
@@ -171,7 +168,7 @@ public class PantryUI : MonoBehaviour
         }
     }
 
-    // ===== FILTER INGREDIENTS BY RECIPE =====
+    // ===== FILTER ACCORDING TO RECIPE =====
     private void RefreshFiltering()
     {
         var allowed = RecipeManager.Instance.GetAllowedIngredients(selectedIngredients);
@@ -189,19 +186,19 @@ public class PantryUI : MonoBehaviour
         }
     }
 
-    // ===== APPLY TO PLAYER BOWL =====
+    // ===== APPLY SELECTED INGREDIENTS =====
     private void ApplySelectionToBowl()
     {
-        if (currentPlayer.currentContainer == null)
+        if (currentPlayer.bowl == null)
             return;
 
         foreach (var ing in selectedIngredients)
-            currentPlayer.currentContainer.AddIngredient(ing);
+            currentPlayer.bowl.AddIngredient(ing);
 
         currentPlayer.OnInventoryChanged?.Invoke();
     }
 
-    // ===== UI SHOW/HIDE =====
+    // ===== SHOW / HIDE =====
     private void Show()
     {
         panelRoot.SetActive(true);

@@ -2,32 +2,38 @@ using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
-    public FoodItemSO currentItem;
-    public ContainerItem currentContainer;
+    public ContainerData bowl;
+    public ServeBoxItem serveBox;
+
+    public bool HasContainer => bowl != null;
+    public bool HasServeBox => serveBox != null;
 
     public System.Action OnInventoryChanged;
 
-    public bool HasItem => currentItem != null;
-    public bool HasContainer => currentContainer != null;
-
-    public void Pick(FoodItemSO item)
+    public void PickCup()
     {
-        currentItem = item;
-        currentContainer = null;
+        bowl = new ContainerData();
+        serveBox = null;
         OnInventoryChanged?.Invoke();
     }
 
-    public void PickContainer(ContainerItem container)
+    public void DropAll()
     {
-        currentContainer = container;
-        currentItem = container.containerType;
+        bowl = null;
+        serveBox = null;
         OnInventoryChanged?.Invoke();
     }
 
-    public void Drop()
+    public void ConvertToServeBox()
     {
-        currentItem = null;
-        currentContainer = null;
+        if (bowl == null || bowl.matchedRecipe == null) return;
+
+        serveBox = new ServeBoxItem
+        {
+            resultRecipe = bowl.matchedRecipe
+        };
+
+        bowl = null;
         OnInventoryChanged?.Invoke();
     }
 }

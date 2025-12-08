@@ -545,6 +545,9 @@ GameObject:
   - component: {fileID: 151235168}
   - component: {fileID: 151235169}
   - component: {fileID: 151235170}
+  - component: {fileID: 151235172}
+  - component: {fileID: 151235173}
+  - component: {fileID: 151235174}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -680,6 +683,49 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DayManager
   dayConfigs:
   - {fileID: 11400000, guid: 023dfc7a8bf6fdf49a9b6692ac65491e, type: 2}
+--- !u!114 &151235172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151235162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3975bcf1b05b5f24ab06a3333705b9b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnlockManager
+  database: {fileID: 11400000, guid: 4d7ecfd331e4840428467eb5fa6d51bb, type: 2}
+  pantryDatabase: {fileID: 151235173}
+  recipeManager: {fileID: 151235166}
+--- !u!114 &151235173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151235162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3fb07c1e8e6f34bbe097fdbe555a74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PantryDatabase
+  initialIngredients:
+  - {fileID: 11400000, guid: 1cae6e1b6897ce440841a480aef9b85a, type: 2}
+  - {fileID: 11400000, guid: 2bbc2f89269a07841a664c7b5645149d, type: 2}
+  - {fileID: 11400000, guid: aec81f460db5b9b4ba3d7b193011d917, type: 2}
+--- !u!114 &151235174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151235162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22d4cdcd388ef6d4faf1eb5760c5ca3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnlockSaveManager
 --- !u!1 &262972615
 GameObject:
   m_ObjectHideFlags: 0

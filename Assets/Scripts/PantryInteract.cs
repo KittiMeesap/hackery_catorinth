@@ -2,18 +2,18 @@ using UnityEngine;
 
 public class PantryInteract : MonoBehaviour, IInteractable
 {
-    public FoodItemSO[] allIngredients;
     public Transform uiAnchor;
 
     public void Interact(PlayerInventory player)
     {
-        if (!player.HasItem || !player.currentItem.isContainer)
+        if (!player.HasContainer)
         {
-            Debug.Log("You didn't have a bowl!");
+            Debug.Log("You need a bowl before selecting ingredients!");
             return;
         }
 
-        PantryUI.Instance.Open(allIngredients, player);
+        var allItems = PantryDatabase.Instance.GetAllIngredients();
+        PantryUI.Instance.Open(allItems.ToArray(), player);
     }
 
     public Transform GetUIAnchor()

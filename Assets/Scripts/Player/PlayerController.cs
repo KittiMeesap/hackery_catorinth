@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     public Animator animator;
     public SpriteRenderer spriteRenderer;
+    public PlayerInventory inventory;
 
     private Rigidbody2D rb;
     private InputManager input;
@@ -49,8 +50,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnMovePerformed(InputAction.CallbackContext ctx)
     {
-        Vector2 v = ctx.ReadValue<Vector2>();
-        moveX = v.x;
+        moveX = ctx.ReadValue<Vector2>().x;
         ResetAFK();
     }
 
@@ -62,7 +62,7 @@ public class PlayerController : MonoBehaviour
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
     {
         ResetAFK();
-        // TODO: Interact system
+        // TODO: Interact logic
     }
 
     private void FixedUpdate()
@@ -85,10 +85,19 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("IsWalking", walking);
         animator.SetBool("IsIdle", !walking);
 
+        // Flip sprite
         if (walking)
             spriteRenderer.flipX = moveX < 0;
 
+        // AFK system
         animator.SetBool("AFK", isAFK);
+
+        // Carry system
+        animator.SetBool("IsCarryingContainer", inventory.HasContainer);
+        animator.SetBool("IsCarryingServeBox", inventory.HasServeBox);
+
+        // Cooking system — set
+        // animator.SetBool("IsCooking", isCooking);
     }
 
     private void HandleAFKTimer()
@@ -110,6 +119,7 @@ public class PlayerController : MonoBehaviour
         isSnoring = false;
     }
 
+    // Animation Event Hooks
     public void Anim_SleepStart() => isSleeping = true;
     public void Anim_SleepEnd() => isSleeping = false;
     public void Anim_SnoreStart() => isSnoring = true;

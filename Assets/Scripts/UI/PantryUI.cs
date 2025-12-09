@@ -138,13 +138,11 @@ public class PantryUI : MonoBehaviour
 
     private void MoveUp() => FocusNearestUnlocked(currentIndex - columns);
     private void MoveDown() => FocusNearestUnlocked(currentIndex + columns);
-
     private void MoveLeft()
     {
         if (currentIndex % columns == 0) return;
         FocusNearestUnlocked(currentIndex - 1);
     }
-
     private void MoveRight()
     {
         if (currentIndex % columns == columns - 1) return;
@@ -174,7 +172,14 @@ public class PantryUI : MonoBehaviour
     private void HighlightCurrent()
     {
         for (int i = 0; i < buttonControllers.Count; i++)
-            buttonControllers[i].SetHighlight(i == currentIndex);
+        {
+            var ctrl = buttonControllers[i];
+            bool highlight = (i == currentIndex);
+            bool selected = selectedIngredients.Contains(ctrl.Ingredient);
+
+            ctrl.SetHighlight(highlight);
+            ctrl.SetSelected(selected);
+        }
     }
 
     private void ScrollToButton(int index)
@@ -217,12 +222,10 @@ public class PantryUI : MonoBehaviour
 
         var bowl = currentPlayer.bowl;
 
-        // ---- Remove ingredient ----
+        // REMOVE
         if (selectedIngredients.Contains(item))
         {
             selectedIngredients.Remove(item);
-
-            // remove 1 instance from bowl
             bowl.contents.Remove(item);
 
             if (bowl.contents.Count == 0)
@@ -230,11 +233,9 @@ public class PantryUI : MonoBehaviour
 
             currentPlayer.OnInventoryChanged?.Invoke();
         }
-        else
+        else // ADD
         {
-            // ---- Add ingredient ----
-            if (bowl.contents.Count >= 4)
-                return;
+            if (bowl.contents.Count >= 4) return;
 
             var allowed = RecipeManager.Instance.GetAllowedIngredients(selectedIngredients);
             if (allowed.Count > 0 && !allowed.Contains(item))
@@ -248,8 +249,8 @@ public class PantryUI : MonoBehaviour
 
         RefreshSelectedIcons();
         RefreshFiltering();
+        HighlightCurrent();
     }
-
 
     private void RefreshSelectedIcons()
     {
@@ -276,7 +277,6 @@ public class PantryUI : MonoBehaviour
             var ctrl = buttonControllers[i];
 
             bool isSelected = selectedIngredients.Contains(item);
-
             bool capacityFull = currentCount >= 4;
             bool hasAllowedList = allowed.Count > 0;
             bool canPickByRecipe = !hasAllowedList || allowed.Contains(item);

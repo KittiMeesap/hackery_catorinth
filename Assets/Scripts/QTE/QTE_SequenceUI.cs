@@ -26,13 +26,20 @@ public class QTE_SequenceUI : MonoBehaviour
     private bool active = false;
 
     private InputManager input => QTEManager.Instance.input;
-    private InputAction hitAction;
+    private InputAction arrowAction;
 
     private Coroutine punchRoutine;
-
     private System.Action<QTEResult> finishCallback;
 
-    // =============================================================
+    private string DirectionFromVector(Vector2 v)
+    {
+        if (v.y > 0.5f) return "up";
+        if (v.y < -0.5f) return "down";
+        if (v.x > 0.5f) return "right";
+        if (v.x < -0.5f) return "left";
+        return null;
+    }
+
     public void Begin(string[] sequence, float timePerKey, System.Action<QTEResult> onFinished)
     {
         this.sequence = sequence;
@@ -45,8 +52,8 @@ public class QTE_SequenceUI : MonoBehaviour
         ShowCurrentKey();
 
         input.QTE.Enable();
-        hitAction = input.QTE.ConfirmHit;
-        hitAction.performed += OnHit;
+        arrowAction = input.QTE.Directional;
+        arrowAction.performed += OnArrow;
 
         active = true;
         gameObject.SetActive(true);
@@ -59,26 +66,29 @@ public class QTE_SequenceUI : MonoBehaviour
         timer -= Time.unscaledDeltaTime;
         if (timer <= 0f)
         {
-            // timeout -> fail
             StartCoroutine(FailFlash());
             Finish(QTEResult.Fail);
         }
     }
 
-    private void OnHit(InputAction.CallbackContext ctx)
+    private void OnArrow(InputAction.CallbackContext ctx)
     {
         if (!active) return;
 
-        string pressed = KeyIconDatabase.GetLogicalFromContext(ctx);
+        Vector2 v = ctx.ReadValue<Vector2>();
+        string pressed = DirectionFromVector(v);
+        if (pressed == null) return;
+
         string expected = sequence[index].ToLowerInvariant();
 
-        if (pressed == expected || (expected == "confirm" && pressed == "space"))
+        if (pressed == expected)
         {
             // correct
             if (punchRoutine != null) StopCoroutine(punchRoutine);
             punchRoutine = StartCoroutine(StepPunch());
 
             index++;
+
             if (index >= sequence.Length)
             {
                 Finish(QTEResult.Success);
@@ -91,17 +101,30 @@ public class QTE_SequenceUI : MonoBehaviour
         }
         else
         {
-            // wrong key
+            // WRONG KEY — do NOT fail immediately
             StartCoroutine(FailFlash());
-            Finish(QTEResult.Fail);
+
+            // Pick a NEW RANDOM ARROW for this index
+            sequence[index] = RandomArrow();
+
+            // Reset timer
+            timer = timePerKey;
+
+            // Show new key
+            ShowCurrentKey();
         }
+    }
+
+    private string RandomArrow()
+    {
+        string[] pool = { "left", "right", "up", "down" };
+        return pool[Random.Range(0, pool.Length)];
     }
 
     private void ShowCurrentKey()
     {
-        if (index < 0 || index >= sequence.Length) return;
-
         string logical = sequence[index].ToLowerInvariant();
+
         keyIcon.sprite = KeyIconDatabase.GetIcon(logical);
         textLabel.text = logical.ToUpperInvariant();
     }
@@ -136,16 +159,10 @@ public class QTE_SequenceUI : MonoBehaviour
 
     private IEnumerator FailFlash()
     {
-        if (background == null) yield break;
-
         Color baseCol = background.color;
         background.color = failFlashColor;
-        float t = 0f;
-        while (t < failFlashDuration)
-        {
-            t += Time.unscaledDeltaTime;
-            yield return null;
-        }
+
+        yield return new WaitForSecondsRealtime(failFlashDuration);
 
         background.color = baseCol;
     }
@@ -153,10 +170,11 @@ public class QTE_SequenceUI : MonoBehaviour
     private void Finish(QTEResult result)
     {
         if (!active) return;
+
         active = false;
 
-        if (hitAction != null)
-            hitAction.performed -= OnHit;
+        if (arrowAction != null)
+            arrowAction.performed -= OnArrow;
 
         input.QTE.Disable();
         gameObject.SetActive(false);

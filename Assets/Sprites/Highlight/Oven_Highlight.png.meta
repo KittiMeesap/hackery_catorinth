@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d3a41a419b15dce46aa5b79ecec43132
+guid: 78e422c2b334dce44a891d81201b1269
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5927569979511303080
-    second: mixed_cookie_0
+      213: 8937770262976866293
+    second: Oven_Highlight_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: mixed_cookie_0
+      name: Oven_Highlight_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 9
-        width: 14
-        height: 10
+        x: 16
+        y: 3
+        width: 32
+        height: 29
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8ab6a02ad75f24250800000000000000
-      internalID: 5927569979511303080
+      spriteID: 5f729c823b6590c70800000000000000
+      internalID: 8937770262976866293
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 389ce03fb864ac947afde829bb6c004c
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      mixed_cookie_0: 5927569979511303080
+      Oven_Highlight_0: 8937770262976866293
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

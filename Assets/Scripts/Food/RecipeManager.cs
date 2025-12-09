@@ -47,4 +47,14 @@ public class RecipeManager : MonoBehaviour
 
         return allowed;
     }
+
+    public bool CanMix(List<IngredientItemSO> contents)
+    {
+        foreach (var recipe in recipes)
+        {
+            if (recipe.MatchIngredients(contents))
+                return true;
+        }
+        return false;
+    }
 }

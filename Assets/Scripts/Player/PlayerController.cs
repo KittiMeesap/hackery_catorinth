@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("IsCarryingContainer", false);
         animator.SetBool("IsCarryingServeBox", false);
         animator.SetBool("AFK", false);
+        animator.SetBool("IsCooking", false);
     }
 
     private void OnEnable()
@@ -117,6 +118,7 @@ public class PlayerController : MonoBehaviour
     {
         UpdateAnimator();
         HandleAFKTimer();
+        RefreshCarryAnimation();
     }
 
     private void UpdateAnimator()
@@ -137,8 +139,15 @@ public class PlayerController : MonoBehaviour
         bool hasBowl = inventory != null && inventory.HasBowl();
         bool hasServe = inventory != null && inventory.HasServeBox();
 
+        if (hasServe) hasBowl = false;
+
         animator.SetBool("IsCarryingContainer", hasBowl);
         animator.SetBool("IsCarryingServeBox", hasServe);
+    }
+
+    public void SetCooking(bool cooking)
+    {
+        animator.SetBool("IsCooking", cooking);
     }
 
     private void HandleAFKTimer()

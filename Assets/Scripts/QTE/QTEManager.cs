@@ -25,8 +25,8 @@ public class QTEManager : MonoBehaviour
     public QTE_SequenceUI sequenceUI;
 
     [Header("Mash Settings")]
-    public float mashFillPerHit = 0.12f;
-    public float mashDrainPerSec = 0.25f;
+    public float mashFillPerHit = 0.08f;
+    public float mashDrainPerSec = 0.6f;
     public float mashSuccessValue = 1.0f;
 
     [Header("Debug")]
@@ -41,7 +41,6 @@ public class QTEManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton setup
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -49,10 +48,8 @@ public class QTEManager : MonoBehaviour
         }
         Instance = this;
 
-        // Create InputManager instance ONCE
         input = new InputManager();
 
-        // Disable all maps first — avoid accidental double input
         input.Player.Disable();
         input.UI.Disable();
         input.QTE.Disable();
@@ -61,9 +58,7 @@ public class QTEManager : MonoBehaviour
         if (logDebug) Debug.Log("QTEManager: InputManager initialized & all maps disabled.");
     }
 
-    // ==========================
-    //       MASH START
-    // ==========================
+    // ============ MASH ============
     public void StartMashQTE(string logicalKey)
     {
         if (isRunning) return;
@@ -71,7 +66,6 @@ public class QTEManager : MonoBehaviour
         isRunning = true;
         currentType = QTEType.Mash;
 
-        // Enable only QTE map
         input.Player.Disable();
         input.UI.Disable();
         input.QTE.Enable();
@@ -86,9 +80,7 @@ public class QTEManager : MonoBehaviour
         );
     }
 
-    // ==========================
-    //      TIMING START
-    // ==========================
+    // ============ TIMING ============
     public void StartTimingQTE(float speed, float zoneSize)
     {
         if (isRunning) return;
@@ -104,9 +96,7 @@ public class QTEManager : MonoBehaviour
         timingUI.Begin(speed, zoneSize, OnTimingFinished);
     }
 
-    // ==========================
-    //      SEQUENCE START
-    // ==========================
+    // ============ SEQUENCE ============
     public void StartSequenceQTE(string[] sequence, float timePerKey = 2f)
     {
         if (isRunning) return;
@@ -122,9 +112,7 @@ public class QTEManager : MonoBehaviour
         sequenceUI.Begin(sequence, timePerKey, OnSequenceFinished);
     }
 
-    // ==========================
-    //         CANCEL
-    // ==========================
+    // ============ CANCEL ============
     public void CancelCurrentQTE()
     {
         if (!isRunning) return;
@@ -141,16 +129,12 @@ public class QTEManager : MonoBehaviour
         isRunning = false;
         currentType = QTEType.None;
 
-        // Return controls to Player mode
         input.QTE.Disable();
         input.UI.Disable();
         input.Player.Enable();
     }
 
-    // ==========================
-    //     CALLBACKS
-    // ==========================
-
+    // ============ CALLBACKS ============
     private void OnMashFinished(QTEResult result)
     {
         if (logDebug) Debug.Log($"Mash QTE: {result}");

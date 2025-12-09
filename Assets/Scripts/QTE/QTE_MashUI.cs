@@ -17,8 +17,6 @@ public class QTE_MashUI : MonoBehaviour
     public float fadeInDuration = 0.15f;
     public float hitPunchScale = 1.15f;
     public float hitPunchDuration = 0.08f;
-    public Color hitFlashColor = Color.white;
-    public float hitFlashDuration = 0.08f;
 
     private float currentFill = 0f;
     private float fillPerHit = 0.1f;
@@ -26,17 +24,15 @@ public class QTE_MashUI : MonoBehaviour
     private float successTarget = 1f;
 
     private bool active = false;
+    private bool hasStarted = false;
 
-    // input
     private InputManager input => QTEManager.Instance.input;
     private InputAction hitAction;
 
     private Coroutine fadeRoutine;
     private Coroutine punchRoutine;
 
-    // =============================================================
-    //  ENTRY
-    // =============================================================
+    private System.Action<QTEResult> finishCallback;
 
     public void Begin(string logicalKey, float perHit, float drain, float successTarget,
                       System.Action<QTEResult> onFinished)
@@ -48,13 +44,13 @@ public class QTE_MashUI : MonoBehaviour
 
         currentFill = 0f;
         barFill.fillAmount = 0f;
+        hasStarted = false;  // reset
 
-        // icon + label
         keyIcon.sprite = KeyIconDatabase.GetIcon(logicalKey);
         labelText.text = logicalKey.ToUpperInvariant();
 
-        // UI setup
         if (root == null) root = (RectTransform)transform;
+
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
@@ -62,7 +58,6 @@ public class QTE_MashUI : MonoBehaviour
             fadeRoutine = StartCoroutine(FadeCanvas(0f, 1f, fadeInDuration));
         }
 
-        // input
         input.QTE.Enable();
         hitAction = input.QTE.ConfirmHit;
         hitAction.performed += OnHit;
@@ -71,33 +66,29 @@ public class QTE_MashUI : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    private System.Action<QTEResult> finishCallback;
-
-    // =============================================================
-    //  UPDATE
-    // =============================================================
-
     private void Update()
     {
         if (!active) return;
 
-        currentFill -= drainPerSec * Time.unscaledDeltaTime;
-        currentFill = Mathf.Clamp01(currentFill);
-        barFill.fillAmount = currentFill;
+        if (hasStarted)
+        {
+            currentFill -= drainPerSec * Time.unscaledDeltaTime;
+            currentFill = Mathf.Clamp01(currentFill);
+            barFill.fillAmount = currentFill;
+
+        }
 
         if (currentFill >= successTarget)
         {
             Finish(QTEResult.Success);
-        }
-        else if (currentFill <= 0f && drainPerSec > 0f)
-        {
-            // optional: fail
         }
     }
 
     private void OnHit(InputAction.CallbackContext ctx)
     {
         if (!active) return;
+
+        hasStarted = true;
 
         currentFill += fillPerHit;
         currentFill = Mathf.Clamp01(currentFill);
@@ -110,10 +101,6 @@ public class QTE_MashUI : MonoBehaviour
             Finish(QTEResult.Success);
         }
     }
-
-    // =============================================================
-    //  EFFECTS
-    // =============================================================
 
     private void PlayHitFeedback()
     {
@@ -133,7 +120,6 @@ public class QTE_MashUI : MonoBehaviour
             float p = t / hitPunchDuration;
             p = p * p * (3 - 2 * p);
             root.localScale = Vector3.Lerp(baseScale, target, p);
-
             yield return null;
         }
 
@@ -144,7 +130,6 @@ public class QTE_MashUI : MonoBehaviour
             float p = t / hitPunchDuration;
             p = p * p * (3 - 2 * p);
             root.localScale = Vector3.Lerp(target, baseScale, p);
-
             yield return null;
         }
 
@@ -165,21 +150,15 @@ public class QTE_MashUI : MonoBehaviour
         canvasGroup.alpha = to;
     }
 
-    // =============================================================
-    //  FINISH / STOP
-    // =============================================================
-
     private void Finish(QTEResult result)
     {
         if (!active) return;
-
         active = false;
 
         if (hitAction != null)
             hitAction.performed -= OnHit;
 
         input.QTE.Disable();
-
         gameObject.SetActive(false);
 
         finishCallback?.Invoke(result);

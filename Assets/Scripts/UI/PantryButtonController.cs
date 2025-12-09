@@ -9,17 +9,20 @@ public class PantryButtonController : MonoBehaviour
 
     [Header("Colors")]
     public Color normalColor = Color.white;
-    public Color highlightColor = new Color(0.7f, 0.85f, 1f);
-    public Color selectedColor = new Color(0.6f, 1f, 0.6f);
-    public Color lockedColor = new Color(0.5f, 0.5f, 0.5f);
+    public Color highlightColor = new Color(0.75f, 0.9f, 1f);
+    public Color selectedColor = new Color(0.65f, 1f, 0.65f);
+    public Color lockedColor = new Color(0.45f, 0.45f, 0.45f);
+    public Color selectedHighlightColor = new Color(0.35f, 0.85f, 0.35f);
 
     private IngredientItemSO ingredient;
 
     private bool isLocked = false;
     private bool isSelected = false;
+    private bool isHighlighted = false;
 
     public IngredientItemSO Ingredient => ingredient;
     public bool IsLocked() => isLocked;
+    public bool IsSelected() => isSelected;
 
     private void Awake()
     {
@@ -35,26 +38,57 @@ public class PantryButtonController : MonoBehaviour
         ingredient = ing;
         if (ingredientIconImage)
             ingredientIconImage.sprite = ing.icon;
+
+        RefreshColor();
     }
 
+    // Highlight (cursor focus)
     public void SetHighlight(bool active)
     {
-        if (isLocked || isSelected) return;
-        background.color = active ? highlightColor : normalColor;
+        isHighlighted = active;
+        RefreshColor();
     }
 
+    // Selected (already chosen)
     public void SetSelected(bool active)
     {
         isSelected = active;
-        background.color = active ? selectedColor : normalColor;
+        RefreshColor();
     }
 
+    // Locked (cannot pick)
     public void SetLocked(bool locked)
     {
         isLocked = locked;
+        RefreshColor();
+    }
 
-        background.color = locked
-            ? lockedColor
-            : (isSelected ? selectedColor : normalColor);
+    private void RefreshColor()
+    {
+        if (isLocked)
+        {
+            background.color = lockedColor;
+            return;
+        }
+
+        if (isSelected && isHighlighted)
+        {
+            background.color = selectedHighlightColor;
+            return;
+        }
+
+        if (isSelected)
+        {
+            background.color = selectedColor;
+            return;
+        }
+
+        if (isHighlighted)
+        {
+            background.color = highlightColor;
+            return;
+        }
+
+        background.color = normalColor;
     }
 }

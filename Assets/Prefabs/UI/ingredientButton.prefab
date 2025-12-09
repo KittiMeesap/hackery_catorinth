@@ -137,9 +137,9 @@ MonoBehaviour:
   background: {fileID: 8706318369316350865}
   ingredientIconImage: {fileID: 7813805733363433014}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
-  highlightColor: {r: 0.7, g: 0.85, b: 1, a: 1}
-  selectedColor: {r: 0.6, g: 1, b: 0.6, a: 1}
-  lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  highlightColor: {r: 0.75, g: 0.9, b: 1, a: 1}
+  selectedColor: {r: 0.65, g: 1, b: 0.65, a: 1}
+  lockedColor: {r: 0.45, g: 0.45, b: 0.45, a: 1}
 --- !u!1 &5019023993427888970
 GameObject:
   m_ObjectHideFlags: 0

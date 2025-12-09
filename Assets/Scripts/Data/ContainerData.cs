@@ -7,13 +7,70 @@ public class ContainerData
     public List<IngredientItemSO> contents = new();
     public RecipeSO matchedRecipe;
 
-    public enum ContainerState { Empty, Mixing, Mixed, Baked, Cooling, Finished }
+    public enum ContainerState
+    {
+        Empty,
+        Mixing,
+        Mixed,
+        Cooling,
+        Baked,
+        Finished
+    }
+
+
+    public float currentCoolingTime = 0f;
+
     public ContainerState state = ContainerState.Empty;
+
+    public bool IsAlreadyMixed()
+    {
+        return state == ContainerState.Mixed ||
+               state == ContainerState.Cooling ||
+               state == ContainerState.Baked ||
+               state == ContainerState.Finished;
+    }
+
+    public bool CanBake()
+    {
+        if (matchedRecipe == null) return false;
+
+        return matchedRecipe.flow switch
+        {
+            ProcessFlow.BakeOnly => state == ContainerState.Mixed,
+            ProcessFlow.BakeThenCool => state == ContainerState.Mixed,
+            ProcessFlow.CoolThenBake => state == ContainerState.Cooling,
+            ProcessFlow.CoolOnly => false,
+            _ => false
+        };
+    }
+
+    public bool CanCool()
+    {
+        if (matchedRecipe == null) return false;
+
+        return matchedRecipe.flow switch
+        {
+            ProcessFlow.CoolOnly => state == ContainerState.Mixed,
+            ProcessFlow.CoolThenBake => state == ContainerState.Mixed,
+            ProcessFlow.BakeThenCool => state == ContainerState.Baked,
+            ProcessFlow.BakeOnly => false,
+            _ => false
+        };
+    }
+
+    public bool IsCoolingCompleted(RecipeSO recipe)
+    {
+        return currentCoolingTime >= recipe.coolingDuration;
+    }
+
+    public bool IsFullyFinished()
+    {
+        return state == ContainerState.Finished;
+    }
 
     public bool AddIngredientSafe(IngredientItemSO ing)
     {
-        if (contents.Count >= 4)
-            return false;
+        if (contents.Count >= 4) return false;
 
         var allowed = RecipeManager.Instance.GetAllowedIngredients(contents);
         if (allowed.Count > 0 && !allowed.Contains(ing))
@@ -22,12 +79,6 @@ public class ContainerData
         contents.Add(ing);
         state = ContainerState.Mixing;
         return true;
-    }
-
-    public void AddIngredient(IngredientItemSO ing)
-    {
-        contents.Add(ing);
-        state = ContainerState.Mixing;
     }
 
     public bool TryMix()
@@ -39,11 +90,28 @@ public class ContainerData
         return true;
     }
 
-    public void Bake()
+    public void DoBake()
     {
-        if (matchedRecipe == null) return;
+        if (!CanBake()) return;
 
-        state = matchedRecipe.requiresCooling ? ContainerState.Cooling : ContainerState.Finished;
+        if (matchedRecipe.flow == ProcessFlow.BakeThenCool)
+            state = ContainerState.Baked;
+        else if (matchedRecipe.flow == ProcessFlow.CoolThenBake)
+            state = ContainerState.Finished;
+        else if (matchedRecipe.flow == ProcessFlow.BakeOnly)
+            state = ContainerState.Finished;
+    }
+
+    public void DoCool()
+    {
+        if (!CanCool()) return;
+
+        if (matchedRecipe.flow == ProcessFlow.CoolOnly)
+            state = ContainerState.Finished;
+        else if (matchedRecipe.flow == ProcessFlow.CoolThenBake)
+            state = ContainerState.Cooling;
+        else if (matchedRecipe.flow == ProcessFlow.BakeThenCool)
+            state = ContainerState.Finished;
     }
 
     public Sprite GetIcon()
@@ -54,6 +122,7 @@ public class ContainerData
         {
             ContainerState.Mixed => matchedRecipe.mixedIcon,
             ContainerState.Cooling => matchedRecipe.cooledIcon,
+            ContainerState.Baked => matchedRecipe.outputIcon,
             ContainerState.Finished => matchedRecipe.outputIcon,
             _ => null
         };

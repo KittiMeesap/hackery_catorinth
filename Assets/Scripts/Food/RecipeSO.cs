@@ -1,6 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ProcessFlow
+{
+    BakeOnly,       // Mix -> Bake -> Finish
+    CoolOnly,       // Mix -> Cool -> Finish
+    CoolThenBake,   // Mix -> Cool -> Bake -> Finish
+    BakeThenCool    // Mix -> Bake -> Cool -> Finish
+}
+
 [CreateAssetMenu(menuName = "Food/Recipe")]
 public class RecipeSO : ScriptableObject
 {
@@ -14,24 +22,37 @@ public class RecipeSO : ScriptableObject
     public Sprite outputIcon;
     public Sprite cooledIcon;
 
-    [Header("Extra Settings")]
-    public bool requiresCooling;
+    [Header("Production Flow")]
+    public ProcessFlow flow;
+
+    [Header("Cooling Settings")]
+    public float coolingDuration = 5f;
 
     public bool MatchesSelected(List<IngredientItemSO> selected)
     {
-        if (selected.Count > ingredients.Count)
-            return false;
+        if (selected.Count > ingredients.Count) return false;
 
         List<IngredientItemSO> temp = new List<IngredientItemSO>(ingredients);
 
         foreach (var sel in selected)
         {
-            if (!temp.Contains(sel))
-                return false;
-
+            if (!temp.Contains(sel)) return false;
             temp.Remove(sel);
         }
+        return true;
+    }
 
+    public bool MatchIngredients(List<IngredientItemSO> contents)
+    {
+        if (contents.Count != ingredients.Count) return false;
+
+        List<IngredientItemSO> temp = new List<IngredientItemSO>(ingredients);
+
+        foreach (var c in contents)
+        {
+            if (!temp.Contains(c)) return false;
+            temp.Remove(c);
+        }
         return true;
     }
 }

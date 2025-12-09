@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 2597237571904471592}
   - component: {fileID: 7366655771860691640}
   - component: {fileID: 958937111068880123}
-  - component: {fileID: 8160877972832773245}
   - component: {fileID: 7323349239095205498}
+  - component: {fileID: 8160877972832773245}
   - component: {fileID: 4328089191415325518}
   - component: {fileID: 8487856928741389976}
   m_Layer: 6
@@ -119,33 +119,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!50 &8160877972832773245
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2493410306410398488}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 4
 --- !u!61 &7323349239095205498
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -192,6 +165,33 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.5532817, y: 0.31273496}
   m_EdgeRadius: 0
+--- !u!50 &8160877972832773245
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2493410306410398488}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!114 &4328089191415325518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,9 +224,11 @@ MonoBehaviour:
   bowl:
     contents: []
     matchedRecipe: {fileID: 0}
+    currentCoolingTime: 0
     state: 0
   serveBox:
     resultRecipe: {fileID: 0}
+  lastCounterPlaced: {fileID: 0}
 --- !u!1 &3129603800523612011
 GameObject:
   m_ObjectHideFlags: 0

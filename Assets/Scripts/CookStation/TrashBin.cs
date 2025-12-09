@@ -13,9 +13,7 @@ public class TrashBin : InteractStation
         base.OnTriggerEnter2D(other);
 
         if (other.CompareTag("Player"))
-        {
             animator?.SetTrigger(AnimOpen);
-        }
     }
 
     protected override void OnTriggerExit2D(Collider2D other)
@@ -23,39 +21,38 @@ public class TrashBin : InteractStation
         base.OnTriggerExit2D(other);
 
         if (other.CompareTag("Player"))
-        {
             animator?.SetTrigger(AnimClose);
-        }
     }
 
     public override void Interact(PlayerInventory player)
     {
         animator?.SetTrigger(AnimUse);
 
+        PlayerController pc = player.GetComponent<PlayerController>();
+
         if (player.HasServeBox())
         {
             player.serveBox = null;
             player.OnInventoryChanged?.Invoke();
-            player.GetComponent<PlayerController>()?.RefreshCarryAnimation();
-            Debug.Log("Serve box discarded.");
+            pc?.RefreshCarryAnimation();
+
+            Debug.Log("TrashBin: Serve box discarded.");
             return;
         }
 
-        if (player.HasBowl() && player.bowl.contents.Count == 0)
+        if (player.HasBowl())
         {
-            player.bowl = null;
-            player.OnInventoryChanged?.Invoke();
-            player.GetComponent<PlayerController>()?.RefreshCarryAnimation();
-            Debug.Log("Empty bowl discarded.");
-            return;
-        }
+            if (player.bowl.contents.Count > 0)
+            {
+                player.bowl.Clear();
+                player.OnInventoryChanged?.Invoke();
+                pc?.RefreshCarryAnimation();
 
-        if (player.HasBowl() && player.bowl.contents.Count > 0)
-        {
-            player.bowl.Clear();
-            player.OnInventoryChanged?.Invoke();
-            player.GetComponent<PlayerController>()?.RefreshCarryAnimation();
-            Debug.Log("Ingredients discarded.");
+                Debug.Log("TrashBin: Ingredients cleared.");
+                return;
+            }
+
+            Debug.Log("TrashBin: Bowl is empty, nothing to discard.");
             return;
         }
 

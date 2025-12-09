@@ -14,7 +14,6 @@ public class Counter : InteractStation
     [Header("UI Icon")]
     public CounterIconUI iconUI;
 
-    // When player interacts normally (place / take)
     public override void Interact(PlayerInventory player)
     {
         PlayerController pc = player.GetComponent<PlayerController>();
@@ -23,13 +22,20 @@ public class Counter : InteractStation
         if (player.HasBowl() && bowlOnCounter == null)
         {
             bowlOnCounter = player.TakeBowl();
-            player.lastCounterPlaced = this;  // REMEMBER THIS COUNTER
+            player.lastCounterPlaced = this;
 
             animator?.SetTrigger(AnimPlace);
             animator?.SetBool(HasBowl, true);
 
             iconUI?.Refresh(bowlOnCounter);
             pc?.RefreshCarryAnimation();
+            return;
+        }
+
+        // === PLAYER TRIES TO TAKE BOWL WHILE HOLDING SERVE BOX ===
+        if (player.HasServeBox())
+        {
+            Debug.Log("Counter: Cannot take bowl while holding a serve box!");
             return;
         }
 
@@ -48,7 +54,6 @@ public class Counter : InteractStation
         }
     }
 
-    // NEW — auto return bowl
     public void ReceiveReturnedBowl(ContainerData data)
     {
         bowlOnCounter = data;

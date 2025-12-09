@@ -809,13 +809,13 @@ GameObject:
   - component: {fileID: 151235164}
   - component: {fileID: 151235167}
   - component: {fileID: 151235171}
-  - component: {fileID: 151235165}
   - component: {fileID: 151235166}
+  - component: {fileID: 151235173}
+  - component: {fileID: 151235165}
   - component: {fileID: 151235168}
   - component: {fileID: 151235169}
   - component: {fileID: 151235170}
   - component: {fileID: 151235172}
-  - component: {fileID: 151235173}
   - component: {fileID: 151235174}
   m_Layer: 0
   m_Name: GameManager

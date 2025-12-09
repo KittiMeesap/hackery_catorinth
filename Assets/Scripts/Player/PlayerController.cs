@@ -33,6 +33,8 @@ public class PlayerController : MonoBehaviour
             input = QTEManager.Instance.input;
 
         ResetAnimatorParameters();
+
+        RefreshCarryAnimation();
     }
 
     private void ResetAnimatorParameters()
@@ -118,7 +120,6 @@ public class PlayerController : MonoBehaviour
     {
         UpdateAnimator();
         HandleAFKTimer();
-        RefreshCarryAnimation();
     }
 
     private void UpdateAnimator()

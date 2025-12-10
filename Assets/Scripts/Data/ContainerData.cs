@@ -14,48 +14,150 @@ public class ContainerData
         Mixed,
         Cooling,
         Baked,
-        Finished
+        Finished,
+        Sliced
     }
-
 
     public float currentCoolingTime = 0f;
 
     public ContainerState state = ContainerState.Empty;
 
+    // ===== STATE HELPERS =====
     public bool IsAlreadyMixed()
     {
         return state == ContainerState.Mixed ||
                state == ContainerState.Cooling ||
                state == ContainerState.Baked ||
-               state == ContainerState.Finished;
+               state == ContainerState.Finished ||
+               state == ContainerState.Sliced;
     }
 
+    public bool IsFullyFinished()
+    {
+        return state == ContainerState.Finished ||
+               state == ContainerState.Sliced;
+    }
+
+    // ===== SLICE LOGIC =====
+    public bool CanSlice()
+    {
+        if (matchedRecipe == null) return false;
+        if (!matchedRecipe.canBeSliced) return false;
+
+        return state == ContainerState.Finished;
+    }
+
+    public void DoSlice()
+    {
+        if (!CanSlice()) return;
+
+        state = ContainerState.Sliced;
+
+        // Switch to sliced recipe variant
+        if (matchedRecipe != null && matchedRecipe.slicedVariant != null)
+        {
+            matchedRecipe = matchedRecipe.slicedVariant;
+        }
+
+        Debug.Log("ContainerData: Cake sliced -> Sliced State");
+    }
+
+    // ===== BAKE LOGIC =====
     public bool CanBake()
     {
         if (matchedRecipe == null) return false;
 
-        return matchedRecipe.flow switch
+        switch (matchedRecipe.flow)
         {
-            ProcessFlow.BakeOnly => state == ContainerState.Mixed,
-            ProcessFlow.BakeThenCool => state == ContainerState.Mixed,
-            ProcessFlow.CoolThenBake => state == ContainerState.Cooling,
-            ProcessFlow.CoolOnly => false,
-            _ => false
-        };
+            case ProcessFlow.BakeOnly:
+            case ProcessFlow.BakeThenCool:
+            case ProcessFlow.BakeCoolSlice:
+            case ProcessFlow.BakeSlice:
+                return state == ContainerState.Mixed;
+
+            case ProcessFlow.CoolThenBake:
+                return state == ContainerState.Cooling;
+
+            default:
+                return false;
+        }
     }
 
+    public void DoBake()
+    {
+        if (!CanBake()) return;
+
+        switch (matchedRecipe.flow)
+        {
+            case ProcessFlow.BakeOnly:
+                state = ContainerState.Finished;
+                break;
+
+            case ProcessFlow.BakeThenCool:
+                state = ContainerState.Baked;
+                break;
+
+            case ProcessFlow.CoolThenBake:
+                state = ContainerState.Finished;
+                break;
+
+            case ProcessFlow.BakeCoolSlice:
+                state = ContainerState.Baked;
+                break;
+
+            case ProcessFlow.BakeSlice:
+                state = ContainerState.Finished;
+                break;
+        }
+    }
+
+    // ===== COOL LOGIC =====
     public bool CanCool()
     {
         if (matchedRecipe == null) return false;
 
-        return matchedRecipe.flow switch
+        switch (matchedRecipe.flow)
         {
-            ProcessFlow.CoolOnly => state == ContainerState.Mixed,
-            ProcessFlow.CoolThenBake => state == ContainerState.Mixed,
-            ProcessFlow.BakeThenCool => state == ContainerState.Baked,
-            ProcessFlow.BakeOnly => false,
-            _ => false
-        };
+            case ProcessFlow.CoolOnly:
+            case ProcessFlow.CoolThenBake:
+            case ProcessFlow.CoolSlice:
+                return state == ContainerState.Mixed;
+
+            case ProcessFlow.BakeThenCool:
+            case ProcessFlow.BakeCoolSlice:
+                return state == ContainerState.Baked;
+
+            default:
+                return false;
+        }
+    }
+
+    public void DoCool()
+    {
+        if (!CanCool()) return;
+
+        switch (matchedRecipe.flow)
+        {
+            case ProcessFlow.CoolOnly:
+                state = ContainerState.Finished;
+                break;
+
+            case ProcessFlow.CoolThenBake:
+                state = ContainerState.Cooling;
+                break;
+
+            case ProcessFlow.BakeThenCool:
+                state = ContainerState.Finished;
+                break;
+
+            case ProcessFlow.BakeCoolSlice:
+                state = ContainerState.Finished;
+                break;
+
+            case ProcessFlow.CoolSlice:
+                state = ContainerState.Finished;
+                break;
+        }
     }
 
     public bool IsCoolingCompleted(RecipeSO recipe)
@@ -63,11 +165,7 @@ public class ContainerData
         return currentCoolingTime >= recipe.coolingDuration;
     }
 
-    public bool IsFullyFinished()
-    {
-        return state == ContainerState.Finished;
-    }
-
+    // ===== INGREDIENT / MIX =====
     public bool AddIngredientSafe(IngredientItemSO ing)
     {
         if (contents.Count >= 4) return false;
@@ -90,30 +188,7 @@ public class ContainerData
         return true;
     }
 
-    public void DoBake()
-    {
-        if (!CanBake()) return;
-
-        if (matchedRecipe.flow == ProcessFlow.BakeThenCool)
-            state = ContainerState.Baked;
-        else if (matchedRecipe.flow == ProcessFlow.CoolThenBake)
-            state = ContainerState.Finished;
-        else if (matchedRecipe.flow == ProcessFlow.BakeOnly)
-            state = ContainerState.Finished;
-    }
-
-    public void DoCool()
-    {
-        if (!CanCool()) return;
-
-        if (matchedRecipe.flow == ProcessFlow.CoolOnly)
-            state = ContainerState.Finished;
-        else if (matchedRecipe.flow == ProcessFlow.CoolThenBake)
-            state = ContainerState.Cooling;
-        else if (matchedRecipe.flow == ProcessFlow.BakeThenCool)
-            state = ContainerState.Finished;
-    }
-
+    // ===== ICON =====
     public Sprite GetIcon()
     {
         if (matchedRecipe == null) return null;
@@ -124,14 +199,21 @@ public class ContainerData
             ContainerState.Cooling => matchedRecipe.cooledIcon,
             ContainerState.Baked => matchedRecipe.outputIcon,
             ContainerState.Finished => matchedRecipe.outputIcon,
+
+            ContainerState.Sliced => matchedRecipe.sliceIcon != null
+                ? matchedRecipe.sliceIcon
+                : matchedRecipe.outputIcon,
+
             _ => null
         };
     }
 
+    // ===== RESET =====
     public void Clear()
     {
         contents.Clear();
         matchedRecipe = null;
+        currentCoolingTime = 0f;
         state = ContainerState.Empty;
     }
 }

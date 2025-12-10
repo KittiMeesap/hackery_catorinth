@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc169437f59396a46816f208e1935c9f, type: 3}
+  m_Name: CakeChocolate
+  m_EditorClassIdentifier: Assembly-CSharp::RecipeSO
+  recipeId: cakechocolate
+  ingredients:
+  - {fileID: 11400000, guid: 2bbc2f89269a07841a664c7b5645149d, type: 2}
+  - {fileID: 11400000, guid: aec81f460db5b9b4ba3d7b193011d917, type: 2}
+  - {fileID: 11400000, guid: 1cae6e1b6897ce440841a480aef9b85a, type: 2}
+  - {fileID: 11400000, guid: 0a297c618123e394f9d033aceea467ab, type: 2}
+  mixedIcon: {fileID: 0}
+  outputIcon: {fileID: 6384937146217888707, guid: 58b2e56593a95014eaaeb82dacabb956, type: 3}
+  cooledIcon: {fileID: 0}
+  flow: 4
+  coolingDuration: 5
+  canBeSliced: 1
+  sliceIcon: {fileID: -6794305457321429515, guid: 68683bfd98cca5e41b20b678c812cbaa, type: 3}
+  slicedVariant: {fileID: 11400000, guid: c570ec335e86f0346a77b3bb46d69de4, type: 2}

@@ -4246,7 +4246,9 @@ MonoBehaviour:
     icon: {fileID: 2206572153915039256, guid: fe4c71ffeeb6e8841b56185b25ecc4c6, type: 3}
   - type: 2
     icon: {fileID: 2552793621133289664, guid: 8cf7c51ad93198649af8674358b58354, type: 3}
-  showMixerIcon: 0
+  - type: 3
+    icon: {fileID: 4428295815776315468, guid: fa32a97ced512314daf396b03a3bd627, type: 3}
+  showMixerIcon: 1
 --- !u!1 &753483067
 GameObject:
   m_ObjectHideFlags: 0

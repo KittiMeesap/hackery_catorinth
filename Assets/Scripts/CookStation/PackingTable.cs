@@ -13,15 +13,17 @@ public class PackingTable : InteractStation
     {
         if (!player.HasBowl())
         {
-            Debug.Log("Packing: Need bowl with finished cookie.");
+            Debug.Log("Packing: Need bowl with finished product.");
             return;
         }
 
         var bowl = player.bowl;
 
-        if (bowl.state != ContainerData.ContainerState.Finished)
+        // Allow Finished or Sliced
+        if (bowl.state != ContainerData.ContainerState.Finished &&
+            bowl.state != ContainerData.ContainerState.Sliced)
         {
-            Debug.Log("Packing: Cookie not ready.");
+            Debug.Log("Packing: Item not ready.");
             return;
         }
 
@@ -59,8 +61,10 @@ public class PackingTable : InteractStation
 
         Debug.Log("Packing success!");
 
+        // Convert to serve box; supports sliced variant automatically
         currentPlayer.ConvertToServeBox();
 
+        // Return empty bowl to the counter
         ContainerData empty = new ContainerData();
         empty.state = ContainerData.ContainerState.Empty;
 

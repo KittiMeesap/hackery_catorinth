@@ -56,8 +56,8 @@ public class GameManager : MonoBehaviour
         endDayUI.HideImmediate();
 
         // Input
-        QTEManager.Instance.input.Player.Enable();
-        QTEManager.Instance.input.UI.Disable();
+        GameInput.Instance.Actions.Player.Enable();
+        GameInput.Instance.Actions.UI.Disable();
     }
 
     // END DAY
@@ -66,8 +66,8 @@ public class GameManager : MonoBehaviour
         dayRunning = false;
         timeSystem.StopDay();
 
-        QTEManager.Instance.input.Player.Disable();
-        QTEManager.Instance.input.UI.Enable();
+        GameInput.Instance.Actions.Player.Disable();
+        GameInput.Instance.Actions.UI.Enable();
 
         bool hasNextDay = DayManager.Instance.HasNextDay();
 

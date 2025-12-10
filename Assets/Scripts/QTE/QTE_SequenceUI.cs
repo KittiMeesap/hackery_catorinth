@@ -27,7 +27,7 @@ public class QTE_SequenceUI : MonoBehaviour
 
     private bool active = false;
 
-    private InputManager input => QTEManager.Instance.input;
+    private InputManager input => GameInput.Instance.Actions;
     private InputAction arrowAction;
 
     private Coroutine punchRoutine;

@@ -68,7 +68,7 @@ public class PantryUI : MonoBehaviour
         BuildGrid();
         Show();
 
-        var input = QTEManager.Instance.input;
+        var input = GameInput.Instance.Actions;
         input.Player.Disable();
         input.UI.Enable();
 
@@ -89,7 +89,7 @@ public class PantryUI : MonoBehaviour
         submitAction.performed -= OnSubmit;
         cancelAction.performed -= OnCancel;
 
-        var input = QTEManager.Instance.input;
+        var input = GameInput.Instance.Actions;
         input.UI.Disable();
         input.Player.Enable();
 

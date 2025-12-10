@@ -1,7 +1,8 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using System;
+using System.Collections;
 
 public class QTE_TimingUI : MonoBehaviour
 {
@@ -9,11 +10,9 @@ public class QTE_TimingUI : MonoBehaviour
     public RectTransform root;
     public Image pointer;
     public Image successZone;
+    public Image keyIcon;
 
-    [Header("Effect")]
-    public Color successColor = Color.green;
-    public Color failColor = Color.red;
-    public float flashDuration = 0.15f;
+    [Header("Visual")]
     public float shakeMagnitude = 8f;
     public float shakeDuration = 0.15f;
 
@@ -23,28 +22,30 @@ public class QTE_TimingUI : MonoBehaviour
 
     private bool active = false;
 
-    private InputManager input => QTEManager.Instance.input;
+    private InputManager input => GameInput.Instance.Actions;
     private InputAction hitAction;
 
-    private System.Action<QTEResult> finishCallback;
+    private Action<QTEResult> finishCallback;
 
-    public void Begin(float speedDegPerSec, float zoneSizeDeg, System.Action<QTEResult> onFinished)
+    public void Begin(string logicalKey, float speed, float zoneSize, Action<QTEResult> callback)
     {
-        finishCallback = onFinished;
-        rotationSpeed = speedDegPerSec;
+        finishCallback = callback;
+        rotationSpeed = speed;
 
-        pointerAngle = 0f;
-        pointer.transform.eulerAngles = Vector3.zero;
+        pointerAngle = 0;
 
-        root.anchoredPosition = Vector2.zero;
+        zoneStart = UnityEngine.Random.Range(0f, 360f - zoneSize);
+        zoneEnd = zoneStart + zoneSize;
 
-        zoneStart = Random.Range(0f, 360f - zoneSizeDeg);
-        zoneEnd = zoneStart + zoneSizeDeg;
         SetZoneVisual(zoneStart, zoneEnd);
 
-        input.QTE.Enable();
+        // Show Key Icon
+        keyIcon.sprite = KeyIconDatabase.GetIcon(logicalKey);
+        keyIcon.enabled = keyIcon.sprite != null;
+
         hitAction = input.QTE.ConfirmHit;
         hitAction.performed += OnHit;
+        input.QTE.Enable();
 
         active = true;
         gameObject.SetActive(true);
@@ -66,7 +67,6 @@ public class QTE_TimingUI : MonoBehaviour
 
         bool inside = pointerAngle >= zoneStart && pointerAngle <= zoneEnd;
 
-        StartCoroutine(Flash(inside ? successColor : failColor));
         StartCoroutine(Shake());
 
         Finish(inside ? QTEResult.Success : QTEResult.Fail);
@@ -79,14 +79,6 @@ public class QTE_TimingUI : MonoBehaviour
         successZone.transform.eulerAngles = new Vector3(0, 0, -startDeg);
     }
 
-    private IEnumerator Flash(Color color)
-    {
-        Color baseColor = successZone.color;
-        successZone.color = color;
-        yield return new WaitForSecondsRealtime(flashDuration);
-        successZone.color = baseColor;
-    }
-
     private IEnumerator Shake()
     {
         Vector2 basePos = root.anchoredPosition;
@@ -95,9 +87,10 @@ public class QTE_TimingUI : MonoBehaviour
         while (t < shakeDuration)
         {
             t += Time.unscaledDeltaTime;
-            float strength = shakeMagnitude * (1f - t / shakeDuration);
 
-            root.anchoredPosition = basePos + Random.insideUnitCircle * strength;
+            root.anchoredPosition =
+                basePos + UnityEngine.Random.insideUnitCircle * shakeMagnitude;
+
             yield return null;
         }
 
@@ -110,10 +103,9 @@ public class QTE_TimingUI : MonoBehaviour
 
         active = false;
 
-        if (hitAction != null)
-            hitAction.performed -= OnHit;
-
+        hitAction.performed -= OnHit;
         input.QTE.Disable();
+
         gameObject.SetActive(false);
 
         finishCallback?.Invoke(result);

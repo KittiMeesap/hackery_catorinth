@@ -26,7 +26,7 @@ public class QTE_MashUI : MonoBehaviour
     private bool active = false;
     private bool hasStarted = false;
 
-    private InputManager input => QTEManager.Instance.input;
+    private InputManager input => GameInput.Instance.Actions;
     private InputAction hitAction;
 
     private Coroutine fadeRoutine;

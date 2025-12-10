@@ -216,7 +216,7 @@ public class CustomerController : MonoBehaviour
         if (!PlayerIsHere) return;
         if (InteractStation.interactionLocked) return;
 
-        var interact = QTEManager.Instance.input.Player.Interact;
+        var interact = GameInput.Instance.Actions.Player.Interact;
         if (!interact.WasPerformedThisFrame()) return;
 
         if (state == State.InQueueIdle || state == State.WaitingOrder)

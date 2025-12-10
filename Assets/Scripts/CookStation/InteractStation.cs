@@ -19,9 +19,9 @@ public abstract class InteractStation : MonoBehaviour
         if (promptUI != null) promptUI.SetActive(false);
         if (highlightObj != null) highlightObj.SetActive(false);
 
-        if (QTEManager.Instance != null)
+        if (GameInput.Instance != null)
         {
-            interactAction = QTEManager.Instance.input.Player.Interact;
+            interactAction = GameInput.Instance.Actions.Player.Interact;
         }
     }
 

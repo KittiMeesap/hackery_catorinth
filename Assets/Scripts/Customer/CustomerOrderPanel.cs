@@ -46,8 +46,8 @@ public class CustomerOrderPanel : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        Instance = this;
 
+        Instance = this;
         BuildToolIconMap();
         Hide();
     }
@@ -55,6 +55,7 @@ public class CustomerOrderPanel : MonoBehaviour
     private void BuildToolIconMap()
     {
         toolIconMap = new Dictionary<CustomerToolType, Sprite>();
+
         foreach (var e in toolIcons)
         {
             if (!toolIconMap.ContainsKey(e.type) && e.icon != null)
@@ -64,7 +65,8 @@ public class CustomerOrderPanel : MonoBehaviour
 
     public void Show(CustomerController customer, RecipeSO recipe, Sprite customerSprite)
     {
-        if (panelRoot != null) panelRoot.SetActive(true);
+        if (panelRoot != null)
+            panelRoot.SetActive(true);
 
         if (customerIcon != null)
             customerIcon.sprite = customerSprite;
@@ -79,7 +81,8 @@ public class CustomerOrderPanel : MonoBehaviour
 
     public void Hide()
     {
-        if (panelRoot != null) panelRoot.SetActive(false);
+        if (panelRoot != null)
+            panelRoot.SetActive(false);
     }
 
     public void UpdateTimer(float normalized)
@@ -111,34 +114,53 @@ public class CustomerOrderPanel : MonoBehaviour
 
         if (recipe == null) return;
 
-        List<CustomerToolType> tools = new List<CustomerToolType>();
+        List<CustomerToolType> tools = new();
 
-        if (showMixerIcon)
-            tools.Add(CustomerToolType.Mixer);
-
-        switch (recipe.flow)
+        if (recipe.flow == ProcessFlow.None)
         {
-            case ProcessFlow.BakeOnly:
-                // Mix -> Bake -> Finish
-                tools.Add(CustomerToolType.Oven);
-                break;
+            // Sliced items have no required tools
+        }
+        else
+        {
+            if (showMixerIcon)
+                tools.Add(CustomerToolType.Mixer);
 
-            case ProcessFlow.CoolOnly:
-                // Mix -> Cool -> Finish
-                tools.Add(CustomerToolType.Fridge);
-                break;
+            switch (recipe.flow)
+            {
+                case ProcessFlow.BakeOnly:
+                    tools.Add(CustomerToolType.Oven);
+                    break;
 
-            case ProcessFlow.BakeThenCool:
-                // Mix -> Bake -> Cool -> Finish
-                tools.Add(CustomerToolType.Oven);
-                tools.Add(CustomerToolType.Fridge);
-                break;
+                case ProcessFlow.CoolOnly:
+                    tools.Add(CustomerToolType.Fridge);
+                    break;
 
-            case ProcessFlow.CoolThenBake:
-                // Mix -> Cool -> Bake -> Finish
-                tools.Add(CustomerToolType.Fridge);
-                tools.Add(CustomerToolType.Oven);
-                break;
+                case ProcessFlow.BakeThenCool:
+                    tools.Add(CustomerToolType.Oven);
+                    tools.Add(CustomerToolType.Fridge);
+                    break;
+
+                case ProcessFlow.CoolThenBake:
+                    tools.Add(CustomerToolType.Fridge);
+                    tools.Add(CustomerToolType.Oven);
+                    break;
+
+                case ProcessFlow.BakeCoolSlice:
+                    tools.Add(CustomerToolType.Oven);
+                    tools.Add(CustomerToolType.Fridge);
+                    tools.Add(CustomerToolType.Slice);
+                    break;
+
+                case ProcessFlow.BakeSlice:
+                    tools.Add(CustomerToolType.Oven);
+                    tools.Add(CustomerToolType.Slice);
+                    break;
+
+                case ProcessFlow.CoolSlice:
+                    tools.Add(CustomerToolType.Fridge);
+                    tools.Add(CustomerToolType.Slice);
+                    break;
+            }
         }
 
         foreach (var tool in tools)
@@ -152,4 +174,5 @@ public class CustomerOrderPanel : MonoBehaviour
                 img.sprite = sprite;
         }
     }
+
 }

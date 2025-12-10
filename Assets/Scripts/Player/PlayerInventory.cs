@@ -16,9 +16,11 @@ public class PlayerInventory : MonoBehaviour
         lastCounterPlaced = null;
     }
 
+    // ===== CHECKERS =====
     public bool HasBowl() => bowl != null;
     public bool HasServeBox() => serveBox != null;
 
+    // ===== GIVE BOWL TO PLAYER =====
     public void GiveBowl(ContainerData data)
     {
         bowl = data;
@@ -28,6 +30,7 @@ public class PlayerInventory : MonoBehaviour
         GetComponent<PlayerController>()?.RefreshCarryAnimation();
     }
 
+    // ===== TAKE BOWL FROM PLAYER =====
     public ContainerData TakeBowl()
     {
         ContainerData temp = bowl;
@@ -39,6 +42,7 @@ public class PlayerInventory : MonoBehaviour
         return temp;
     }
 
+    // ===== RETURN BOWL TO COUNTER =====
     public void ReturnBowlToLastCounter(ContainerData bowlData)
     {
         Counter target = null;
@@ -61,6 +65,7 @@ public class PlayerInventory : MonoBehaviour
         target.ReceiveReturnedBowl(bowlData);
     }
 
+    // ===== PICK EMPTY CUP =====
     public void PickCup()
     {
         bowl = new ContainerData();
@@ -70,14 +75,31 @@ public class PlayerInventory : MonoBehaviour
         OnInventoryChanged?.Invoke();
     }
 
+    // ===== CONVERT BOWL TO SERVE BOX (WHOLE OR SLICED) =====
     public void ConvertToServeBox()
     {
         if (bowl == null || bowl.matchedRecipe == null)
             return;
 
+        RecipeSO finalRecipe = bowl.matchedRecipe;
+
+        // If container is in Sliced state, try to use sliced variant recipe
+        if (bowl.state == ContainerData.ContainerState.Sliced)
+        {
+            if (bowl.matchedRecipe.slicedVariant != null)
+            {
+                finalRecipe = bowl.matchedRecipe.slicedVariant;
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"ConvertToServeBox: Container is Sliced but recipe '{bowl.matchedRecipe.name}' has no slicedVariant assigned. Using base recipe.");
+            }
+        }
+
         serveBox = new ServeBoxItem
         {
-            resultRecipe = bowl.matchedRecipe
+            resultRecipe = finalRecipe
         };
 
         bowl = null;
@@ -86,5 +108,4 @@ public class PlayerInventory : MonoBehaviour
         var pc = GetComponent<PlayerController>();
         if (pc) pc.RefreshCarryAnimation();
     }
-
 }

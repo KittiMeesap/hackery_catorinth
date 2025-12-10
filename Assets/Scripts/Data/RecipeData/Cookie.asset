@@ -20,4 +20,8 @@ MonoBehaviour:
   mixedIcon: {fileID: 5927569979511303080, guid: 122aba81e7196dc4e8b9cb1c67d0fbc2, type: 3}
   outputIcon: {fileID: -7673252519464838879, guid: 45c91f84c6da13241acc0d7397b28988, type: 3}
   cooledIcon: {fileID: 0}
-  requiresCooling: 0
+  flow: 1
+  coolingDuration: 5
+  canBeSliced: 0
+  sliceIcon: {fileID: 0}
+  slicedVariant: {fileID: 0}

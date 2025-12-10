@@ -13,22 +13,39 @@ public class RecipeManager : MonoBehaviour
         Instance = this;
     }
 
+    // ===== ADD RECIPE =====
     public void AddRecipe(RecipeSO recipe)
     {
         if (!recipes.Contains(recipe))
             recipes.Add(recipe);
     }
 
+    // ===== FIND RECIPE FROM INGREDIENTS (PREFER BASE/SLICEABLE) =====
     public RecipeSO GetRecipeFromIngredients(List<IngredientItemSO> selected)
     {
+        RecipeSO best = null;
+
         foreach (var recipe in recipes)
         {
-            if (recipe.MatchesSelected(selected))
-                return recipe;
+            if (!recipe.MatchesSelected(selected))
+                continue;
+
+            if (best == null)
+            {
+                best = recipe;
+            }
+            else
+            {
+                // Prefer recipe that can be sliced (base production recipe)
+                if (recipe.canBeSliced && !best.canBeSliced)
+                    best = recipe;
+            }
         }
-        return null;
+
+        return best;
     }
 
+    // ===== ALLOWED INGREDIENTS HELPER =====
     public List<IngredientItemSO> GetAllowedIngredients(List<IngredientItemSO> selected)
     {
         List<IngredientItemSO> allowed = new();
@@ -48,6 +65,7 @@ public class RecipeManager : MonoBehaviour
         return allowed;
     }
 
+    // ===== EXACT MATCH CHECK =====
     public bool CanMix(List<IngredientItemSO> contents)
     {
         foreach (var recipe in recipes)

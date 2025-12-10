@@ -10,13 +10,15 @@ public class QTE_SequenceUI : MonoBehaviour
     public RectTransform root;
     public Image keyIcon;
     public TextMeshProUGUI textLabel;
-    public Image background;
+
+    [Header("Timer Bar")]
+    public Image bgFill;
 
     [Header("Effects")]
     public float stepPunchScale = 1.15f;
     public float stepPunchDuration = 0.08f;
-    public Color failFlashColor = Color.red;
-    public float failFlashDuration = 0.15f;
+    public float failShakeMagnitude = 40f;
+    public float failShakeDuration = 0.08f;
 
     private string[] sequence;
     private int index;
@@ -29,6 +31,7 @@ public class QTE_SequenceUI : MonoBehaviour
     private InputAction arrowAction;
 
     private Coroutine punchRoutine;
+    private Coroutine shakeRoutine;
     private System.Action<QTEResult> finishCallback;
 
     private string DirectionFromVector(Vector2 v)
@@ -49,6 +52,8 @@ public class QTE_SequenceUI : MonoBehaviour
         index = 0;
         timer = timePerKey;
 
+        bgFill.fillAmount = 1f;
+
         ShowCurrentKey();
 
         input.QTE.Enable();
@@ -64,9 +69,10 @@ public class QTE_SequenceUI : MonoBehaviour
         if (!active) return;
 
         timer -= Time.unscaledDeltaTime;
+        bgFill.fillAmount = Mathf.Clamp01(timer / timePerKey);
+
         if (timer <= 0f)
         {
-            StartCoroutine(FailFlash());
             Finish(QTEResult.Fail);
         }
     }
@@ -79,11 +85,10 @@ public class QTE_SequenceUI : MonoBehaviour
         string pressed = DirectionFromVector(v);
         if (pressed == null) return;
 
-        string expected = sequence[index].ToLowerInvariant();
+        string expected = sequence[index];
 
         if (pressed == expected)
         {
-            // correct
             if (punchRoutine != null) StopCoroutine(punchRoutine);
             punchRoutine = StartCoroutine(StepPunch());
 
@@ -96,21 +101,19 @@ public class QTE_SequenceUI : MonoBehaviour
             else
             {
                 timer = timePerKey;
+                bgFill.fillAmount = 1f;
                 ShowCurrentKey();
             }
         }
         else
         {
-            // WRONG KEY — do NOT fail immediately
-            StartCoroutine(FailFlash());
+            if (shakeRoutine != null) StopCoroutine(shakeRoutine);
+            shakeRoutine = StartCoroutine(Shake());
 
-            // Pick a NEW RANDOM ARROW for this index
             sequence[index] = RandomArrow();
-
-            // Reset timer
             timer = timePerKey;
+            bgFill.fillAmount = 1f;
 
-            // Show new key
             ShowCurrentKey();
         }
     }
@@ -123,10 +126,13 @@ public class QTE_SequenceUI : MonoBehaviour
 
     private void ShowCurrentKey()
     {
-        string logical = sequence[index].ToLowerInvariant();
+        string logical = sequence[index];
 
-        keyIcon.sprite = KeyIconDatabase.GetIcon(logical);
-        textLabel.text = logical.ToUpperInvariant();
+        var icon = KeyIconDatabase.GetIcon(logical);
+        keyIcon.enabled = icon != null;
+        keyIcon.sprite = icon;
+
+        textLabel.text = "PRESS";
     }
 
     private IEnumerator StepPunch()
@@ -157,14 +163,19 @@ public class QTE_SequenceUI : MonoBehaviour
         root.localScale = baseScale;
     }
 
-    private IEnumerator FailFlash()
+    private IEnumerator Shake()
     {
-        Color baseCol = background.color;
-        background.color = failFlashColor;
+        Vector2 basePos = root.anchoredPosition;
 
-        yield return new WaitForSecondsRealtime(failFlashDuration);
+        float t = 0f;
+        while (t < failShakeDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            root.anchoredPosition = basePos + Random.insideUnitCircle * failShakeMagnitude;
+            yield return null;
+        }
 
-        background.color = baseCol;
+        root.anchoredPosition = basePos;
     }
 
     private void Finish(QTEResult result)

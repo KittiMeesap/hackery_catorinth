@@ -19,9 +19,9 @@ public class QTE_MashUI : MonoBehaviour
     public float hitPunchDuration = 0.08f;
 
     private float currentFill = 0f;
-    private float fillPerHit = 0.1f;
-    private float drainPerSec = 0.25f;
-    private float successTarget = 1f;
+    private float fillPerHit;
+    private float drainPerSec;
+    private float successTarget;
 
     private bool active = false;
     private bool hasStarted = false;
@@ -31,7 +31,6 @@ public class QTE_MashUI : MonoBehaviour
 
     private Coroutine fadeRoutine;
     private Coroutine punchRoutine;
-
     private System.Action<QTEResult> finishCallback;
 
     public void Begin(string logicalKey, float perHit, float drain, float successTarget,
@@ -42,15 +41,32 @@ public class QTE_MashUI : MonoBehaviour
         this.successTarget = successTarget;
         this.finishCallback = onFinished;
 
+        // Reset state
         currentFill = 0f;
         barFill.fillAmount = 0f;
-        hasStarted = false;  // reset
+        hasStarted = false;
+        active = true;
 
-        keyIcon.sprite = KeyIconDatabase.GetIcon(logicalKey);
-        labelText.text = logicalKey.ToUpperInvariant();
+        // Reset UI scale
+        if (root != null)
+            root.localScale = Vector3.one;
 
-        if (root == null) root = (RectTransform)transform;
+        // Get correct icon
+        Sprite icon = KeyIconDatabase.GetIcon(logicalKey);
+        if (icon != null)
+        {
+            keyIcon.enabled = true;
+            keyIcon.sprite = icon;
+        }
+        else
+        {
+            keyIcon.enabled = false;
+        }
 
+        // Label always uses action text
+        labelText.text = "MASH!";
+
+        // Fade-in effect
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
@@ -58,12 +74,13 @@ public class QTE_MashUI : MonoBehaviour
             fadeRoutine = StartCoroutine(FadeCanvas(0f, 1f, fadeInDuration));
         }
 
+        // Activate UI before enabling input
+        gameObject.SetActive(true);
+
+        // Setup input
         input.QTE.Enable();
         hitAction = input.QTE.ConfirmHit;
         hitAction.performed += OnHit;
-
-        active = true;
-        gameObject.SetActive(true);
     }
 
     private void Update()
@@ -75,9 +92,9 @@ public class QTE_MashUI : MonoBehaviour
             currentFill -= drainPerSec * Time.unscaledDeltaTime;
             currentFill = Mathf.Clamp01(currentFill);
             barFill.fillAmount = currentFill;
-
         }
 
+        // Auto success when full
         if (currentFill >= successTarget)
         {
             Finish(QTEResult.Success);
@@ -94,18 +111,15 @@ public class QTE_MashUI : MonoBehaviour
         currentFill = Mathf.Clamp01(currentFill);
         barFill.fillAmount = currentFill;
 
-        PlayHitFeedback();
+        if (punchRoutine != null)
+            StopCoroutine(punchRoutine);
+
+        punchRoutine = StartCoroutine(HitRoutine());
 
         if (currentFill >= successTarget)
         {
             Finish(QTEResult.Success);
         }
-    }
-
-    private void PlayHitFeedback()
-    {
-        if (punchRoutine != null) StopCoroutine(punchRoutine);
-        punchRoutine = StartCoroutine(HitRoutine());
     }
 
     private IEnumerator HitRoutine()
@@ -136,14 +150,13 @@ public class QTE_MashUI : MonoBehaviour
         root.localScale = baseScale;
     }
 
-    private IEnumerator FadeCanvas(float from, float to, float duration)
+    private IEnumerator FadeCanvas(float from, float to, float dur)
     {
         float t = 0f;
-        while (t < duration)
+        while (t < dur)
         {
             t += Time.unscaledDeltaTime;
-            float p = Mathf.Clamp01(t / duration);
-            p = p * p * (3 - 2 * p);
+            float p = t / dur;
             canvasGroup.alpha = Mathf.Lerp(from, to, p);
             yield return null;
         }
@@ -153,6 +166,7 @@ public class QTE_MashUI : MonoBehaviour
     private void Finish(QTEResult result)
     {
         if (!active) return;
+
         active = false;
 
         if (hitAction != null)

@@ -28,21 +28,20 @@ public class QTE_TimingUI : MonoBehaviour
 
     private System.Action<QTEResult> finishCallback;
 
-    // =============================================================
     public void Begin(float speedDegPerSec, float zoneSizeDeg, System.Action<QTEResult> onFinished)
     {
-        rotationSpeed = speedDegPerSec;
         finishCallback = onFinished;
-
-        // random zone
-        zoneStart = Random.Range(0f, 360f - zoneSizeDeg);
-        zoneEnd = zoneStart + zoneSizeDeg;
-        SetZoneVisual(zoneStart, zoneEnd);
+        rotationSpeed = speedDegPerSec;
 
         pointerAngle = 0f;
         pointer.transform.eulerAngles = Vector3.zero;
 
-        // input
+        root.anchoredPosition = Vector2.zero;
+
+        zoneStart = Random.Range(0f, 360f - zoneSizeDeg);
+        zoneEnd = zoneStart + zoneSizeDeg;
+        SetZoneVisual(zoneStart, zoneEnd);
+
         input.QTE.Enable();
         hitAction = input.QTE.ConfirmHit;
         hitAction.performed += OnHit;
@@ -51,7 +50,6 @@ public class QTE_TimingUI : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    // =============================================================
     private void Update()
     {
         if (!active) return;
@@ -66,23 +64,14 @@ public class QTE_TimingUI : MonoBehaviour
     {
         if (!active) return;
 
-        bool success = pointerAngle >= zoneStart && pointerAngle <= zoneEnd;
+        bool inside = pointerAngle >= zoneStart && pointerAngle <= zoneEnd;
 
-        if (success)
-        {
-            StartCoroutine(Flash(successColor));
-            StartCoroutine(Shake());
-            Finish(QTEResult.Success);
-        }
-        else
-        {
-            StartCoroutine(Flash(failColor));
-            StartCoroutine(Shake());
-            Finish(QTEResult.Fail);
-        }
+        StartCoroutine(Flash(inside ? successColor : failColor));
+        StartCoroutine(Shake());
+
+        Finish(inside ? QTEResult.Success : QTEResult.Fail);
     }
 
-    // =============================================================
     private void SetZoneVisual(float startDeg, float endDeg)
     {
         float size = endDeg - startDeg;
@@ -94,27 +83,21 @@ public class QTE_TimingUI : MonoBehaviour
     {
         Color baseColor = successZone.color;
         successZone.color = color;
-        float t = 0f;
-
-        while (t < flashDuration)
-        {
-            t += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
+        yield return new WaitForSecondsRealtime(flashDuration);
         successZone.color = baseColor;
     }
 
     private IEnumerator Shake()
     {
-        Vector3 basePos = root.anchoredPosition;
-        float t = 0f;
+        Vector2 basePos = root.anchoredPosition;
 
+        float t = 0f;
         while (t < shakeDuration)
         {
             t += Time.unscaledDeltaTime;
             float strength = shakeMagnitude * (1f - t / shakeDuration);
-            root.anchoredPosition = basePos + (Vector3)Random.insideUnitCircle * strength;
+
+            root.anchoredPosition = basePos + Random.insideUnitCircle * strength;
             yield return null;
         }
 
@@ -124,6 +107,7 @@ public class QTE_TimingUI : MonoBehaviour
     private void Finish(QTEResult result)
     {
         if (!active) return;
+
         active = false;
 
         if (hitAction != null)

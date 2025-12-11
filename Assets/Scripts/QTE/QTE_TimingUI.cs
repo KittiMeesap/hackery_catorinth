@@ -22,7 +22,6 @@ public class QTE_TimingUI : MonoBehaviour
 
     private bool active = false;
 
-    private InputManager input => GameInput.Instance.Actions;
     private InputAction hitAction;
 
     private Action<QTEResult> finishCallback;
@@ -39,13 +38,13 @@ public class QTE_TimingUI : MonoBehaviour
 
         SetZoneVisual(zoneStart, zoneEnd);
 
-        // Show Key Icon
         keyIcon.sprite = KeyIconDatabase.GetIcon(logicalKey);
         keyIcon.enabled = keyIcon.sprite != null;
 
-        hitAction = input.QTE.ConfirmHit;
-        hitAction.performed += OnHit;
-        input.QTE.Enable();
+        GameInput.Instance.SetModeQTE();
+        hitAction = GameInput.Instance.QTEConfirmHitAction;
+        if (hitAction != null)
+            hitAction.performed += OnHit;
 
         active = true;
         gameObject.SetActive(true);
@@ -103,8 +102,10 @@ public class QTE_TimingUI : MonoBehaviour
 
         active = false;
 
-        hitAction.performed -= OnHit;
-        input.QTE.Disable();
+        if (hitAction != null)
+            hitAction.performed -= OnHit;
+
+        GameInput.Instance.SetModePlayer();
 
         gameObject.SetActive(false);
 

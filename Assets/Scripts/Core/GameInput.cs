@@ -6,74 +6,78 @@ public class GameInput : MonoBehaviour
 {
     public static GameInput Instance { get; private set; }
 
-    public InputManager Actions { get; private set; }
+    public PlayerInput PlayerInputComponent { get; private set; }
     public string CurrentControlScheme { get; private set; }
 
     public enum InputMode { Player, UI, QTE }
-    public InputMode CurrentMode { get; private set; } = InputMode.Player;
+    public InputMode CurrentMode { get; private set; }
 
-    private PlayerInput playerInput;
+    public event System.Action ControlSchemeChanged;
+
+    // PLAYER
+    public InputAction MoveAction { get; private set; }
+    public InputAction InteractAction { get; private set; }
+
+    // UI
+    public InputAction NavigateAction { get; private set; }
+    public InputAction SubmitAction { get; private set; }
+    public InputAction CancelAction { get; private set; }
+
+    // QTE
+    public InputAction QTEConfirmHitAction { get; private set; }
+    public InputAction QTEDirectionalAction { get; private set; }
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        Instance = this;
+        PlayerInputComponent = GetComponent<PlayerInput>();
+
+        PlayerInputComponent.onControlsChanged += OnControlSchemeChanged;
+        CurrentControlScheme = PlayerInputComponent.currentControlScheme;
+
+        CacheInputActions();
+    }
+
+    private void Start()
+    {
+        PlayerInputComponent.actions.Enable();
+
+        SetModeUI();
+    }
+
+    private void CacheInputActions()
+    {
+        var player = PlayerInputComponent.actions.FindActionMap("Player");
+        if (player != null)
         {
-            Destroy(gameObject);
-            return;
+            MoveAction = player.FindAction("Move");
+            InteractAction = player.FindAction("Interact");
         }
 
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
+        var ui = PlayerInputComponent.actions.FindActionMap("UI");
+        if (ui != null)
+        {
+            NavigateAction = ui.FindAction("Navigate");
+            SubmitAction = ui.FindAction("Submit");
+            CancelAction = ui.FindAction("Cancel");
+        }
 
-        playerInput = GetComponent<PlayerInput>();
-
-        Actions = new InputManager();
-
-        Actions.asset.bindingMask = playerInput.actions.bindingMask;
-        Actions.asset.devices = playerInput.actions.devices;
-
-        DisableAllMaps();
-        SetModePlayer();
-
-        playerInput.onControlsChanged += OnControlSchemeChanged;
-        CurrentControlScheme = playerInput.currentControlScheme;
-    }
-
-    private void DisableAllMaps()
-    {
-        Actions.Player.Disable();
-        Actions.UI.Disable();
-        Actions.QTE.Disable();
-        Actions.GameControls.Disable();
-    }
-
-    public void SetModePlayer()
-    {
-        DisableAllMaps();
-        Actions.Player.Enable();
-        CurrentMode = InputMode.Player;
-        playerInput.SwitchCurrentActionMap("Player");
-    }
-
-    public void SetModeUI()
-    {
-        DisableAllMaps();
-        Actions.UI.Enable();
-        CurrentMode = InputMode.UI;
-        playerInput.SwitchCurrentActionMap("UI");
-    }
-
-    public void SetModeQTE()
-    {
-        DisableAllMaps();
-        Actions.QTE.Enable();
-        CurrentMode = InputMode.QTE;
-        playerInput.SwitchCurrentActionMap("QTE");
+        var qte = PlayerInputComponent.actions.FindActionMap("QTE");
+        if (qte != null)
+        {
+            QTEConfirmHitAction = qte.FindAction("ConfirmHit");
+            QTEDirectionalAction = qte.FindAction("Directional");
+        }
     }
 
     private void OnControlSchemeChanged(PlayerInput input)
     {
         CurrentControlScheme = input.currentControlScheme;
-        Debug.Log("Control Scheme Switched -> " + CurrentControlScheme);
+        ControlSchemeChanged?.Invoke();
     }
+
+    // ----- SWITCH MAP -----
+    public void SetModePlayer() => PlayerInputComponent.SwitchCurrentActionMap("Player");
+    public void SetModeUI() => PlayerInputComponent.SwitchCurrentActionMap("UI");
+    public void SetModeQTE() => PlayerInputComponent.SwitchCurrentActionMap("QTE");
 }

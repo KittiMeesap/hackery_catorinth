@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public enum CustomerPersonality
 {
@@ -66,6 +67,9 @@ public class CustomerController : MonoBehaviour
 
     [HideInInspector] public CustomerQueueManager queueManager;
 
+    // NEW — direct InputAction
+    private InputAction interactAction;
+
     private void Awake()
     {
         if (!rb) rb = GetComponent<Rigidbody2D>();
@@ -76,6 +80,10 @@ public class CustomerController : MonoBehaviour
 
         if (interactUI)
             interactUI.SetActive(false);
+
+        // NEW — get input action directly
+        if (GameInput.Instance != null)
+            interactAction = GameInput.Instance.InteractAction;
     }
 
     private void OnEnable()
@@ -174,7 +182,8 @@ public class CustomerController : MonoBehaviour
 
             float dir = Mathf.Sign(target.x - pos.x);
             rb.linearVelocity = new Vector2(dir * moveSpeed, rb.linearVelocity.y);
-            if (spriteRenderer)
+
+            if (spriteRenderer != null)
                 spriteRenderer.flipX = dir < 0;
         }
         else
@@ -194,7 +203,7 @@ public class CustomerController : MonoBehaviour
 
     private void UpdateAnimator()
     {
-        if (animator)
+        if (animator != null)
             animator.SetBool("IsWalking", Mathf.Abs(rb.linearVelocity.x) > 0.05f);
     }
 
@@ -215,9 +224,10 @@ public class CustomerController : MonoBehaviour
         if (!IsCustomerAtServicePoint) return;
         if (!PlayerIsHere) return;
         if (InteractStation.interactionLocked) return;
+        if (interactAction == null) return;
 
-        var interact = GameInput.Instance.Actions.Player.Interact;
-        if (!interact.WasPerformedThisFrame()) return;
+        // NEW — direct input call
+        if (!interactAction.WasPerformedThisFrame()) return;
 
         if (state == State.InQueueIdle || state == State.WaitingOrder)
             OnPlayerAcceptOrder();
@@ -248,7 +258,6 @@ public class CustomerController : MonoBehaviour
         if (hasActiveOrder) return;
 
         hasActiveOrder = true;
-
         ShowEmotion(emotionNeutral);
 
         SetInteractVisible(false);
@@ -272,8 +281,9 @@ public class CustomerController : MonoBehaviour
         if (player == null) return;
         if (!player.HasServeBox()) return;
 
-        bool correct = player.serveBox != null &&
-                       player.serveBox.resultRecipe == currentRecipe;
+        bool correct =
+            player.serveBox != null &&
+            player.serveBox.resultRecipe == currentRecipe;
 
         player.serveBox = null;
         player.OnInventoryChanged?.Invoke();
@@ -308,7 +318,6 @@ public class CustomerController : MonoBehaviour
             MichelinStarSystem.Instance.LoseStar(1);
 
         GameManager.Instance.RegisterOrderFail();
-
         StartLeave();
     }
 
@@ -316,12 +325,12 @@ public class CustomerController : MonoBehaviour
     private void StartLeave()
     {
         hasActiveOrder = false;
-
         SetInteractVisible(false);
-        if (emotionIcon)
+
+        if (emotionIcon != null)
             emotionIcon.enabled = false;
 
-        if (spriteRenderer)
+        if (spriteRenderer != null)
             spriteRenderer.flipX = !spriteRenderer.flipX;
 
         if (queueManager?.exitPoint != null)
@@ -369,7 +378,7 @@ public class CustomerController : MonoBehaviour
 
     private void SetInteractVisible(bool visible)
     {
-        if (interactUI)
+        if (interactUI != null)
             interactUI.SetActive(visible);
     }
 }

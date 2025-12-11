@@ -14,7 +14,6 @@ public class PlayerController : MonoBehaviour
     public PlayerInventory inventory;
 
     private Rigidbody2D rb;
-    private InputManager input;
 
     private float moveX;
     private float inactivityTimer;
@@ -24,6 +23,10 @@ public class PlayerController : MonoBehaviour
     private bool isSnoring;
 
     private bool movementEnabled = true;
+
+    // New: direct actions from GameInput
+    private InputAction moveAction;
+    private InputAction interactAction;
 
     private void Awake()
     {
@@ -35,7 +38,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        input = GameInput.Instance.Actions;
+        moveAction = GameInput.Instance.MoveAction;
+        interactAction = GameInput.Instance.InteractAction;
 
         ResetAnimator();
         RefreshCarryAnimation();
@@ -43,18 +47,30 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        var p = input.Player;
-        p.Move.performed += OnMovePerformed;
-        p.Move.canceled += OnMoveCanceled;
-        p.Interact.performed += OnInteractPerformed;
+        if (moveAction != null)
+        {
+            moveAction.performed += OnMovePerformed;
+            moveAction.canceled += OnMoveCanceled;
+        }
+
+        if (interactAction != null)
+        {
+            interactAction.performed += OnInteractPerformed;
+        }
     }
 
     private void OnDisable()
     {
-        var p = input.Player;
-        p.Move.performed -= OnMovePerformed;
-        p.Move.canceled -= OnMoveCanceled;
-        p.Interact.performed -= OnInteractPerformed;
+        if (moveAction != null)
+        {
+            moveAction.performed -= OnMovePerformed;
+            moveAction.canceled -= OnMoveCanceled;
+        }
+
+        if (interactAction != null)
+        {
+            interactAction.performed -= OnInteractPerformed;
+        }
     }
 
     private void ResetAnimator()
@@ -115,7 +131,6 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("AFK", isAFK);
     }
 
-
     // ============================
     //  COOKING FLAG
     // ============================
@@ -127,7 +142,6 @@ public class PlayerController : MonoBehaviour
     // ============================
     //  AFK SYSTEM
     // ============================
-
     private void HandleAFK()
     {
         inactivityTimer += Time.deltaTime;

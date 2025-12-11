@@ -68,32 +68,35 @@ public class PantryUI : MonoBehaviour
         BuildGrid();
         Show();
 
-        var input = GameInput.Instance.Actions;
-        input.Player.Disable();
-        input.UI.Enable();
+        GameInput.Instance.SetModeUI();
 
         playerController.DisableMovement();
 
-        navigateAction = input.UI.Navigate;
-        submitAction = input.UI.Submit;
-        cancelAction = input.UI.Cancel;
+        navigateAction = GameInput.Instance.NavigateAction;
+        submitAction = GameInput.Instance.SubmitAction;
+        cancelAction = GameInput.Instance.CancelAction;
 
-        submitAction.performed += OnSubmit;
-        cancelAction.performed += OnCancel;
+        if (submitAction != null)
+            submitAction.performed += OnSubmit;
+
+        if (cancelAction != null)
+            cancelAction.performed += OnCancel;
 
         FocusNearestUnlocked(0);
     }
 
     public void Close()
     {
-        submitAction.performed -= OnSubmit;
-        cancelAction.performed -= OnCancel;
+        if (submitAction != null)
+            submitAction.performed -= OnSubmit;
 
-        var input = GameInput.Instance.Actions;
-        input.UI.Disable();
-        input.Player.Enable();
+        if (cancelAction != null)
+            cancelAction.performed -= OnCancel;
 
-        playerController.EnableMovement();
+        GameInput.Instance.SetModePlayer();
+
+        if (playerController != null)
+            playerController.EnableMovement();
 
         Hide();
         owner.UnlockInteraction();

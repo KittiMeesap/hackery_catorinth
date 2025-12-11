@@ -7605,7 +7605,7 @@ MonoBehaviour:
   poolSize: 10
   customerPrefabs:
   - id: 0
-    personality: 0
+    personality: 1
     prefab: {fileID: 1284491292260071742, guid: 6477a81035365414e8382975d056c7a3, type: 3}
     weight: 2
   - id: 1
@@ -7613,15 +7613,15 @@ MonoBehaviour:
     prefab: {fileID: 8602450321321192693, guid: 309abfad2aabd3a4f86ce7a229d57c6d, type: 3}
     weight: 2
   - id: 2
-    personality: 0
-    prefab: {fileID: 4120923641649208074, guid: a8542f8a70353324092284d3503c6169, type: 3}
+    personality: 1
+    prefab: {fileID: 4180548889126801338, guid: b3c40321cbd6f544a8181b02f89f108e, type: 3}
     weight: 2
   - id: 3
-    personality: 0
+    personality: 2
     prefab: {fileID: 4120923641649208074, guid: a8542f8a70353324092284d3503c6169, type: 3}
     weight: 2
   - id: 4
-    personality: 0
+    personality: 1
     prefab: {fileID: 3065364023190363647, guid: cce1da15c86a2844e919728fa55cd7b8, type: 3}
     weight: 2
   - id: 5
@@ -7633,11 +7633,11 @@ MonoBehaviour:
     prefab: {fileID: 683317019467270309, guid: 8307fa6714b3ea94489572951e4e31be, type: 3}
     weight: 2
   - id: 7
-    personality: 0
+    personality: 2
     prefab: {fileID: 4607010228120901139, guid: 09325469d8556dc4fb2299167a4c2949, type: 3}
     weight: 2
   - id: 8
-    personality: 0
+    personality: 3
     prefab: {fileID: 8683356249817631651, guid: 279b34d34b5583c408ce840238db784c, type: 3}
     weight: 1
 --- !u!1 &1445940884

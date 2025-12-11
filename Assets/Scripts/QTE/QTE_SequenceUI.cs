@@ -27,7 +27,6 @@ public class QTE_SequenceUI : MonoBehaviour
 
     private bool active = false;
 
-    private InputManager input => GameInput.Instance.Actions;
     private InputAction arrowAction;
 
     private Coroutine punchRoutine;
@@ -56,9 +55,10 @@ public class QTE_SequenceUI : MonoBehaviour
 
         ShowCurrentKey();
 
-        input.QTE.Enable();
-        arrowAction = input.QTE.Directional;
-        arrowAction.performed += OnArrow;
+        GameInput.Instance.SetModeQTE();
+        arrowAction = GameInput.Instance.QTEDirectionalAction;
+        if (arrowAction != null)
+            arrowAction.performed += OnArrow;
 
         active = true;
         gameObject.SetActive(true);
@@ -187,7 +187,8 @@ public class QTE_SequenceUI : MonoBehaviour
         if (arrowAction != null)
             arrowAction.performed -= OnArrow;
 
-        input.QTE.Disable();
+        GameInput.Instance.SetModePlayer();
+
         gameObject.SetActive(false);
 
         finishCallback?.Invoke(result);

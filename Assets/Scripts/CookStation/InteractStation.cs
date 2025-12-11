@@ -21,7 +21,7 @@ public abstract class InteractStation : MonoBehaviour
 
         if (GameInput.Instance != null)
         {
-            interactAction = GameInput.Instance.Actions.Player.Interact;
+            interactAction = GameInput.Instance.InteractAction;
         }
     }
 
@@ -57,7 +57,6 @@ public abstract class InteractStation : MonoBehaviour
         if (interactionLocked) return;
         if (interactAction == null) return;
 
-        // Correct Input System way
         if (interactAction.WasPerformedThisFrame())
         {
             if (promptUI != null) promptUI.SetActive(false);

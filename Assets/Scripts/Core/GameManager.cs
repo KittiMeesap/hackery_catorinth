@@ -55,9 +55,8 @@ public class GameManager : MonoBehaviour
 
         endDayUI.HideImmediate();
 
-        // Input
-        GameInput.Instance.Actions.Player.Enable();
-        GameInput.Instance.Actions.UI.Disable();
+        // Input mode: gameplay
+        GameInput.Instance.SetModePlayer();
     }
 
     // END DAY
@@ -66,8 +65,7 @@ public class GameManager : MonoBehaviour
         dayRunning = false;
         timeSystem.StopDay();
 
-        GameInput.Instance.Actions.Player.Disable();
-        GameInput.Instance.Actions.UI.Enable();
+        GameInput.Instance.SetModeUI();
 
         bool hasNextDay = DayManager.Instance.HasNextDay();
 

@@ -777,23 +777,23 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""7bd3e685-c84e-421f-8c61-822965ebec78"",
-                    ""path"": ""*/{Submit}"",
+                    ""id"": ""f103c6fb-758e-43ac-8e26-1fc1a767f208"",
+                    ""path"": ""<Keyboard>/enter"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Submit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""838be0bb-35d6-484e-9a0d-0722a796c28a"",
-                    ""path"": ""*/{Cancel}"",
+                    ""id"": ""57915a84-d0cb-4a77-889f-f488b75108f9"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
-                    ""action"": ""Cancel"",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Submit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -928,43 +928,26 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""action"": ""TrackedDeviceOrientation"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                }
-            ]
-        },
-        {
-            ""name"": ""GameControls"",
-            ""id"": ""19e28080-47ab-4b80-a690-0a6e5a62c63e"",
-            ""actions"": [
-                {
-                    ""name"": ""Continue"",
-                    ""type"": ""Button"",
-                    ""id"": ""ae73aaeb-75e0-4b10-8c6e-3eb3dcdfff56"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                }
-            ],
-            ""bindings"": [
+                },
                 {
                     ""name"": """",
-                    ""id"": ""9ae6b375-f46e-45da-b8fa-8762c9d06dbb"",
-                    ""path"": ""<Keyboard>/anyKey"",
+                    ""id"": ""ae3e57a9-9b5f-43f0-b49e-020d06bd506e"",
+                    ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Continue"",
+                    ""action"": ""Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""62fa3f2d-8c0a-4b3a-b9a9-81d23cddb65e"",
+                    ""id"": ""b66d41b2-9328-486a-a5cb-2558ca916770"",
                     ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
-                    ""action"": ""Continue"",
+                    ""action"": ""Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1054,9 +1037,6 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         m_UI_ScrollWheel = m_UI.FindAction("ScrollWheel", throwIfNotFound: true);
         m_UI_TrackedDevicePosition = m_UI.FindAction("TrackedDevicePosition", throwIfNotFound: true);
         m_UI_TrackedDeviceOrientation = m_UI.FindAction("TrackedDeviceOrientation", throwIfNotFound: true);
-        // GameControls
-        m_GameControls = asset.FindActionMap("GameControls", throwIfNotFound: true);
-        m_GameControls_Continue = m_GameControls.FindAction("Continue", throwIfNotFound: true);
     }
 
     ~@InputManager()
@@ -1064,7 +1044,6 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, InputManager.Player.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_QTE.enabled, "This will cause a leak and performance issues, InputManager.QTE.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, InputManager.UI.Disable() has not been called.");
-        UnityEngine.Debug.Assert(!m_GameControls.enabled, "This will cause a leak and performance issues, InputManager.GameControls.Disable() has not been called.");
     }
 
     /// <summary>
@@ -1545,102 +1524,6 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="UIActions" /> instance referencing this action map.
     /// </summary>
     public UIActions @UI => new UIActions(this);
-
-    // GameControls
-    private readonly InputActionMap m_GameControls;
-    private List<IGameControlsActions> m_GameControlsActionsCallbackInterfaces = new List<IGameControlsActions>();
-    private readonly InputAction m_GameControls_Continue;
-    /// <summary>
-    /// Provides access to input actions defined in input action map "GameControls".
-    /// </summary>
-    public struct GameControlsActions
-    {
-        private @InputManager m_Wrapper;
-
-        /// <summary>
-        /// Construct a new instance of the input action map wrapper class.
-        /// </summary>
-        public GameControlsActions(@InputManager wrapper) { m_Wrapper = wrapper; }
-        /// <summary>
-        /// Provides access to the underlying input action "GameControls/Continue".
-        /// </summary>
-        public InputAction @Continue => m_Wrapper.m_GameControls_Continue;
-        /// <summary>
-        /// Provides access to the underlying input action map instance.
-        /// </summary>
-        public InputActionMap Get() { return m_Wrapper.m_GameControls; }
-        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
-        public void Enable() { Get().Enable(); }
-        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
-        public void Disable() { Get().Disable(); }
-        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
-        public bool enabled => Get().enabled;
-        /// <summary>
-        /// Implicitly converts an <see ref="GameControlsActions" /> to an <see ref="InputActionMap" /> instance.
-        /// </summary>
-        public static implicit operator InputActionMap(GameControlsActions set) { return set.Get(); }
-        /// <summary>
-        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
-        /// </summary>
-        /// <param name="instance">Callback instance.</param>
-        /// <remarks>
-        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
-        /// </remarks>
-        /// <seealso cref="GameControlsActions" />
-        public void AddCallbacks(IGameControlsActions instance)
-        {
-            if (instance == null || m_Wrapper.m_GameControlsActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_GameControlsActionsCallbackInterfaces.Add(instance);
-            @Continue.started += instance.OnContinue;
-            @Continue.performed += instance.OnContinue;
-            @Continue.canceled += instance.OnContinue;
-        }
-
-        /// <summary>
-        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
-        /// </summary>
-        /// <remarks>
-        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
-        /// </remarks>
-        /// <seealso cref="GameControlsActions" />
-        private void UnregisterCallbacks(IGameControlsActions instance)
-        {
-            @Continue.started -= instance.OnContinue;
-            @Continue.performed -= instance.OnContinue;
-            @Continue.canceled -= instance.OnContinue;
-        }
-
-        /// <summary>
-        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="GameControlsActions.UnregisterCallbacks(IGameControlsActions)" />.
-        /// </summary>
-        /// <seealso cref="GameControlsActions.UnregisterCallbacks(IGameControlsActions)" />
-        public void RemoveCallbacks(IGameControlsActions instance)
-        {
-            if (m_Wrapper.m_GameControlsActionsCallbackInterfaces.Remove(instance))
-                UnregisterCallbacks(instance);
-        }
-
-        /// <summary>
-        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
-        /// </summary>
-        /// <remarks>
-        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
-        /// </remarks>
-        /// <seealso cref="GameControlsActions.AddCallbacks(IGameControlsActions)" />
-        /// <seealso cref="GameControlsActions.RemoveCallbacks(IGameControlsActions)" />
-        /// <seealso cref="GameControlsActions.UnregisterCallbacks(IGameControlsActions)" />
-        public void SetCallbacks(IGameControlsActions instance)
-        {
-            foreach (var item in m_Wrapper.m_GameControlsActionsCallbackInterfaces)
-                UnregisterCallbacks(item);
-            m_Wrapper.m_GameControlsActionsCallbackInterfaces.Clear();
-            AddCallbacks(instance);
-        }
-    }
-    /// <summary>
-    /// Provides a new <see cref="GameControlsActions" /> instance referencing this action map.
-    /// </summary>
-    public GameControlsActions @GameControls => new GameControlsActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     /// <summary>
     /// Provides access to the input control scheme.
@@ -1827,20 +1710,5 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTrackedDeviceOrientation(InputAction.CallbackContext context);
-    }
-    /// <summary>
-    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "GameControls" which allows adding and removing callbacks.
-    /// </summary>
-    /// <seealso cref="GameControlsActions.AddCallbacks(IGameControlsActions)" />
-    /// <seealso cref="GameControlsActions.RemoveCallbacks(IGameControlsActions)" />
-    public interface IGameControlsActions
-    {
-        /// <summary>
-        /// Method invoked when associated input action "Continue" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnContinue(InputAction.CallbackContext context);
     }
 }

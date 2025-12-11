@@ -7,68 +7,32 @@ using UnityEngine.InputSystem.XInput;
 [CreateAssetMenu(menuName = "Input/Key Icon Database")]
 public class KeyIconDatabase : ScriptableObject
 {
-    // ---------- SINGLETON ----------
     public static KeyIconDatabase Instance;
     private void OnEnable() => Instance = this;
 
     // ---------- KEYBOARD ----------
-    [Header("Keyboard - Face Buttons")]
     public Sprite key_Space;
-    public Sprite key_Q;
-    public Sprite key_E;
+    public Sprite key_Enter;
+    public Sprite key_Escape;
+    public Sprite key_R;
 
-    [Header("Keyboard - Arrows")]
     public Sprite key_ArrowUp;
     public Sprite key_ArrowDown;
     public Sprite key_ArrowLeft;
     public Sprite key_ArrowRight;
 
-    // ---------- XBOX ----------
-    [Header("Xbox - Face Buttons")]
-    public Sprite xbox_A;
-    public Sprite xbox_B;
-    public Sprite xbox_X;
-    public Sprite xbox_Y;
+    // ---------- GAMEPAD ----------
+    public Sprite xbox_A, xbox_B, xbox_X;
+    public Sprite xbox_DpadUp, xbox_DpadDown, xbox_DpadLeft, xbox_DpadRight;
 
-    [Header("Xbox - DPad")]
-    public Sprite xbox_DpadUp;
-    public Sprite xbox_DpadDown;
-    public Sprite xbox_DpadLeft;
-    public Sprite xbox_DpadRight;
+    public Sprite ps_Cross, ps_Circle, ps_Square;
+    public Sprite ps_DpadUp, ps_DpadDown, ps_DpadLeft, ps_DpadRight;
 
-    // ---------- PS5 ----------
-    [Header("PS5 - Face Buttons")]
-    public Sprite ps_Cross;
-    public Sprite ps_Circle;
-    public Sprite ps_Square;
-    public Sprite ps_Triangle;
+    public Sprite sw_B, sw_A, sw_Y;
+    public Sprite sw_DpadUp, sw_DpadDown, sw_DpadLeft, sw_DpadRight;
 
-    [Header("PS5 - DPad")]
-    public Sprite ps_DpadUp;
-    public Sprite ps_DpadDown;
-    public Sprite ps_DpadLeft;
-    public Sprite ps_DpadRight;
 
-    // ---------- SWITCH ----------
-    [Header("Switch Pro - Face Buttons")]
-    public Sprite sw_B;
-    public Sprite sw_A;
-    public Sprite sw_X;
-    public Sprite sw_Y;
-
-    [Header("Switch Pro - DPad")]
-    public Sprite sw_DpadUp;
-    public Sprite sw_DpadDown;
-    public Sprite sw_DpadLeft;
-    public Sprite sw_DpadRight;
-
-    // =============================================================
-    //  PUBLIC STATIC API
-    // =============================================================
-
-    /// <summary>
-    /// logicalKey: "confirm", "q", "space", "left", "right", "up", "down"
-    /// </summary>
+    // ---------- ICON LOOKUP ----------
     public static Sprite GetIcon(string logicalKey)
     {
         var db = Instance;
@@ -79,112 +43,83 @@ public class KeyIconDatabase : ScriptableObject
         Keyboard kb = Keyboard.current;
         Gamepad gp = Gamepad.current;
 
-        // --- Keyboard only ---
+        // KEYBOARD ONLY
         if (kb != null && gp == null)
         {
             switch (logicalKey)
             {
                 case "confirm":
-                case "space": return db.key_Space;
-                case "q": return db.key_Q;
-                case "e": return db.key_E;
+                case "enter": return db.key_Enter;
+
+                case "cancel": return db.key_Escape;
+                case "reset": return db.key_R;
+
                 case "up": return db.key_ArrowUp;
                 case "down": return db.key_ArrowDown;
                 case "left": return db.key_ArrowLeft;
                 case "right": return db.key_ArrowRight;
             }
-
-            return db.key_Space;
         }
 
-        // --- Gamepad (auto detect type) ---
+        // GAMEPAD
         if (gp != null)
         {
-            bool isXbox = gp is XInputController;
-            bool isPS = gp is DualSenseGamepadHID || gp is DualShockGamepad;
-            bool isSwitch = gp is SwitchProControllerHID;
+            bool xbox = gp is XInputController;
+            bool ps = gp is DualSenseGamepadHID || gp is DualShockGamepad;
+            bool sw = gp is SwitchProControllerHID;
 
-            // Face / Confirm
             if (logicalKey == "confirm")
-            {
-                if (isXbox) return db.xbox_A;
-                if (isPS) return db.ps_Cross;
-                if (isSwitch) return db.sw_B; // Nintendo layout
-                return db.xbox_A != null ? db.xbox_A : db.ps_Cross;
-            }
+                return xbox ? db.xbox_A : ps ? db.ps_Cross : db.sw_B;
 
-            // Directions
-            if (logicalKey == "up")
-            {
-                if (isXbox) return db.xbox_DpadUp;
-                if (isPS) return db.ps_DpadUp;
-                if (isSwitch) return db.sw_DpadUp;
-            }
-            if (logicalKey == "down")
-            {
-                if (isXbox) return db.xbox_DpadDown;
-                if (isPS) return db.ps_DpadDown;
-                if (isSwitch) return db.sw_DpadDown;
-            }
-            if (logicalKey == "left")
-            {
-                if (isXbox) return db.xbox_DpadLeft;
-                if (isPS) return db.ps_DpadLeft;
-                if (isSwitch) return db.sw_DpadLeft;
-            }
-            if (logicalKey == "right")
-            {
-                if (isXbox) return db.xbox_DpadRight;
-                if (isPS) return db.ps_DpadRight;
-                if (isSwitch) return db.sw_DpadRight;
-            }
+            if (logicalKey == "cancel")
+                return xbox ? db.xbox_B : ps ? db.ps_Circle : db.sw_A;
 
-            // fallback
-            return GetIcon("confirm");
+            if (logicalKey == "reset")
+                return xbox ? db.xbox_X : ps ? db.ps_Square : db.sw_Y;
+
+            if (logicalKey == "up") return xbox ? db.xbox_DpadUp : ps ? db.ps_DpadUp : db.sw_DpadUp;
+            if (logicalKey == "down") return xbox ? db.xbox_DpadDown : ps ? db.ps_DpadDown : db.sw_DpadDown;
+            if (logicalKey == "left") return xbox ? db.xbox_DpadLeft : ps ? db.ps_DpadLeft : db.sw_DpadLeft;
+            if (logicalKey == "right") return xbox ? db.xbox_DpadRight : ps ? db.ps_DpadRight : db.sw_DpadRight;
         }
 
-        return null;
+        return db.key_Enter;
     }
 
     public static string GetLogicalFromContext(InputAction.CallbackContext ctx)
     {
-        if (ctx.control == null)
-            return string.Empty;
+        if (ctx.control == null) return "";
 
-        var control = ctx.control;
-        var device = control.device;
+        var c = ctx.control;
+        var device = c.device;
 
-        // ---------- Keyboard ----------
         if (device is Keyboard)
         {
-            switch (control.name)
+            switch (c.name)
             {
-                case "space": return "space";
-                case "q": return "q";
-                case "e": return "e";
+                case "enter": return "confirm";
+                case "escape": return "cancel";
+                case "r": return "reset";
+
                 case "upArrow": return "up";
                 case "downArrow": return "down";
                 case "leftArrow": return "left";
                 case "rightArrow": return "right";
             }
-
-            return control.name.ToLowerInvariant();
         }
 
-        // ---------- Gamepad ----------
         if (device is Gamepad gp)
         {
-            if (control == gp.buttonSouth) return "confirm";
-            if (control == gp.buttonEast) return "right";
-            if (control == gp.buttonWest) return "left";
-            if (control == gp.buttonNorth) return "up";
+            if (c == gp.buttonSouth) return "confirm";
+            if (c == gp.buttonEast) return "cancel";
+            if (c == gp.buttonWest) return "reset";
 
-            if (control == gp.dpad.up) return "up";
-            if (control == gp.dpad.down) return "down";
-            if (control == gp.dpad.left) return "left";
-            if (control == gp.dpad.right) return "right";
+            if (c == gp.dpad.up) return "up";
+            if (c == gp.dpad.down) return "down";
+            if (c == gp.dpad.left) return "left";
+            if (c == gp.dpad.right) return "right";
         }
 
-        return control.name.ToLowerInvariant();
+        return "";
     }
 }

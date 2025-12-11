@@ -691,23 +691,23 @@
                 },
                 {
                     "name": "",
-                    "id": "7bd3e685-c84e-421f-8c61-822965ebec78",
-                    "path": "*/{Submit}",
+                    "id": "f103c6fb-758e-43ac-8e26-1fc1a767f208",
+                    "path": "<Keyboard>/enter",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse;Gamepad;Touch;Joystick;XR",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Submit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "838be0bb-35d6-484e-9a0d-0722a796c28a",
-                    "path": "*/{Cancel}",
+                    "id": "57915a84-d0cb-4a77-889f-f488b75108f9",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse;Gamepad;Touch;Joystick;XR",
-                    "action": "Cancel",
+                    "groups": ";Gamepad",
+                    "action": "Submit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -842,43 +842,26 @@
                     "action": "TrackedDeviceOrientation",
                     "isComposite": false,
                     "isPartOfComposite": false
-                }
-            ]
-        },
-        {
-            "name": "GameControls",
-            "id": "19e28080-47ab-4b80-a690-0a6e5a62c63e",
-            "actions": [
-                {
-                    "name": "Continue",
-                    "type": "Button",
-                    "id": "ae73aaeb-75e0-4b10-8c6e-3eb3dcdfff56",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
+                },
                 {
                     "name": "",
-                    "id": "9ae6b375-f46e-45da-b8fa-8762c9d06dbb",
-                    "path": "<Keyboard>/anyKey",
+                    "id": "ae3e57a9-9b5f-43f0-b49e-020d06bd506e",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Continue",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "62fa3f2d-8c0a-4b3a-b9a9-81d23cddb65e",
+                    "id": "b66d41b2-9328-486a-a5cb-2558ca916770",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Continue",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

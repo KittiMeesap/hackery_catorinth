@@ -26,7 +26,6 @@ public class QTE_MashUI : MonoBehaviour
     private bool active = false;
     private bool hasStarted = false;
 
-    private InputManager input => GameInput.Instance.Actions;
     private InputAction hitAction;
 
     private Coroutine fadeRoutine;
@@ -41,17 +40,15 @@ public class QTE_MashUI : MonoBehaviour
         this.successTarget = successTarget;
         this.finishCallback = onFinished;
 
-        // Reset state
         currentFill = 0f;
         barFill.fillAmount = 0f;
         hasStarted = false;
         active = true;
 
-        // Reset UI scale
         if (root != null)
             root.localScale = Vector3.one;
 
-        // Get correct icon
+        // icon
         Sprite icon = KeyIconDatabase.GetIcon(logicalKey);
         if (icon != null)
         {
@@ -63,10 +60,8 @@ public class QTE_MashUI : MonoBehaviour
             keyIcon.enabled = false;
         }
 
-        // Label always uses action text
         labelText.text = "MASH!";
 
-        // Fade-in effect
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
@@ -74,13 +69,12 @@ public class QTE_MashUI : MonoBehaviour
             fadeRoutine = StartCoroutine(FadeCanvas(0f, 1f, fadeInDuration));
         }
 
-        // Activate UI before enabling input
         gameObject.SetActive(true);
 
-        // Setup input
-        input.QTE.Enable();
-        hitAction = input.QTE.ConfirmHit;
-        hitAction.performed += OnHit;
+        GameInput.Instance.SetModeQTE();
+        hitAction = GameInput.Instance.QTEConfirmHitAction;
+        if (hitAction != null)
+            hitAction.performed += OnHit;
     }
 
     private void Update()
@@ -94,7 +88,6 @@ public class QTE_MashUI : MonoBehaviour
             barFill.fillAmount = currentFill;
         }
 
-        // Auto success when full
         if (currentFill >= successTarget)
         {
             Finish(QTEResult.Success);
@@ -172,9 +165,9 @@ public class QTE_MashUI : MonoBehaviour
         if (hitAction != null)
             hitAction.performed -= OnHit;
 
-        input.QTE.Disable();
-        gameObject.SetActive(false);
+        GameInput.Instance.SetModePlayer();
 
+        gameObject.SetActive(false);
         finishCallback?.Invoke(result);
     }
 

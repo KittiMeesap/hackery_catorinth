@@ -31,12 +31,19 @@ public class GameInput : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
+        DontDestroyOnLoad(gameObject);
+
         PlayerInputComponent = GetComponent<PlayerInput>();
-
         PlayerInputComponent.onControlsChanged += OnControlSchemeChanged;
-        CurrentControlScheme = PlayerInputComponent.currentControlScheme;
 
+        CurrentControlScheme = PlayerInputComponent.currentControlScheme;
         CacheInputActions();
     }
 
@@ -48,7 +55,6 @@ public class GameInput : MonoBehaviour
 
     private void CacheInputActions()
     {
-        //  PLAYER 
         var player = PlayerInputComponent.actions.FindActionMap("Player");
         if (player != null)
         {
@@ -57,7 +63,6 @@ public class GameInput : MonoBehaviour
             PauseAction = player.FindAction("Pause");
         }
 
-        //  UI 
         var ui = PlayerInputComponent.actions.FindActionMap("UI");
         if (ui != null)
         {
@@ -66,7 +71,6 @@ public class GameInput : MonoBehaviour
             CancelAction = ui.FindAction("Cancel");
         }
 
-        //  QTE 
         var qte = PlayerInputComponent.actions.FindActionMap("QTE");
         if (qte != null)
         {
@@ -82,7 +86,9 @@ public class GameInput : MonoBehaviour
         ControlSchemeChanged?.Invoke();
     }
 
+    // ==============================
     // MODE SWITCH
+    // ==============================
     public void SetModePlayer()
     {
         CurrentMode = InputMode.Player;

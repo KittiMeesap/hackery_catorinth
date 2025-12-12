@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -30,53 +31,62 @@ public class QTE_MashUI : MonoBehaviour
 
     private Coroutine fadeRoutine;
     private Coroutine punchRoutine;
-    private System.Action<QTEResult> finishCallback;
+    private Action<QTEResult> finishCallback;
 
+    private string currentLogicalKey = "confirm";
+
+    //  PUBLIC API
     public void Begin(string logicalKey, float perHit, float drain, float successTarget,
-                      System.Action<QTEResult> onFinished)
+                      Action<QTEResult> onFinished)
     {
+        if (GameInput.Instance == null)
+        {
+            Debug.LogError("QTE_MashUI: GameInput is NULL");
+            return;
+        }
+
+        if (!gameObject.activeInHierarchy)
+            gameObject.SetActive(true);
+
+        enabled = true;
+
         this.fillPerHit = perHit;
         this.drainPerSec = drain;
         this.successTarget = successTarget;
         this.finishCallback = onFinished;
 
         currentFill = 0f;
-        barFill.fillAmount = 0f;
+        if (barFill != null)
+            barFill.fillAmount = 0f;
+
         hasStarted = false;
         active = true;
 
         if (root != null)
             root.localScale = Vector3.one;
 
-        // icon
-        Sprite icon = KeyIconDatabase.GetIcon(logicalKey);
-        if (icon != null)
-        {
-            keyIcon.enabled = true;
-            keyIcon.sprite = icon;
-        }
-        else
-        {
-            keyIcon.enabled = false;
-        }
+        currentLogicalKey = string.IsNullOrEmpty(logicalKey) ? "confirm" : logicalKey;
+        UpdateKeyIconSprite();
 
-        labelText.text = "MASH!";
+        if (labelText != null)
+            labelText.text = "MASH!";
 
+        // Fade-in
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
-            if (fadeRoutine != null) StopCoroutine(fadeRoutine);
             fadeRoutine = StartCoroutine(FadeCanvas(0f, 1f, fadeInDuration));
         }
 
-        gameObject.SetActive(true);
-
+        // ENABLE QTE ACTION MAP
         GameInput.Instance.SetModeQTE();
+
+        // GET INPUT ACTION
         hitAction = GameInput.Instance.QTEConfirmHitAction;
-        if (hitAction != null)
-            hitAction.performed += OnHit;
+        hitAction.performed += OnHit;
     }
 
+    //  UPDATE
     private void Update()
     {
         if (!active) return;
@@ -85,7 +95,9 @@ public class QTE_MashUI : MonoBehaviour
         {
             currentFill -= drainPerSec * Time.unscaledDeltaTime;
             currentFill = Mathf.Clamp01(currentFill);
-            barFill.fillAmount = currentFill;
+
+            if (barFill != null)
+                barFill.fillAmount = currentFill;
         }
 
         if (currentFill >= successTarget)
@@ -94,25 +106,46 @@ public class QTE_MashUI : MonoBehaviour
         }
     }
 
+    //  INPUT CALLBACK
     private void OnHit(InputAction.CallbackContext ctx)
     {
         if (!active) return;
 
         hasStarted = true;
 
+        // Auto switch icon
+        string logical = KeyIconDatabase.GetLogicalFromContext(ctx);
+        if (!string.IsNullOrEmpty(logical))
+        {
+            currentLogicalKey = logical;
+            UpdateKeyIconSprite();
+        }
+
         currentFill += fillPerHit;
         currentFill = Mathf.Clamp01(currentFill);
-        barFill.fillAmount = currentFill;
+
+        if (barFill != null)
+            barFill.fillAmount = currentFill;
 
         if (punchRoutine != null)
             StopCoroutine(punchRoutine);
-
         punchRoutine = StartCoroutine(HitRoutine());
 
         if (currentFill >= successTarget)
-        {
             Finish(QTEResult.Success);
+    }
+
+    //  VISUAL
+    private void UpdateKeyIconSprite()
+    {
+        var icon = KeyIconDatabase.GetIcon(currentLogicalKey);
+
+        if (icon != null)
+        {
+            keyIcon.enabled = true;
+            keyIcon.sprite = icon;
         }
+        else keyIcon.enabled = false;
     }
 
     private IEnumerator HitRoutine()
@@ -124,9 +157,7 @@ public class QTE_MashUI : MonoBehaviour
         while (t < hitPunchDuration)
         {
             t += Time.unscaledDeltaTime;
-            float p = t / hitPunchDuration;
-            p = p * p * (3 - 2 * p);
-            root.localScale = Vector3.Lerp(baseScale, target, p);
+            root.localScale = Vector3.Lerp(baseScale, target, t / hitPunchDuration);
             yield return null;
         }
 
@@ -134,9 +165,7 @@ public class QTE_MashUI : MonoBehaviour
         while (t < hitPunchDuration)
         {
             t += Time.unscaledDeltaTime;
-            float p = t / hitPunchDuration;
-            p = p * p * (3 - 2 * p);
-            root.localScale = Vector3.Lerp(target, baseScale, p);
+            root.localScale = Vector3.Lerp(target, baseScale, t / hitPunchDuration);
             yield return null;
         }
 
@@ -149,23 +178,20 @@ public class QTE_MashUI : MonoBehaviour
         while (t < dur)
         {
             t += Time.unscaledDeltaTime;
-            float p = t / dur;
-            canvasGroup.alpha = Mathf.Lerp(from, to, p);
+            canvasGroup.alpha = Mathf.Lerp(from, to, t / dur);
             yield return null;
         }
         canvasGroup.alpha = to;
     }
 
+    //  FINISH / FORCE STOP
     private void Finish(QTEResult result)
     {
         if (!active) return;
-
         active = false;
 
         if (hitAction != null)
             hitAction.performed -= OnHit;
-
-        GameInput.Instance.SetModePlayer();
 
         gameObject.SetActive(false);
         finishCallback?.Invoke(result);

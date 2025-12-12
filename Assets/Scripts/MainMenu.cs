@@ -15,6 +15,10 @@ public class MainMenu : MonoBehaviour
     [Header("Buttons")]
     public GameObject firstSelectedMain;
 
+    [Header("Button Hover Scale")]
+    public Vector3 hoverScale = new Vector3(1.1f, 1.1f, 1f);
+    private GameObject lastSelectedButton;
+
     [Header("Fade")]
     public Image fadeOverlay;
     public float fadeDuration = 0.5f;
@@ -55,15 +59,13 @@ public class MainMenu : MonoBehaviour
             cancelAction.performed -= OnCancelPressed;
     }
 
-    // ------------------------------
     // UI LOCK SYSTEM
-    // ------------------------------
     public void SetUILocked(bool locked)
     {
         uiLocked = locked;
     }
 
-    // ------------------------------
+    // CANCEL HANDLER
     private void OnCancelPressed(InputAction.CallbackContext ctx)
     {
         if (uiLocked) return;
@@ -78,7 +80,27 @@ public class MainMenu : MonoBehaviour
             return;
     }
 
-    // ------------------------------
+    // BUTTON SELECT VISUAL
+    private void Update()
+    {
+        var current = EventSystem.current.currentSelectedGameObject;
+
+        if (current != lastSelectedButton)
+        {
+            if (lastSelectedButton != null)
+                lastSelectedButton.transform.localScale = Vector3.one;
+
+            if (current != null)
+            {
+                current.transform.localScale = hoverScale;
+                PlayHover();
+            }
+
+            lastSelectedButton = current;
+        }
+    }
+
+    // UI NAVIGATION
     public void ShowMainMenu()
     {
         PlayHover();
@@ -98,23 +120,25 @@ public class MainMenu : MonoBehaviour
     public void ShowSetting()
     {
         PlayClick();
-
         uiLocked = true;
 
         mainPanel.SetActive(true);
         settingPanel.SetActive(true);
         creditsPanel.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(settingPanel.GetComponentInChildren<Button>().gameObject);
     }
 
     public void ShowCredits()
     {
         PlayClick();
-
         uiLocked = true;
 
         mainPanel.SetActive(true);
         settingPanel.SetActive(false);
         creditsPanel.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(creditsPanel.GetComponentInChildren<Button>().gameObject);
     }
 
     public void CloseCredits()
@@ -124,13 +148,14 @@ public class MainMenu : MonoBehaviour
         ShowMainMenu();
     }
 
+    // SCENE LOAD
     public void PlayGame()
     {
         if (isTransitioning) return;
         isTransitioning = true;
 
         PlayClick();
-        StartCoroutine(FadeAndLoad("GameScene"));
+        StartCoroutine(FadeAndLoad("Tutorial 1"));
     }
 
     IEnumerator FadeAndLoad(string sceneName)
@@ -151,6 +176,7 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
+    // QUIT
     public void QuitGame()
     {
         PlayClick();

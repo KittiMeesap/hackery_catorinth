@@ -8,7 +8,6 @@ public class ConfirmPanelInputController : MonoBehaviour
 {
     public Button confirmButton;
     public Button cancelButton;
-    public TextMeshProUGUI messageText;
 
     private InputAction submitAction;
     private InputAction cancelAction;
@@ -29,12 +28,6 @@ public class ConfirmPanelInputController : MonoBehaviour
     {
         submitAction.performed -= OnSubmit;
         cancelAction.performed -= OnCancel;
-    }
-
-    public void SetMessage(string msg)
-    {
-        if (messageText != null)
-            messageText.text = msg;
     }
 
     private void OnSubmit(InputAction.CallbackContext ctx)

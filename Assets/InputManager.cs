@@ -109,6 +109,15 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""06a6e1a3-7136-4d7b-8928-6b4e124169fe"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -243,6 +252,28 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ccff1a9d-ba4d-4780-89b2-48de58cf66e7"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""590913a0-d90f-43b3-905f-9e2f5a799374"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -251,7 +282,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
             ""id"": ""c5819470-e8d5-4d80-a9ef-ed0990a0f359"",
             ""actions"": [
                 {
-                    ""name"": ""Confirm / Hit"",
+                    ""name"": ""ConfirmHit"",
                     ""type"": ""Button"",
                     ""id"": ""5c8cf25d-a635-4f01-858f-6d5cd5cb5a6f"",
                     ""expectedControlType"": """",
@@ -267,6 +298,15 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""CancelQTE"",
+                    ""type"": ""Button"",
+                    ""id"": ""1e50fd88-38d0-4942-a88b-17cf34b4097e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -277,7 +317,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Confirm / Hit"",
+                    ""action"": ""ConfirmHit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -288,7 +328,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Confirm / Hit"",
+                    ""action"": ""ConfirmHit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -299,7 +339,29 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
-                    ""action"": ""Confirm / Hit"",
+                    ""action"": ""ConfirmHit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ee378b30-1d52-4cd0-b345-eea6a10cba47"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""CancelQTE"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2263b2f6-a4e5-4110-97ef-9936246c493f"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""CancelQTE"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -932,7 +994,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""ae3e57a9-9b5f-43f0-b49e-020d06bd506e"",
-                    ""path"": ""<Keyboard>/escape"",
+                    ""path"": ""<Keyboard>/backspace"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
@@ -1021,10 +1083,12 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
+        m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
         // QTE
         m_QTE = asset.FindActionMap("QTE", throwIfNotFound: true);
-        m_QTE_ConfirmHit = m_QTE.FindAction("Confirm / Hit", throwIfNotFound: true);
+        m_QTE_ConfirmHit = m_QTE.FindAction("ConfirmHit", throwIfNotFound: true);
         m_QTE_Directional = m_QTE.FindAction("Directional", throwIfNotFound: true);
+        m_QTE_CancelQTE = m_QTE.FindAction("CancelQTE", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1121,6 +1185,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Interact;
+    private readonly InputAction m_Player_Pause;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1140,6 +1205,10 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Interact".
         /// </summary>
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Pause".
+        /// </summary>
+        public InputAction @Pause => m_Wrapper.m_Player_Pause;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1172,6 +1241,9 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
+            @Pause.started += instance.OnPause;
+            @Pause.performed += instance.OnPause;
+            @Pause.canceled += instance.OnPause;
         }
 
         /// <summary>
@@ -1189,6 +1261,9 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
+            @Pause.started -= instance.OnPause;
+            @Pause.performed -= instance.OnPause;
+            @Pause.canceled -= instance.OnPause;
         }
 
         /// <summary>
@@ -1228,6 +1303,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
     private List<IQTEActions> m_QTEActionsCallbackInterfaces = new List<IQTEActions>();
     private readonly InputAction m_QTE_ConfirmHit;
     private readonly InputAction m_QTE_Directional;
+    private readonly InputAction m_QTE_CancelQTE;
     /// <summary>
     /// Provides access to input actions defined in input action map "QTE".
     /// </summary>
@@ -1247,6 +1323,10 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "QTE/Directional".
         /// </summary>
         public InputAction @Directional => m_Wrapper.m_QTE_Directional;
+        /// <summary>
+        /// Provides access to the underlying input action "QTE/CancelQTE".
+        /// </summary>
+        public InputAction @CancelQTE => m_Wrapper.m_QTE_CancelQTE;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1279,6 +1359,9 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
             @Directional.started += instance.OnDirectional;
             @Directional.performed += instance.OnDirectional;
             @Directional.canceled += instance.OnDirectional;
+            @CancelQTE.started += instance.OnCancelQTE;
+            @CancelQTE.performed += instance.OnCancelQTE;
+            @CancelQTE.canceled += instance.OnCancelQTE;
         }
 
         /// <summary>
@@ -1296,6 +1379,9 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
             @Directional.started -= instance.OnDirectional;
             @Directional.performed -= instance.OnDirectional;
             @Directional.canceled -= instance.OnDirectional;
+            @CancelQTE.started -= instance.OnCancelQTE;
+            @CancelQTE.performed -= instance.OnCancelQTE;
+            @CancelQTE.canceled -= instance.OnCancelQTE;
         }
 
         /// <summary>
@@ -1610,6 +1696,13 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInteract(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Pause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPause(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "QTE" which allows adding and removing callbacks.
@@ -1619,7 +1712,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
     public interface IQTEActions
     {
         /// <summary>
-        /// Method invoked when associated input action "Confirm / Hit" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "ConfirmHit" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
@@ -1632,6 +1725,13 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDirectional(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CancelQTE" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCancelQTE(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

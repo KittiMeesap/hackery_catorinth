@@ -1,33 +1,28 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public enum QTEType
-{
-    None,
-    Mash,
-    Timing,
-    Sequence
-}
+public enum QTEType { None, Mash, Timing, Sequence }
+public enum QTEResult { Success, Fail }
 
-public enum QTEResult
-{
-    Success,
-    Fail
-}
 public class QTEManager : MonoBehaviour
 {
     public static QTEManager Instance { get; private set; }
 
+    [Header("QTE UI References")]
     public QTE_MashUI mashUI;
     public QTE_TimingUI timingUI;
     public QTE_SequenceUI sequenceUI;
 
+    [Header("Mash QTE Settings")]
     public float mashFillPerHit = 0.08f;
     public float mashDrainPerSec = 0.6f;
     public float mashSuccessValue = 1.0f;
 
-    private bool isRunning = false;
+    public bool IsRunning { get; private set; }
     public Action<QTEResult> OnQTEFinished;
+
+    private InputAction cancelQTEAction;
 
     private void Awake()
     {
@@ -39,83 +34,94 @@ public class QTEManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        mashUI?.gameObject.SetActive(false);
-        timingUI?.gameObject.SetActive(false);
-        sequenceUI?.gameObject.SetActive(false);
+        if (GameInput.Instance != null)
+        {
+            cancelQTEAction = GameInput.Instance.CancelQTEAction;
+            if (cancelQTEAction != null)
+                cancelQTEAction.performed += OnCancelQTE;
+        }
     }
 
-    // MASH
-    public void StartMashQTE(string logicalKey)
+    private void OnDisable()
     {
-        if (isRunning) return;
-        isRunning = true;
+        if (cancelQTEAction != null)
+            cancelQTEAction.performed -= OnCancelQTE;
+    }
 
+    private void OnCancelQTE(InputAction.CallbackContext ctx)
+    {
+        if (!IsRunning) return;
+        CancelCurrentQTE();
+    }
+
+    private void Start()
+    {
+        if (mashUI != null) mashUI.gameObject.SetActive(false);
+        if (timingUI != null) timingUI.gameObject.SetActive(false);
+        if (sequenceUI != null) sequenceUI.gameObject.SetActive(false);
+    }
+
+    // MASH QTE
+    public void StartMashQTE(string logicalKey = "confirm")
+    {
+        if (IsRunning) return;
+
+        IsRunning = true;
         GameInput.Instance.SetModeQTE();
 
         mashUI.gameObject.SetActive(true);
-        mashUI.Begin(logicalKey,
+        mashUI.Begin(
+            logicalKey,
             mashFillPerHit,
             mashDrainPerSec,
             mashSuccessValue,
-            OnMashFinished);
+            OnQTEFinishedInternal
+        );
     }
 
-    private void OnMashFinished(QTEResult result)
+    // TIMING QTE
+    public void StartTimingQTE(float speed, float zoneSize, string logicalKey = "confirm")
     {
-        isRunning = false;
-        GameInput.Instance.SetModePlayer();
-        OnQTEFinished?.Invoke(result);
-    }
+        if (IsRunning) return;
 
-    // TIMING
-    public void StartTimingQTE(float speed, float zoneSize)
-    {
-        if (isRunning) return;
-        isRunning = true;
-
+        IsRunning = true;
         GameInput.Instance.SetModeQTE();
 
         timingUI.gameObject.SetActive(true);
-        timingUI.Begin("space", speed, zoneSize, OnTimingFinished);
+        timingUI.Begin(logicalKey, speed, zoneSize, OnQTEFinishedInternal);
     }
 
-    private void OnTimingFinished(QTEResult result)
-    {
-        isRunning = false;
-        GameInput.Instance.SetModePlayer();
-        OnQTEFinished?.Invoke(result);
-    }
-
-    // SEQUENCE
+    // SEQUENCE QTE
     public void StartSequenceQTE(string[] sequence, float timePerKey = 2f)
     {
-        if (isRunning) return;
-        isRunning = true;
+        if (IsRunning) return;
 
+        IsRunning = true;
         GameInput.Instance.SetModeQTE();
 
         sequenceUI.gameObject.SetActive(true);
-        sequenceUI.Begin(sequence, timePerKey, OnSequenceFinished);
+        sequenceUI.Begin(sequence, timePerKey, OnQTEFinishedInternal);
     }
 
-    private void OnSequenceFinished(QTEResult result)
+    private void OnQTEFinishedInternal(QTEResult result)
     {
-        isRunning = false;
+        IsRunning = false;
         GameInput.Instance.SetModePlayer();
         OnQTEFinished?.Invoke(result);
     }
 
+    // CANCEL ALL QTE
     public void CancelCurrentQTE()
     {
-        if (!isRunning) return;
+        if (!IsRunning) return;
 
-        mashUI?.ForceStop();
-        timingUI?.ForceStop();
-        sequenceUI?.ForceStop();
+        if (mashUI != null) mashUI.ForceStop();
+        if (timingUI != null) timingUI.ForceStop();
+        if (sequenceUI != null) sequenceUI.ForceStop();
 
-        isRunning = false;
+        IsRunning = false;
         GameInput.Instance.SetModePlayer();
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -27,23 +28,33 @@ public class QTE_SequenceUI : MonoBehaviour
 
     private bool active = false;
 
-    private InputAction arrowAction;
+    private InputAction directionalAction;
 
     private Coroutine punchRoutine;
     private Coroutine shakeRoutine;
-    private System.Action<QTEResult> finishCallback;
+    private Action<QTEResult> finishCallback;
 
-    private string DirectionFromVector(Vector2 v)
+    // =====================================================
+    //  PUBLIC API
+    // =====================================================
+    public void Begin(string[] sequence, float timePerKey, Action<QTEResult> onFinished)
     {
-        if (v.y > 0.5f) return "up";
-        if (v.y < -0.5f) return "down";
-        if (v.x > 0.5f) return "right";
-        if (v.x < -0.5f) return "left";
-        return null;
-    }
+        if (GameInput.Instance == null)
+        {
+            Debug.LogError("QTE_SequenceUI: GameInput.Instance is null!");
+            return;
+        }
 
-    public void Begin(string[] sequence, float timePerKey, System.Action<QTEResult> onFinished)
-    {
+        if (sequence == null || sequence.Length == 0)
+        {
+            Debug.LogError("QTE_SequenceUI: sequence is empty!");
+            return;
+        }
+
+        if (!gameObject.activeInHierarchy)
+            gameObject.SetActive(true);
+        enabled = true;
+
         this.sequence = sequence;
         this.timePerKey = timePerKey;
         this.finishCallback = onFinished;
@@ -51,32 +62,39 @@ public class QTE_SequenceUI : MonoBehaviour
         index = 0;
         timer = timePerKey;
 
-        bgFill.fillAmount = 1f;
+        if (bgFill != null)
+            bgFill.fillAmount = 1f;
 
         ShowCurrentKey();
 
+        // Switch input mode
         GameInput.Instance.SetModeQTE();
-        arrowAction = GameInput.Instance.QTEDirectionalAction;
-        if (arrowAction != null)
-            arrowAction.performed += OnArrow;
+
+        // Get directional action
+        directionalAction = GameInput.Instance.QTEDirectionalAction;
+        directionalAction.performed += OnArrow;
 
         active = true;
-        gameObject.SetActive(true);
     }
 
+    // =====================================================
+    //  UPDATE
+    // =====================================================
     private void Update()
     {
         if (!active) return;
 
         timer -= Time.unscaledDeltaTime;
-        bgFill.fillAmount = Mathf.Clamp01(timer / timePerKey);
+        if (bgFill != null)
+            bgFill.fillAmount = Mathf.Clamp01(timer / timePerKey);
 
         if (timer <= 0f)
-        {
             Finish(QTEResult.Fail);
-        }
     }
 
+    // =====================================================
+    //  INPUT CALLBACK
+    // =====================================================
     private void OnArrow(InputAction.CallbackContext ctx)
     {
         if (!active) return;
@@ -89,8 +107,10 @@ public class QTE_SequenceUI : MonoBehaviour
 
         if (pressed == expected)
         {
+            // Correct
             if (punchRoutine != null) StopCoroutine(punchRoutine);
-            punchRoutine = StartCoroutine(StepPunch());
+            if (root != null)
+                punchRoutine = StartCoroutine(StepPunch());
 
             index++;
 
@@ -101,38 +121,58 @@ public class QTE_SequenceUI : MonoBehaviour
             else
             {
                 timer = timePerKey;
-                bgFill.fillAmount = 1f;
+                if (bgFill != null) bgFill.fillAmount = 1f;
                 ShowCurrentKey();
             }
         }
         else
         {
+            // Wrong -> shake + random new arrow
             if (shakeRoutine != null) StopCoroutine(shakeRoutine);
-            shakeRoutine = StartCoroutine(Shake());
+            if (root != null)
+                shakeRoutine = StartCoroutine(Shake());
 
             sequence[index] = RandomArrow();
             timer = timePerKey;
-            bgFill.fillAmount = 1f;
+            if (bgFill != null) bgFill.fillAmount = 1f;
 
             ShowCurrentKey();
         }
     }
 
+    private string DirectionFromVector(Vector2 v)
+    {
+        if (v.y > 0.5f) return "up";
+        if (v.y < -0.5f) return "down";
+        if (v.x > 0.5f) return "right";
+        if (v.x < -0.5f) return "left";
+        return null;
+    }
+
     private string RandomArrow()
     {
         string[] pool = { "left", "right", "up", "down" };
-        return pool[Random.Range(0, pool.Length)];
+        return pool[UnityEngine.Random.Range(0, pool.Length)];
     }
 
+    // =====================================================
+    //  VISUAL
+    // =====================================================
     private void ShowCurrentKey()
     {
+        if (sequence == null || sequence.Length == 0) return;
+
         string logical = sequence[index];
-
         var icon = KeyIconDatabase.GetIcon(logical);
-        keyIcon.enabled = icon != null;
-        keyIcon.sprite = icon;
 
-        textLabel.text = "PRESS";
+        if (keyIcon != null)
+        {
+            keyIcon.enabled = icon != null;
+            keyIcon.sprite = icon;
+        }
+
+        if (textLabel != null)
+            textLabel.text = "PRESS";
     }
 
     private IEnumerator StepPunch()
@@ -171,26 +211,26 @@ public class QTE_SequenceUI : MonoBehaviour
         while (t < failShakeDuration)
         {
             t += Time.unscaledDeltaTime;
-            root.anchoredPosition = basePos + Random.insideUnitCircle * failShakeMagnitude;
+            root.anchoredPosition =
+                basePos + UnityEngine.Random.insideUnitCircle * failShakeMagnitude;
             yield return null;
         }
 
         root.anchoredPosition = basePos;
     }
 
+    // =====================================================
+    //  FINISH / FORCE STOP
+    // =====================================================
     private void Finish(QTEResult result)
     {
         if (!active) return;
-
         active = false;
 
-        if (arrowAction != null)
-            arrowAction.performed -= OnArrow;
-
-        GameInput.Instance.SetModePlayer();
+        if (directionalAction != null)
+            directionalAction.performed -= OnArrow;
 
         gameObject.SetActive(false);
-
         finishCallback?.Invoke(result);
     }
 

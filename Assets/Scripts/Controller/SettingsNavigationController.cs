@@ -33,7 +33,7 @@ public class SettingsNavigationController : MonoBehaviour
     public TextMeshProUGUI sfxValueText;
 
     [Header("Volume Step")]
-    public float volumeStep = 0.05f;
+    public float volumeStep = 0.01f;
 
     [Header("Confirm Panel")]
     public GameObject confirmPanel;
@@ -55,6 +55,13 @@ public class SettingsNavigationController : MonoBehaviour
     private bool isDirty = false;
 
     private readonly string[] displayModeNames = { "Windowed", "Borderless", "Fullscreen" };
+
+    // HOLD LOGIC
+    private float holdTimer = 0f;
+    private int holdDirection = 0;
+
+    public float holdDelay = 0.25f;
+    public float repeatRate = 0.06f;
 
     private void OnEnable()
     {
@@ -91,7 +98,19 @@ public class SettingsNavigationController : MonoBehaviour
         sfxSlider.onValueChanged.RemoveAllListeners();
     }
 
-    // -----------------------------
+    private void Update()
+    {
+        if (holdDirection != 0)
+        {
+            holdTimer -= Time.unscaledDeltaTime;
+            if (holdTimer <= 0f)
+            {
+                AdjustCurrentRow(holdDirection);
+                holdTimer = repeatRate;
+            }
+        }
+    }
+
     private void LoadSettings()
     {
         resolutions = Screen.resolutions;
@@ -115,18 +134,28 @@ public class SettingsNavigationController : MonoBehaviour
         sfxSlider.value = data.sfxVolume;
     }
 
-    // -----------------------------
     private void OnNavigate(InputAction.CallbackContext ctx)
     {
         if (confirmPanel != null && confirmPanel.activeSelf) return;
 
         Vector2 nav = ctx.ReadValue<Vector2>();
 
+        // vertical navigation
         if (nav.y > 0.5f) MoveRow(-1);
         else if (nav.y < -0.5f) MoveRow(+1);
 
-        if (nav.x > 0.5f) AdjustCurrentRow(+1);
-        else if (nav.x < -0.5f) AdjustCurrentRow(-1);
+        // horizontal adjust
+        if (Mathf.Abs(nav.x) > 0.5f)
+        {
+            holdDirection = nav.x > 0 ? +1 : -1;
+            holdTimer = holdDelay;
+
+            AdjustCurrentRow(holdDirection);
+        }
+        else
+        {
+            holdDirection = 0;
+        }
     }
 
     private void OnSubmit(InputAction.CallbackContext ctx)
@@ -169,7 +198,6 @@ public class SettingsNavigationController : MonoBehaviour
         });
     }
 
-    // -----------------------------
     private void MoveRow(int delta)
     {
         currentRowIndex = Mathf.Clamp(currentRowIndex + delta, 0, rowImages.Length - 1);
@@ -195,14 +223,20 @@ public class SettingsNavigationController : MonoBehaviour
 
             case RowType.MasterVolume:
                 masterSlider.value = Mathf.Clamp01(masterSlider.value + dir * volumeStep);
+                isDirty = true;
+                RefreshVolumeTexts();
                 break;
 
             case RowType.MusicVolume:
                 musicSlider.value = Mathf.Clamp01(musicSlider.value + dir * volumeStep);
+                isDirty = true;
+                RefreshVolumeTexts();
                 break;
 
             case RowType.SfxVolume:
                 sfxSlider.value = Mathf.Clamp01(sfxSlider.value + dir * volumeStep);
+                isDirty = true;
+                RefreshVolumeTexts();
                 break;
         }
     }
@@ -221,7 +255,6 @@ public class SettingsNavigationController : MonoBehaviour
         scrollRect.verticalNormalizedPosition = Mathf.Clamp01(t);
     }
 
-    // -----------------------------
     private void RefreshDisplayTexts()
     {
         displayModeValueText.text = displayModeNames[displayModeIndex];
@@ -251,7 +284,6 @@ public class SettingsNavigationController : MonoBehaviour
         UpdateScrollPosition();
     }
 
-    // -----------------------------
     private void SaveSettings()
     {
         data.displayMode = displayModeIndex;
@@ -281,6 +313,14 @@ public class SettingsNavigationController : MonoBehaviour
     {
         gameObject.SetActive(false);
 
+        var pause = FindFirstObjectByType<PauseMenu>();
+        if (pause != null)
+        {
+            pause.pausePanel.SetActive(true);
+            EventSystem.current.SetSelectedGameObject(pause.firstSelectedPause);
+            return;
+        }
+
         var main = FindFirstObjectByType<MainMenu>();
         if (main != null)
         {
@@ -289,4 +329,5 @@ public class SettingsNavigationController : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(main.firstSelectedMain);
         }
     }
+
 }

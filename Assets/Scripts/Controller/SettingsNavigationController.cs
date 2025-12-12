@@ -313,6 +313,14 @@ public class SettingsNavigationController : MonoBehaviour
     {
         gameObject.SetActive(false);
 
+        var pause = FindFirstObjectByType<PauseMenu>();
+        if (pause != null)
+        {
+            pause.pausePanel.SetActive(true);
+            EventSystem.current.SetSelectedGameObject(pause.firstSelectedPause);
+            return;
+        }
+
         var main = FindFirstObjectByType<MainMenu>();
         if (main != null)
         {
@@ -321,4 +329,5 @@ public class SettingsNavigationController : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(main.firstSelectedMain);
         }
     }
+
 }

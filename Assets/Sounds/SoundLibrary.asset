@@ -13,5 +13,33 @@ MonoBehaviour:
   m_Name: SoundLibrary
   m_EditorClassIdentifier: Assembly-CSharp::SoundLibrary
   sounds:
-  - key: 
+  - key: SFX_UI_Move
+    clip: {fileID: 8300000, guid: b525c5d9da0857740a411a7af0f514ea, type: 3}
+  - key: SFX_UI_Submit
+    clip: {fileID: 8300000, guid: 9801dc0cefc0d15438a3aae1907023a8, type: 3}
+  - key: SFX_PickBowl
+    clip: {fileID: 8300000, guid: 9801dc0cefc0d15438a3aae1907023a8, type: 3}
+  - key: SFX_PlaceBowl
+    clip: {fileID: 8300000, guid: 9801dc0cefc0d15438a3aae1907023a8, type: 3}
+  - key: SFX_Pantry_Item_Pick
+    clip: {fileID: 8300000, guid: e8c1bbfd5bc9bce44aeb67cc81583ca6, type: 3}
+  - key: SFX_Pantry_Item_Place
+    clip: {fileID: 8300000, guid: 57e6f2444c7f60d4db7167b890d1515f, type: 3}
+  - key: SFX_Mixer_Loop
+    clip: {fileID: 8300000, guid: 39e01149acab0294fbd4da9788fca138, type: 3}
+  - key: SFX_Mixer_Mash
+    clip: {fileID: 8300000, guid: 57e6f2444c7f60d4db7167b890d1515f, type: 3}
+  - key: SFX_Mixer_Success
+    clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
+  - key: SFX_Oven_Success
+    clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
+  - key: SFX_Oven_Loop
+    clip: {fileID: 8300000, guid: 92ff7def751cb6f44af30fd321d13f64, type: 3}
+  - key: SFX_Packing_Loop
+    clip: {fileID: 0}
+  - key: SFX_Packing_Success
+    clip: {fileID: 0}
+  - key: SFX_Player_Footstep
+    clip: {fileID: 8300000, guid: 731b754dd4c89f349b4795bd659734ac, type: 3}
+  - key: SFX_Player_Sleep
     clip: {fileID: 0}

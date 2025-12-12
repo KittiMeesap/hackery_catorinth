@@ -20,6 +20,11 @@ public class PantryUI : MonoBehaviour
     [Header("Selected Icons (max 4)")]
     public Image[] selectedSlots;
 
+    // ?? SFX (ADD / REMOVE ONLY)
+    [Header("SFX Keys")]
+    public string sfxPickItem = "SFX_Pantry_Item_Pick";
+    public string sfxPlaceItem = "SFX_Pantry_Item_Place";
+
     private List<PantryButtonController> buttonControllers = new();
     private List<IngredientItemSO> pantryIngredients = new();
     private List<IngredientItemSO> selectedIngredients = new();
@@ -141,11 +146,13 @@ public class PantryUI : MonoBehaviour
 
     private void MoveUp() => FocusNearestUnlocked(currentIndex - columns);
     private void MoveDown() => FocusNearestUnlocked(currentIndex + columns);
+
     private void MoveLeft()
     {
         if (currentIndex % columns == 0) return;
         FocusNearestUnlocked(currentIndex - 1);
     }
+
     private void MoveRight()
     {
         if (currentIndex % columns == columns - 1) return;
@@ -218,6 +225,9 @@ public class PantryUI : MonoBehaviour
         Close();
     }
 
+    // =========================================================
+    // ?? PICK / PLACE SOUND ONLY HERE
+    // =========================================================
     private void ToggleIngredient(IngredientItemSO item)
     {
         if (currentPlayer.bowl == null)
@@ -225,7 +235,6 @@ public class PantryUI : MonoBehaviour
 
         var bowl = currentPlayer.bowl;
 
-        // REMOVE
         if (selectedIngredients.Contains(item))
         {
             selectedIngredients.Remove(item);
@@ -234,9 +243,11 @@ public class PantryUI : MonoBehaviour
             if (bowl.contents.Count == 0)
                 bowl.state = ContainerData.ContainerState.Empty;
 
-            currentPlayer.OnInventoryChanged?.Invoke();
+            // ?? PLACE
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayUI(sfxPlaceItem);
         }
-        else // ADD
+        else
         {
             if (bowl.contents.Count >= 4) return;
 
@@ -247,8 +258,12 @@ public class PantryUI : MonoBehaviour
             selectedIngredients.Add(item);
             bowl.contents.Add(item);
 
-            currentPlayer.OnInventoryChanged?.Invoke();
+            // ?? PICK
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayUI(sfxPickItem);
         }
+
+        currentPlayer.OnInventoryChanged?.Invoke();
 
         RefreshSelectedIcons();
         RefreshFiltering();

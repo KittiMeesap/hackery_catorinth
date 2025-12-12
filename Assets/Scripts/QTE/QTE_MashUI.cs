@@ -19,6 +19,10 @@ public class QTE_MashUI : MonoBehaviour
     public float hitPunchScale = 1.15f;
     public float hitPunchDuration = 0.08f;
 
+    [Header("SFX")]
+    public string sfxMashHit = "SFX_Mixer_Mash";
+    public string sfxSuccess = "SFX_Mixer_Success";
+
     private float currentFill;
     private float fillPerHit;
     private float drainPerSec;
@@ -33,7 +37,6 @@ public class QTE_MashUI : MonoBehaviour
     private Action<QTEResult> finishCallback;
 
     private string currentLogicalKey = "confirm";
-
     private Vector3 initialScale = Vector3.one;
 
     private void Awake()
@@ -54,9 +57,6 @@ public class QTE_MashUI : MonoBehaviour
         hasStarted = false;
     }
 
-    // ==============================
-    // PUBLIC API
-    // ==============================
     public void Begin(
         string logicalKey,
         float perHit,
@@ -122,6 +122,7 @@ public class QTE_MashUI : MonoBehaviour
         {
             currentFill -= drainPerSec * Time.unscaledDeltaTime;
             currentFill = Mathf.Clamp01(currentFill);
+
             if (barFill != null)
                 barFill.fillAmount = currentFill;
         }
@@ -136,6 +137,9 @@ public class QTE_MashUI : MonoBehaviour
 
         hasStarted = true;
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayUI(sfxMashHit);
+
         string logical = KeyIconDatabase.GetLogicalFromContext(ctx);
         if (!string.IsNullOrEmpty(logical))
         {
@@ -144,6 +148,7 @@ public class QTE_MashUI : MonoBehaviour
         }
 
         currentFill = Mathf.Clamp01(currentFill + fillPerHit);
+
         if (barFill != null)
             barFill.fillAmount = currentFill;
 
@@ -208,6 +213,9 @@ public class QTE_MashUI : MonoBehaviour
 
         active = false;
         UnbindInput();
+
+        if (result == QTEResult.Success && AudioManager.Instance != null)
+            AudioManager.Instance.PlayUI(sfxSuccess);
 
         if (root != null)
             root.localScale = initialScale;

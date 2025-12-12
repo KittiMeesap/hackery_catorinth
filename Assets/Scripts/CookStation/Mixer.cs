@@ -5,39 +5,31 @@ public class Mixer : InteractStation
     [Header("Settings")]
     public string mashKey = "Q";
 
+    [Header("SFX Keys")]
+    public string sfxMixLoop = "SFX_Mixer_Loop";
+
     private bool isMixing = false;
     private PlayerInventory currentPlayer;
     private PlayerController currentController;
+
+    private AudioSource loopSource;
+
+    private void Awake()
+    {
+        loopSource = gameObject.AddComponent<AudioSource>();
+        loopSource.playOnAwake = false;
+        loopSource.loop = true;
+        loopSource.spatialBlend = 1f;
+    }
 
     public override void Interact(PlayerInventory player)
     {
         if (isMixing) return;
 
-        if (!player.HasBowl())
-        {
-            Debug.Log("Mixer: Need a bowl.");
-            return;
-        }
-
-        var bowl = player.bowl;
-
-        if (bowl.contents.Count == 0)
-        {
-            Debug.Log("Mixer: Bowl is empty.");
-            return;
-        }
-
-        if (bowl.IsAlreadyMixed())
-        {
-            Debug.Log("Mixer: Already mixed, cannot mix again.");
-            return;
-        }
-
-        if (!RecipeManager.Instance.CanMix(bowl.contents))
-        {
-            Debug.Log("Mixer: Invalid recipe.");
-            return;
-        }
+        if (!player.HasBowl()) return;
+        if (player.bowl.contents.Count == 0) return;
+        if (player.bowl.IsAlreadyMixed()) return;
+        if (!RecipeManager.Instance.CanMix(player.bowl.contents)) return;
 
         LockInteraction();
         isMixing = true;
@@ -48,6 +40,8 @@ public class Mixer : InteractStation
         currentController.DisableMovement();
         currentController.SetCooking(true);
 
+        StartMixerLoop();
+
         QTEManager.Instance.OnQTEFinished += OnQTEFinished;
         QTEManager.Instance.StartMashQTE(mashKey);
     }
@@ -56,24 +50,40 @@ public class Mixer : InteractStation
     {
         QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
 
+        StopMixerLoop();
+
         currentController.EnableMovement();
         currentController.SetCooking(false);
 
         if (result == QTEResult.Success)
         {
-            var bowl = currentPlayer.bowl;
-            if (bowl.TryMix())
-            {
+            if (currentPlayer.bowl.TryMix())
                 currentPlayer.OnInventoryChanged?.Invoke();
-                Debug.Log("Mixer: Mix success");
-            }
-        }
-        else
-        {
-            Debug.Log("Mixer: QTE failed");
         }
 
         isMixing = false;
         UnlockInteraction();
+    }
+
+    // =========================
+    // ?? MIXER LOOP SOUND
+    // =========================
+
+    private void StartMixerLoop()
+    {
+        if (AudioManager.Instance == null) return;
+
+        var clip = AudioManager.Instance.GetClipByKey(sfxMixLoop);
+        if (clip == null) return;
+
+        loopSource.clip = clip;
+        loopSource.volume = AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
+        loopSource.Play();
+    }
+
+    private void StopMixerLoop()
+    {
+        if (loopSource.isPlaying)
+            loopSource.Stop();
     }
 }

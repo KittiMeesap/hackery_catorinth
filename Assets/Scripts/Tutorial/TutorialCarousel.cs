@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class TutorialCarousel : MonoBehaviour
 {
@@ -15,14 +16,14 @@ public class TutorialCarousel : MonoBehaviour
     public float spacing = 700f;
     public float moveSpeed = 12f;
 
-    // ================================
-    // ?? PAGE DOTS SUPPORT
-    // ================================
     [Header("Page Dots")]
-    public Image[] pageDots;          
+    public Image[] pageDots;
     public Color activeColor = Color.white;
     public Color inactiveColor = new Color(1, 1, 1, 0.3f);
-    // ================================
+
+    [Header("SFX Keys")]
+    public string sfxMove = "SFX_UI_Move";
+    public string sfxSubmit = "SFX_UI_Submit";
 
     private int currentIndex = 0;
     private Vector2 targetPos;
@@ -43,10 +44,8 @@ public class TutorialCarousel : MonoBehaviour
     {
         GameInput.Instance.SetModeUI();
 
-        var ui = GameInput.Instance.PlayerInputComponent.actions.FindActionMap("UI");
-
-        navigate = ui.FindAction("Navigate");
-        submit = ui.FindAction("Submit");
+        navigate = GameInput.Instance.NavigateAction;
+        submit = GameInput.Instance.SubmitAction;
 
         navigate.performed += OnNavigate;
         submit.performed += OnSubmit;
@@ -54,8 +53,6 @@ public class TutorialCarousel : MonoBehaviour
         PositionPanels();
 
         SnapToIndex(0, true);
-
-        
         UpdatePageDots(0);
 
         Invoke(nameof(ActivateInput), 0.1f);
@@ -80,8 +77,6 @@ public class TutorialCarousel : MonoBehaviour
             Time.deltaTime * moveSpeed
         );
     }
-
-    // ------------------------------------------------------------
 
     private void PositionPanels()
     {
@@ -108,6 +103,8 @@ public class TutorialCarousel : MonoBehaviour
         if (currentIndex < 0) currentIndex = panels.Length - 1;
         if (currentIndex >= panels.Length) currentIndex = 0;
 
+        AudioManager.Instance.PlaySFX(sfxMove);
+
         SnapToIndex(currentIndex);
     }
 
@@ -119,7 +116,6 @@ public class TutorialCarousel : MonoBehaviour
         if (instant)
             content.anchoredPosition = targetPos;
 
-        
         UpdatePageDots(index);
     }
 
@@ -127,12 +123,16 @@ public class TutorialCarousel : MonoBehaviour
     {
         if (!inputReady) return;
 
-        Debug.Log("Selected Tutorial Page = " + currentIndex);
+        AudioManager.Instance.PlaySFX(sfxSubmit);
+
+        LoadGameScene();
     }
 
-    // ================================
-    // ?? PAGE DOT UPDATE FUNCTION
-    // ================================
+    private void LoadGameScene()
+    {
+        SceneManager.LoadScene("NewGame");
+    }
+
     private void UpdatePageDots(int index)
     {
         if (pageDots == null || pageDots.Length == 0) return;

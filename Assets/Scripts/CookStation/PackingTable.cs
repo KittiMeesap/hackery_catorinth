@@ -6,8 +6,22 @@ public class PackingTable : InteractStation
     public int arrowCount = 3;
     public float timePerKey = 1.2f;
 
+    [Header("SFX Keys")]
+    public string sfxPackingLoop = "SFX_Packing_Loop";
+    public string sfxPackingSuccess = "SFX_Packing_Success";
+
     private PlayerInventory currentPlayer;
     private PlayerController currentController;
+
+    private AudioSource loopSource;
+
+    private void Awake()
+    {
+        loopSource = gameObject.AddComponent<AudioSource>();
+        loopSource.playOnAwake = false;
+        loopSource.loop = true;
+        loopSource.spatialBlend = 1f;
+    }
 
     public override void Interact(PlayerInventory player)
     {
@@ -34,6 +48,7 @@ public class PackingTable : InteractStation
         currentController.DisableMovement();
         currentController.SetCooking(true);
 
+        StartPackingLoop();
         StartSequenceQTE();
     }
 
@@ -49,6 +64,8 @@ public class PackingTable : InteractStation
     {
         QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
 
+        StopPackingLoop();
+
         currentController.SetCooking(false);
         currentController.EnableMovement();
         UnlockInteraction();
@@ -61,16 +78,17 @@ public class PackingTable : InteractStation
 
         Debug.Log("Packing success!");
 
-        // Convert to serve box; supports sliced variant automatically
+        // Convert to serve box (supports sliced variant)
         currentPlayer.ConvertToServeBox();
 
-        // Return empty bowl to the counter
+        // Return empty bowl to counter
         ContainerData empty = new ContainerData();
         empty.state = ContainerData.ContainerState.Empty;
-
         currentPlayer.ReturnBowlToLastCounter(empty);
 
         currentPlayer.OnInventoryChanged?.Invoke();
+
+        PlaySuccessSFX();
     }
 
     private string[] GenerateRandomArrowSequence(int count)
@@ -82,5 +100,36 @@ public class PackingTable : InteractStation
             seq[i] = pool[Random.Range(0, pool.Length)];
 
         return seq;
+    }
+
+   
+    private void StartPackingLoop()
+    {
+        if (AudioManager.Instance == null) return;
+
+        var clip = AudioManager.Instance.GetClipByKey(sfxPackingLoop);
+        if (clip == null) return;
+
+        loopSource.clip = clip;
+        loopSource.volume = AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
+        loopSource.Play();
+    }
+
+    private void StopPackingLoop()
+    {
+        if (loopSource.isPlaying)
+            loopSource.Stop();
+    }
+
+    
+    private void PlaySuccessSFX()
+    {
+        if (AudioManager.Instance == null) return;
+
+        AudioManager.Instance.PlaySFXAt(
+            sfxPackingSuccess,
+            transform.position,
+            true
+        );
     }
 }

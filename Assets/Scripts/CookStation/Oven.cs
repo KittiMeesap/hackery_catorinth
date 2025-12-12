@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Oven : InteractStation
 {
+    [Header("Animator")]
     public Animator animator;
 
     private static readonly int Open = Animator.StringToHash("Open");
@@ -12,8 +13,22 @@ public class Oven : InteractStation
     public int arrowCount = 4;
     public float timePerKey = 1.2f;
 
+    [Header("SFX Keys")]
+    public string sfxOvenLoop = "SFX_Oven_Loop";
+    public string sfxOvenSuccess = "SFX_Oven_Success";
+
     private PlayerInventory currentPlayer;
     private PlayerController currentController;
+
+    private AudioSource loopSource;
+
+    private void Awake()
+    {
+        loopSource = gameObject.AddComponent<AudioSource>();
+        loopSource.playOnAwake = false;
+        loopSource.loop = true;
+        loopSource.spatialBlend = 1f;
+    }
 
     protected override void OnTriggerEnter2D(Collider2D other)
     {
@@ -34,25 +49,11 @@ public class Oven : InteractStation
         currentPlayer = player;
         currentController = player.GetComponent<PlayerController>();
 
-        if (!player.HasBowl())
-        {
-            Debug.Log("Oven: Need bowl.");
-            return;
-        }
+        if (!player.HasBowl()) return;
 
         var bowl = player.bowl;
-
-        if (bowl.matchedRecipe == null)
-        {
-            Debug.Log("Oven: Must mix first.");
-            return;
-        }
-
-        if (!bowl.CanBake())
-        {
-            Debug.Log("Oven: Cannot bake at this state.");
-            return;
-        }
+        if (bowl.matchedRecipe == null) return;
+        if (!bowl.CanBake()) return;
 
         animator.SetBool(IsBaking, true);
 
@@ -60,6 +61,7 @@ public class Oven : InteractStation
         currentController.DisableMovement();
         LockInteraction();
 
+        StartOvenLoop();
         StartQTE();
     }
 
@@ -75,13 +77,17 @@ public class Oven : InteractStation
     {
         QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
 
-        currentController.SetCooking(false);
+        StopOvenLoop();
+
         animator.SetBool(IsBaking, false);
+        currentController.SetCooking(false);
 
         if (result == QTEResult.Success)
         {
             currentPlayer.bowl.DoBake();
             currentPlayer.OnInventoryChanged?.Invoke();
+
+            PlaySuccessSFX();
         }
 
         currentController.EnableMovement();
@@ -97,5 +103,40 @@ public class Oven : InteractStation
             seq[i] = pool[Random.Range(0, pool.Length)];
 
         return seq;
+    }
+
+    // =========================
+    //  LOOP SOUND
+    // =========================
+    private void StartOvenLoop()
+    {
+        if (AudioManager.Instance == null) return;
+
+        var clip = AudioManager.Instance.GetClipByKey(sfxOvenLoop);
+        if (clip == null) return;
+
+        loopSource.clip = clip;
+        loopSource.volume = AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
+        loopSource.Play();
+    }
+
+    private void StopOvenLoop()
+    {
+        if (loopSource.isPlaying)
+            loopSource.Stop();
+    }
+
+    // =========================
+    // ? SUCCESS ONE-SHOT
+    // =========================
+    private void PlaySuccessSFX()
+    {
+        if (AudioManager.Instance == null) return;
+
+        AudioManager.Instance.PlaySFXAt(
+            sfxOvenSuccess,
+            transform.position,
+            true
+        );
     }
 }

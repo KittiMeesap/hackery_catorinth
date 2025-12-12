@@ -2,13 +2,6 @@ using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
-    [Header("SFX Keys")]
-    public string sfxPickCup = "SFX_PickCup";
-    public string sfxPickBowl = "SFX_PickBowl";
-    public string sfxTakeBowl = "SFX_TakeBowl";
-    public string sfxPlaceBowl = "SFX_PlaceBowl";
-    public string sfxConvertServeBox = "SFX_ConvertServeBox";
-
     public ContainerData bowl;
     public ServeBoxItem serveBox;
 
@@ -23,26 +16,25 @@ public class PlayerInventory : MonoBehaviour
         lastCounterPlaced = null;
     }
 
+    // ===== CHECKERS =====
     public bool HasBowl() => bowl != null;
     public bool HasServeBox() => serveBox != null;
 
+    // ===== GIVE BOWL TO PLAYER =====
     public void GiveBowl(ContainerData data)
     {
         bowl = data;
         serveBox = null;
 
-        AudioManager.Instance.PlaySFX(sfxPickBowl);
-
         OnInventoryChanged?.Invoke();
         GetComponent<PlayerController>()?.RefreshCarryAnimation();
     }
 
+    // ===== TAKE BOWL FROM PLAYER =====
     public ContainerData TakeBowl()
     {
         ContainerData temp = bowl;
         bowl = null;
-
-        AudioManager.Instance.PlaySFX(sfxTakeBowl);
 
         OnInventoryChanged?.Invoke();
         GetComponent<PlayerController>()?.RefreshCarryAnimation();
@@ -50,14 +42,19 @@ public class PlayerInventory : MonoBehaviour
         return temp;
     }
 
+    // ===== RETURN BOWL TO COUNTER =====
     public void ReturnBowlToLastCounter(ContainerData bowlData)
     {
         Counter target = null;
 
         if (lastCounterPlaced != null && lastCounterPlaced.bowlOnCounter == null)
+        {
             target = lastCounterPlaced;
+        }
         else
+        {
             target = CounterUtility.FindBestCounterForReturn(transform.position);
+        }
 
         if (target == null)
         {
@@ -65,22 +62,20 @@ public class PlayerInventory : MonoBehaviour
             return;
         }
 
-        AudioManager.Instance.PlaySFX(sfxPlaceBowl);
-
         target.ReceiveReturnedBowl(bowlData);
     }
 
+    // ===== PICK EMPTY CUP =====
     public void PickCup()
     {
         bowl = new ContainerData();
         serveBox = null;
 
-        AudioManager.Instance.PlaySFX(sfxPickCup);
-
         GetComponent<PlayerController>()?.RefreshCarryAnimation();
         OnInventoryChanged?.Invoke();
     }
 
+    // ===== CONVERT BOWL TO SERVE BOX (WHOLE OR SLICED) =====
     public void ConvertToServeBox()
     {
         if (bowl == null || bowl.matchedRecipe == null)
@@ -91,7 +86,15 @@ public class PlayerInventory : MonoBehaviour
         if (bowl.state == ContainerData.ContainerState.Sliced)
         {
             if (bowl.matchedRecipe.slicedVariant != null)
+            {
                 finalRecipe = bowl.matchedRecipe.slicedVariant;
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"ConvertToServeBox: Container is Sliced but recipe '{bowl.matchedRecipe.name}' has no slicedVariant assigned. Using base recipe."
+                );
+            }
         }
 
         serveBox = new ServeBoxItem
@@ -101,10 +104,10 @@ public class PlayerInventory : MonoBehaviour
 
         bowl = null;
 
-        AudioManager.Instance.PlaySFX(sfxConvertServeBox);
-
         OnInventoryChanged?.Invoke();
+
         var pc = GetComponent<PlayerController>();
-        if (pc) pc.RefreshCarryAnimation();
+        if (pc)
+            pc.RefreshCarryAnimation();
     }
 }

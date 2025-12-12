@@ -2368,7 +2368,7 @@ Transform:
   m_GameObject: {fileID: 302549713}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.29, z: 0}
+  m_LocalPosition: {x: 0, y: 0.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4895,7 +4895,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.22
+      value: -1.01
       objectReference: {fileID: 0}
     - target: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5702,7 +5702,7 @@ Transform:
   m_GameObject: {fileID: 636508100}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.88, y: -0.22000003, z: -10}
+  m_LocalPosition: {x: 4.88, y: -0.00999999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9396,6 +9396,8 @@ MonoBehaviour:
   animator: {fileID: 1012310647}
   arrowCount: 4
   timePerKey: 1.2
+  sfxOvenLoop: SFX_Oven_Loop
+  sfxOvenSuccess: SFX_Oven_Success
 --- !u!1 &1026130872
 GameObject:
   m_ObjectHideFlags: 0
@@ -10102,6 +10104,8 @@ MonoBehaviour:
   gridLayout: {fileID: 1564142033}
   scrollRect: {fileID: 1624482853}
   selectedSlots: []
+  sfxPickItem: SFX_Pantry_Item_Pick
+  sfxPlaceItem: SFX_Pantry_Item_Place
 --- !u!225 &1130539316
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -10112,7 +10116,7 @@ CanvasGroup:
   m_Enabled: 1
   m_Alpha: 1
   m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!1 &1130777920
 GameObject:
@@ -10471,6 +10475,7 @@ MonoBehaviour:
   promptUI: {fileID: 1458573234}
   highlightObj: {fileID: 778139316}
   mashKey: Q
+  sfxMixLoop: SFX_Mixer_Loop
 --- !u!1 &1152015056
 GameObject:
   m_ObjectHideFlags: 0
@@ -13391,7 +13396,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &1502717955
 SpriteRenderer:
   serializedVersion: 2
@@ -13460,7 +13465,7 @@ Transform:
   m_GameObject: {fileID: 1502717954}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.52, y: -1.2318699, z: 0}
+  m_LocalPosition: {x: -5.3, y: -1.2318699, z: 0}
   m_LocalScale: {x: 1.7518499, y: 1.7518499, z: 1.1679}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14425,6 +14430,8 @@ MonoBehaviour:
   fadeInDuration: 0.15
   hitPunchScale: 1.15
   hitPunchDuration: 0.08
+  sfxMashHit: SFX_Mixer_Mash
+  sfxSuccess: SFX_Mixer_Success
 --- !u!225 &1622498018
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -15298,6 +15305,8 @@ MonoBehaviour:
   highlightObj: {fileID: 429110452}
   arrowCount: 3
   timePerKey: 1.2
+  sfxPackingLoop: SFX_Packing_Loop
+  sfxPackingSuccess: SFX_Packing_Success
 --- !u!1 &1667440196
 GameObject:
   m_ObjectHideFlags: 0

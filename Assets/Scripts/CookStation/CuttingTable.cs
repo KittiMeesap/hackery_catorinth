@@ -66,7 +66,7 @@ public class CuttingTable : InteractStation
         currentController.SetCooking(true);
 
         QTEManager.Instance.OnQTEFinished += OnQTEFinished;
-        QTEManager.Instance.StartTimingQTE(speed, zoneSize);
+        QTEManager.Instance.StartTimingQTE(zoneSize, speed,"");
     }
 
     private void OnQTEFinished(QTEResult result)

@@ -1,8 +1,8 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using System;
-using System.Collections;
 
 public class QTE_TimingUI : MonoBehaviour
 {
@@ -22,34 +22,54 @@ public class QTE_TimingUI : MonoBehaviour
 
     private bool active = false;
 
-    private InputAction hitAction;
+    private InputAction confirmHitAction;
 
     private Action<QTEResult> finishCallback;
+    private string currentLogicalKey = "confirm";
 
+    // =====================================================
+    //  PUBLIC API
+    // =====================================================
     public void Begin(string logicalKey, float speed, float zoneSize, Action<QTEResult> callback)
     {
+        if (GameInput.Instance == null)
+        {
+            Debug.LogError("QTE_TimingUI: GameInput.Instance is null!");
+            return;
+        }
+
+        // ensure active
+        if (!gameObject.activeInHierarchy)
+            gameObject.SetActive(true);
+
+        enabled = true;
+
         finishCallback = callback;
         rotationSpeed = speed;
+        currentLogicalKey = string.IsNullOrEmpty(logicalKey) ? "confirm" : logicalKey;
 
-        pointerAngle = 0;
+        pointerAngle = 0f;
 
+        // random success zone
         zoneStart = UnityEngine.Random.Range(0f, 360f - zoneSize);
         zoneEnd = zoneStart + zoneSize;
 
         SetZoneVisual(zoneStart, zoneEnd);
+        UpdateKeyIconSprite();
 
-        keyIcon.sprite = KeyIconDatabase.GetIcon(logicalKey);
-        keyIcon.enabled = keyIcon.sprite != null;
-
+        // switch input map
         GameInput.Instance.SetModeQTE();
-        hitAction = GameInput.Instance.QTEConfirmHitAction;
-        if (hitAction != null)
-            hitAction.performed += OnHit;
+
+        // get action
+        confirmHitAction = GameInput.Instance.QTEConfirmHitAction;
+        confirmHitAction.performed += OnHit;
 
         active = true;
-        gameObject.SetActive(true);
     }
 
+    // =====================================================
+    //  UPDATE
+    // =====================================================
     private void Update()
     {
         if (!active) return;
@@ -57,22 +77,53 @@ public class QTE_TimingUI : MonoBehaviour
         pointerAngle += rotationSpeed * Time.unscaledDeltaTime;
         pointerAngle %= 360f;
 
-        pointer.transform.eulerAngles = new Vector3(0, 0, -pointerAngle);
+        if (pointer != null)
+            pointer.transform.eulerAngles = new Vector3(0, 0, -pointerAngle);
     }
 
+    // =====================================================
+    //  INPUT CALLBACK
+    // =====================================================
     private void OnHit(InputAction.CallbackContext ctx)
     {
         if (!active) return;
 
+        // Dynamic key icon update
+        string logical = KeyIconDatabase.GetLogicalFromContext(ctx);
+        if (!string.IsNullOrEmpty(logical))
+        {
+            currentLogicalKey = logical;
+            UpdateKeyIconSprite();
+        }
+
         bool inside = pointerAngle >= zoneStart && pointerAngle <= zoneEnd;
 
-        StartCoroutine(Shake());
+        if (root != null)
+            StartCoroutine(Shake());
 
         Finish(inside ? QTEResult.Success : QTEResult.Fail);
     }
 
+    // =====================================================
+    //  VISUAL HELPERS
+    // =====================================================
+    private void UpdateKeyIconSprite()
+    {
+        if (keyIcon == null) return;
+
+        var icon = KeyIconDatabase.GetIcon(currentLogicalKey);
+        if (icon != null)
+        {
+            keyIcon.enabled = true;
+            keyIcon.sprite = icon;
+        }
+        else keyIcon.enabled = false;
+    }
+
     private void SetZoneVisual(float startDeg, float endDeg)
     {
+        if (successZone == null) return;
+
         float size = endDeg - startDeg;
         successZone.fillAmount = size / 360f;
         successZone.transform.eulerAngles = new Vector3(0, 0, -startDeg);
@@ -86,7 +137,6 @@ public class QTE_TimingUI : MonoBehaviour
         while (t < shakeDuration)
         {
             t += Time.unscaledDeltaTime;
-
             root.anchoredPosition =
                 basePos + UnityEngine.Random.insideUnitCircle * shakeMagnitude;
 
@@ -96,19 +146,16 @@ public class QTE_TimingUI : MonoBehaviour
         root.anchoredPosition = basePos;
     }
 
+    //  FINISH / FORCE STOP
     private void Finish(QTEResult result)
     {
         if (!active) return;
-
         active = false;
 
-        if (hitAction != null)
-            hitAction.performed -= OnHit;
-
-        GameInput.Instance.SetModePlayer();
+        if (confirmHitAction != null)
+            confirmHitAction.performed -= OnHit;
 
         gameObject.SetActive(false);
-
         finishCallback?.Invoke(result);
     }
 

@@ -41,7 +41,6 @@ public class GameInput : MonoBehaviour
     private void Start()
     {
         PlayerInputComponent.actions.Enable();
-
         SetModeUI();
     }
 
@@ -76,7 +75,6 @@ public class GameInput : MonoBehaviour
         ControlSchemeChanged?.Invoke();
     }
 
-    // ----- SWITCH MAP -----
     public void SetModePlayer() => PlayerInputComponent.SwitchCurrentActionMap("Player");
     public void SetModeUI() => PlayerInputComponent.SwitchCurrentActionMap("UI");
     public void SetModeQTE() => PlayerInputComponent.SwitchCurrentActionMap("QTE");

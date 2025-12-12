@@ -251,7 +251,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
             ""id"": ""c5819470-e8d5-4d80-a9ef-ed0990a0f359"",
             ""actions"": [
                 {
-                    ""name"": ""Confirm / Hit"",
+                    ""name"": ""ConfirmHit"",
                     ""type"": ""Button"",
                     ""id"": ""5c8cf25d-a635-4f01-858f-6d5cd5cb5a6f"",
                     ""expectedControlType"": """",
@@ -277,7 +277,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Confirm / Hit"",
+                    ""action"": ""ConfirmHit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -288,7 +288,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Confirm / Hit"",
+                    ""action"": ""ConfirmHit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -299,7 +299,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
-                    ""action"": ""Confirm / Hit"",
+                    ""action"": ""ConfirmHit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1023,7 +1023,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         // QTE
         m_QTE = asset.FindActionMap("QTE", throwIfNotFound: true);
-        m_QTE_ConfirmHit = m_QTE.FindAction("Confirm / Hit", throwIfNotFound: true);
+        m_QTE_ConfirmHit = m_QTE.FindAction("ConfirmHit", throwIfNotFound: true);
         m_QTE_Directional = m_QTE.FindAction("Directional", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
@@ -1619,7 +1619,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
     public interface IQTEActions
     {
         /// <summary>
-        /// Method invoked when associated input action "Confirm / Hit" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "ConfirmHit" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />

@@ -165,7 +165,7 @@
             "id": "c5819470-e8d5-4d80-a9ef-ed0990a0f359",
             "actions": [
                 {
-                    "name": "Confirm / Hit",
+                    "name": "ConfirmHit",
                     "type": "Button",
                     "id": "5c8cf25d-a635-4f01-858f-6d5cd5cb5a6f",
                     "expectedControlType": "",
@@ -191,7 +191,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Confirm / Hit",
+                    "action": "ConfirmHit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -202,7 +202,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Confirm / Hit",
+                    "action": "ConfirmHit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -213,7 +213,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Confirm / Hit",
+                    "action": "ConfirmHit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

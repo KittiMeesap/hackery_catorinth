@@ -130,7 +130,7 @@ public class MainMenu : MonoBehaviour
         isTransitioning = true;
 
         PlayClick();
-        StartCoroutine(FadeAndLoad("GameScene"));
+        StartCoroutine(FadeAndLoad("Tutorial 1"));
     }
 
     IEnumerator FadeAndLoad(string sceneName)

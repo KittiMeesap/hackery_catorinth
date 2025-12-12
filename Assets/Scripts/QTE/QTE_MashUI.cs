@@ -19,35 +19,59 @@ public class QTE_MashUI : MonoBehaviour
     public float hitPunchScale = 1.15f;
     public float hitPunchDuration = 0.08f;
 
-    private float currentFill = 0f;
+    private float currentFill;
     private float fillPerHit;
     private float drainPerSec;
     private float successTarget;
 
-    private bool active = false;
-    private bool hasStarted = false;
+    private bool active;
+    private bool hasStarted;
 
     private InputAction hitAction;
-
     private Coroutine fadeRoutine;
     private Coroutine punchRoutine;
     private Action<QTEResult> finishCallback;
 
     private string currentLogicalKey = "confirm";
 
-    //  PUBLIC API
-    public void Begin(string logicalKey, float perHit, float drain, float successTarget,
-                      Action<QTEResult> onFinished)
+    private Vector3 initialScale = Vector3.one;
+
+    private void Awake()
+    {
+        if (root != null)
+            initialScale = root.localScale;
+    }
+
+    private void OnDisable()
+    {
+        UnbindInput();
+        StopAllCoroutines();
+
+        if (root != null)
+            root.localScale = initialScale;
+
+        active = false;
+        hasStarted = false;
+    }
+
+    // ==============================
+    // PUBLIC API
+    // ==============================
+    public void Begin(
+        string logicalKey,
+        float perHit,
+        float drain,
+        float successTarget,
+        Action<QTEResult> onFinished)
     {
         if (GameInput.Instance == null)
         {
-            Debug.LogError("QTE_MashUI: GameInput is NULL");
+            Debug.LogError("QTE_MashUI: GameInput.Instance is null");
+            onFinished?.Invoke(QTEResult.Fail);
             return;
         }
 
-        if (!gameObject.activeInHierarchy)
-            gameObject.SetActive(true);
-
+        gameObject.SetActive(true);
         enabled = true;
 
         this.fillPerHit = perHit;
@@ -56,37 +80,40 @@ public class QTE_MashUI : MonoBehaviour
         this.finishCallback = onFinished;
 
         currentFill = 0f;
-        if (barFill != null)
-            barFill.fillAmount = 0f;
-
         hasStarted = false;
         active = true;
 
+        if (barFill != null)
+            barFill.fillAmount = 0f;
+
         if (root != null)
-            root.localScale = Vector3.one;
+            root.localScale = initialScale;
 
         currentLogicalKey = string.IsNullOrEmpty(logicalKey) ? "confirm" : logicalKey;
-        UpdateKeyIconSprite();
+        UpdateKeyIcon();
 
         if (labelText != null)
             labelText.text = "MASH!";
 
-        // Fade-in
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
             fadeRoutine = StartCoroutine(FadeCanvas(0f, 1f, fadeInDuration));
         }
 
-        // ENABLE QTE ACTION MAP
         GameInput.Instance.SetModeQTE();
 
-        // GET INPUT ACTION
         hitAction = GameInput.Instance.QTEConfirmHitAction;
+        if (hitAction == null)
+        {
+            Debug.LogError("QTE_MashUI: QTEConfirmHitAction is null");
+            Finish(QTEResult.Fail);
+            return;
+        }
+
         hitAction.performed += OnHit;
     }
 
-    //  UPDATE
     private void Update()
     {
         if (!active) return;
@@ -95,62 +122,44 @@ public class QTE_MashUI : MonoBehaviour
         {
             currentFill -= drainPerSec * Time.unscaledDeltaTime;
             currentFill = Mathf.Clamp01(currentFill);
-
             if (barFill != null)
                 barFill.fillAmount = currentFill;
         }
 
         if (currentFill >= successTarget)
-        {
             Finish(QTEResult.Success);
-        }
     }
 
-    //  INPUT CALLBACK
     private void OnHit(InputAction.CallbackContext ctx)
     {
         if (!active) return;
 
         hasStarted = true;
 
-        // Auto switch icon
         string logical = KeyIconDatabase.GetLogicalFromContext(ctx);
         if (!string.IsNullOrEmpty(logical))
         {
             currentLogicalKey = logical;
-            UpdateKeyIconSprite();
+            UpdateKeyIcon();
         }
 
-        currentFill += fillPerHit;
-        currentFill = Mathf.Clamp01(currentFill);
-
+        currentFill = Mathf.Clamp01(currentFill + fillPerHit);
         if (barFill != null)
             barFill.fillAmount = currentFill;
 
         if (punchRoutine != null)
             StopCoroutine(punchRoutine);
-        punchRoutine = StartCoroutine(HitRoutine());
+        punchRoutine = StartCoroutine(Punch());
 
         if (currentFill >= successTarget)
             Finish(QTEResult.Success);
     }
 
-    //  VISUAL
-    private void UpdateKeyIconSprite()
+    private IEnumerator Punch()
     {
-        var icon = KeyIconDatabase.GetIcon(currentLogicalKey);
+        if (root == null) yield break;
 
-        if (icon != null)
-        {
-            keyIcon.enabled = true;
-            keyIcon.sprite = icon;
-        }
-        else keyIcon.enabled = false;
-    }
-
-    private IEnumerator HitRoutine()
-    {
-        Vector3 baseScale = root.localScale;
+        Vector3 baseScale = initialScale;
         Vector3 target = baseScale * hitPunchScale;
 
         float t = 0f;
@@ -184,14 +193,24 @@ public class QTE_MashUI : MonoBehaviour
         canvasGroup.alpha = to;
     }
 
-    //  FINISH / FORCE STOP
+    private void UpdateKeyIcon()
+    {
+        if (keyIcon == null) return;
+
+        var icon = KeyIconDatabase.GetIcon(currentLogicalKey);
+        keyIcon.enabled = icon != null;
+        keyIcon.sprite = icon;
+    }
+
     private void Finish(QTEResult result)
     {
         if (!active) return;
-        active = false;
 
-        if (hitAction != null)
-            hitAction.performed -= OnHit;
+        active = false;
+        UnbindInput();
+
+        if (root != null)
+            root.localScale = initialScale;
 
         gameObject.SetActive(false);
         finishCallback?.Invoke(result);
@@ -200,5 +219,12 @@ public class QTE_MashUI : MonoBehaviour
     public void ForceStop()
     {
         Finish(QTEResult.Fail);
+    }
+
+    private void UnbindInput()
+    {
+        if (hitAction != null)
+            hitAction.performed -= OnHit;
+        hitAction = null;
     }
 }

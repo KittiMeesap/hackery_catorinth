@@ -1,27 +1,25 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using TMPro;
 
 public class QTE_MashUI : MonoBehaviour
 {
-    [Header("UI References")]
-    public RectTransform root;
-    public CanvasGroup canvasGroup;
+    [Header("UI")]
     public Image barFill;
     public Image keyIcon;
-    public TextMeshProUGUI labelText;
+    public RectTransform barRoot;
 
-    [Header("Effects")]
-    public float fadeInDuration = 0.15f;
-    public float hitPunchScale = 1.15f;
-    public float hitPunchDuration = 0.08f;
+    [Header("Mash Difficulty")]
+    public float graceAfterHit = 0.1f;
+    public float drainMultiplier = 1.35f;
+    public float comboBoost = 0.05f;
+    public float comboWindow = 0.22f;
 
-    [Header("SFX")]
-    public string sfxMashHit = "SFX_Mixer_Mash";
-    public string sfxSuccess = "SFX_Mixer_Success";
+    [Header("Juice")]
+    public float bounceScale = 1.15f;
+    public float bounceSpeed = 16f;
+    public float returnSpeed = 10f;
 
     private float currentFill;
     private float fillPerHit;
@@ -29,103 +27,89 @@ public class QTE_MashUI : MonoBehaviour
     private float successTarget;
 
     private bool active;
-    private bool hasStarted;
+    private float graceTimer;
+    private float comboTimer;
+    private int comboCount;
+
+    private Vector3 baseScale;
+    private Vector3 targetScale;
 
     private InputAction hitAction;
-    private Coroutine fadeRoutine;
-    private Coroutine punchRoutine;
     private Action<QTEResult> finishCallback;
-
-    private string currentLogicalKey = "confirm";
-    private Vector3 initialScale = Vector3.one;
 
     private void Awake()
     {
-        if (root != null)
-            initialScale = root.localScale;
+        if (barRoot == null)
+            barRoot = barFill.rectTransform;
+
+        baseScale = barRoot.localScale;
+        targetScale = baseScale;
     }
 
     private void OnDisable()
     {
-        UnbindInput();
-        StopAllCoroutines();
-
-        if (root != null)
-            root.localScale = initialScale;
-
-        active = false;
-        hasStarted = false;
+        if (hitAction != null)
+            hitAction.started -= OnHit;
     }
 
     public void Begin(
-        string logicalKey,
         float perHit,
         float drain,
-        float successTarget,
+        float success,
         Action<QTEResult> onFinished)
     {
-        if (GameInput.Instance == null)
-        {
-            Debug.LogError("QTE_MashUI: GameInput.Instance is null");
-            onFinished?.Invoke(QTEResult.Fail);
-            return;
-        }
-
         gameObject.SetActive(true);
-        enabled = true;
 
-        this.fillPerHit = perHit;
-        this.drainPerSec = drain;
-        this.successTarget = successTarget;
-        this.finishCallback = onFinished;
+        fillPerHit = perHit;
+        drainPerSec = drain;
+        successTarget = success;
+        finishCallback = onFinished;
 
         currentFill = 0f;
-        hasStarted = false;
+        barFill.fillAmount = 0f;
+
+        graceTimer = 0f;
+        comboTimer = 0f;
+        comboCount = 0;
+
         active = true;
 
-        if (barFill != null)
-            barFill.fillAmount = 0f;
+        barRoot.localScale = baseScale;
+        targetScale = baseScale;
 
-        if (root != null)
-            root.localScale = initialScale;
+        keyIcon.sprite = KeyIconDatabase.GetIcon(LogicalInput.QTEConfirm);
 
-        currentLogicalKey = string.IsNullOrEmpty(logicalKey) ? "confirm" : logicalKey;
-        UpdateKeyIcon();
-
-        if (labelText != null)
-            labelText.text = "MASH!";
-
-        if (canvasGroup != null)
-        {
-            canvasGroup.alpha = 0f;
-            fadeRoutine = StartCoroutine(FadeCanvas(0f, 1f, fadeInDuration));
-        }
-
-        GameInput.Instance.SetModeQTE();
-
-        hitAction = GameInput.Instance.QTEConfirmHitAction;
-        if (hitAction == null)
-        {
-            Debug.LogError("QTE_MashUI: QTEConfirmHitAction is null");
-            Finish(QTEResult.Fail);
-            return;
-        }
-
-        hitAction.performed += OnHit;
+        hitAction = GameInput.Instance.QTEConfirmAction;
+        hitAction.started += OnHit;
     }
 
     private void Update()
     {
         if (!active) return;
 
-        if (hasStarted)
-        {
-            currentFill -= drainPerSec * Time.unscaledDeltaTime;
-            currentFill = Mathf.Clamp01(currentFill);
+        // ===== COMBO TIMER =====
+        if (comboTimer > 0f)
+            comboTimer -= Time.unscaledDeltaTime;
+        else
+            comboCount = 0;
 
-            if (barFill != null)
-                barFill.fillAmount = currentFill;
+        // ===== DRAIN =====
+        if (graceTimer > 0f)
+        {
+            graceTimer -= Time.unscaledDeltaTime;
         }
+        else
+        {
+            float difficultyScale = Mathf.Lerp(0.9f, 1.6f, currentFill);
+            currentFill -= drainPerSec * drainMultiplier * difficultyScale * Time.unscaledDeltaTime;
+        }
+
+        currentFill = Mathf.Clamp01(currentFill);
+        barFill.fillAmount = currentFill;
+
+        // ===== JUICE SCALE RETURN =====
+        targetScale = Vector3.Lerp(targetScale, baseScale, returnSpeed * Time.unscaledDeltaTime);
+        barRoot.localScale = Vector3.Lerp(barRoot.localScale, targetScale, bounceSpeed * Time.unscaledDeltaTime);
 
         if (currentFill >= successTarget)
             Finish(QTEResult.Success);
@@ -135,104 +119,34 @@ public class QTE_MashUI : MonoBehaviour
     {
         if (!active) return;
 
-        hasStarted = true;
+        // ===== COMBO =====
+        comboCount = (comboTimer > 0f) ? comboCount + 1 : 1;
+        comboTimer = comboWindow;
+        graceTimer = graceAfterHit;
 
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayUI(sfxMashHit);
+        float bonus = Mathf.Min(comboBoost * comboCount, fillPerHit * 0.9f);
+        float gain = fillPerHit + bonus;
 
-        string logical = KeyIconDatabase.GetLogicalFromContext(ctx);
-        if (!string.IsNullOrEmpty(logical))
-        {
-            currentLogicalKey = logical;
-            UpdateKeyIcon();
-        }
+        currentFill += gain;
+        currentFill = Mathf.Clamp01(currentFill);
+        barFill.fillAmount = currentFill;
 
-        currentFill = Mathf.Clamp01(currentFill + fillPerHit);
-
-        if (barFill != null)
-            barFill.fillAmount = currentFill;
-
-        if (punchRoutine != null)
-            StopCoroutine(punchRoutine);
-        punchRoutine = StartCoroutine(Punch());
-
-        if (currentFill >= successTarget)
-            Finish(QTEResult.Success);
-    }
-
-    private IEnumerator Punch()
-    {
-        if (root == null) yield break;
-
-        Vector3 baseScale = initialScale;
-        Vector3 target = baseScale * hitPunchScale;
-
-        float t = 0f;
-        while (t < hitPunchDuration)
-        {
-            t += Time.unscaledDeltaTime;
-            root.localScale = Vector3.Lerp(baseScale, target, t / hitPunchDuration);
-            yield return null;
-        }
-
-        t = 0f;
-        while (t < hitPunchDuration)
-        {
-            t += Time.unscaledDeltaTime;
-            root.localScale = Vector3.Lerp(target, baseScale, t / hitPunchDuration);
-            yield return null;
-        }
-
-        root.localScale = baseScale;
-    }
-
-    private IEnumerator FadeCanvas(float from, float to, float dur)
-    {
-        float t = 0f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(from, to, t / dur);
-            yield return null;
-        }
-        canvasGroup.alpha = to;
-    }
-
-    private void UpdateKeyIcon()
-    {
-        if (keyIcon == null) return;
-
-        var icon = KeyIconDatabase.GetIcon(currentLogicalKey);
-        keyIcon.enabled = icon != null;
-        keyIcon.sprite = icon;
+        // ===== JUICE BOUNCE =====
+        float intensity = Mathf.Clamp01(0.5f + comboCount * 0.15f);
+        targetScale = baseScale * Mathf.Lerp(1f, bounceScale, intensity);
     }
 
     private void Finish(QTEResult result)
     {
-        if (!active) return;
-
         active = false;
-        UnbindInput();
 
-        if (result == QTEResult.Success && AudioManager.Instance != null)
-            AudioManager.Instance.PlayUI(sfxSuccess);
+        if (hitAction != null)
+            hitAction.started -= OnHit;
 
-        if (root != null)
-            root.localScale = initialScale;
-
+        barRoot.localScale = baseScale;
         gameObject.SetActive(false);
         finishCallback?.Invoke(result);
     }
 
-    public void ForceStop()
-    {
-        Finish(QTEResult.Fail);
-    }
-
-    private void UnbindInput()
-    {
-        if (hitAction != null)
-            hitAction.performed -= OnHit;
-        hitAction = null;
-    }
+    public void ForceStop() => Finish(QTEResult.Fail);
 }

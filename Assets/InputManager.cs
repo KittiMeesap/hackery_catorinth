@@ -107,7 +107,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""id"": ""e018cc34-8ada-4419-8713-ed2704af1818"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -116,7 +116,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""id"": ""06a6e1a3-7136-4d7b-8928-6b4e124169fe"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": false
                 }
             ],
@@ -157,10 +157,10 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""up"",
                     ""id"": ""48c45417-dd94-43e3-867a-f7b4a926773e"",
-                    ""path"": """",
+                    ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -168,10 +168,10 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""down"",
                     ""id"": ""2f627abd-3e02-44bf-ad02-21bab95c3545"",
-                    ""path"": """",
+                    ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -212,10 +212,10 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""up"",
                     ""id"": ""69aa3304-c5e5-4e93-abbd-0a20c1e6756e"",
-                    ""path"": """",
+                    ""path"": ""<Gamepad>/leftStick/up"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": "";Gamepad"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -223,10 +223,10 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""down"",
                     ""id"": ""d815f061-3020-4655-8eb9-082c5c89e25a"",
-                    ""path"": """",
+                    ""path"": ""<Gamepad>/leftStick/down"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": "";Gamepad"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -287,7 +287,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""id"": ""5c8cf25d-a635-4f01-858f-6d5cd5cb5a6f"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -296,7 +296,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""id"": ""2d77f678-e1ae-4c81-bd70-d70b3959dd0c"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": true
                 },
                 {
@@ -305,7 +305,7 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
                     ""id"": ""1e50fd88-38d0-4942-a88b-17cf34b4097e"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": false
                 }
             ],

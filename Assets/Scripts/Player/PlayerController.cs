@@ -18,11 +18,14 @@ public class PlayerController : MonoBehaviour
     public string sfxSleepLoop = "SFX_Player_Sleep";
 
     [Header("Footstep Timing")]
-    public float minStepInterval = 0.6f;   // เดินช้า
-    public float maxStepInterval = 0.4f;   // เดินเร็ว
+    public float minStepInterval = 0.6f;
+    public float maxStepInterval = 0.4f;
     public float stepIntervalMultiplier = 1.2f;
     public float minSpeedToPlay = 0.15f;
 
+    // =====================================================
+    // RUNTIME
+    // =====================================================
     private Rigidbody2D rb;
 
     private float moveX;
@@ -33,95 +36,136 @@ public class PlayerController : MonoBehaviour
     private bool isSleeping;
     private bool isSnoring;
     private bool movementEnabled = true;
-
     private bool wasWalkingLastFrame;
 
+    // Input
     private InputAction moveAction;
     private InputAction interactAction;
 
+    // Audio
     private AudioSource sleepSource;
 
+    // =====================================================
+    // LIFECYCLE
+    // =====================================================
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
 
         if (GameInput.Instance == null)
         {
-            Debug.LogError("PlayerController: No GameInput in scene!");
+            Debug.LogError("PlayerController: GameInput not found");
+            enabled = false;
             return;
         }
-
-        moveAction = GameInput.Instance.MoveAction;
-        interactAction = GameInput.Instance.InteractAction;
 
         SetupAudio();
         ResetAnimator();
         RefreshCarryAnimation();
     }
 
-    private void SetupAudio()
-    {
-        sleepSource = gameObject.AddComponent<AudioSource>();
-        sleepSource.loop = true;
-        sleepSource.playOnAwake = false;
-        sleepSource.spatialBlend = 0f;
-    }
-
     private void OnEnable()
     {
-        moveAction.performed += OnMovePerformed;
-        moveAction.canceled += OnMoveCanceled;
-        interactAction.performed += OnInteractPerformed;
+        BindInput();
+
+        if (GameInput.Instance != null)
+            GameInput.Instance.ControlSchemeChanged += RebindInput;
     }
 
     private void OnDisable()
     {
-        moveAction.performed -= OnMovePerformed;
-        moveAction.canceled -= OnMoveCanceled;
-        interactAction.performed -= OnInteractPerformed;
+        UnbindInput();
+
+        if (GameInput.Instance != null)
+            GameInput.Instance.ControlSchemeChanged -= RebindInput;
     }
 
-    private void FixedUpdate()
+    // =====================================================
+    // INPUT BINDING
+    // =====================================================
+    private void BindInput()
     {
-        if (!movementEnabled || isSleeping || isSnoring) return;
-        rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
+        var input = GameInput.Instance;
+        if (input == null) return;
+
+        moveAction = input.MoveAction;
+        interactAction = input.InteractAction;
+
+        if (interactAction != null)
+            interactAction.performed += OnInteractPerformed;
     }
 
+    private void UnbindInput()
+    {
+        if (interactAction != null)
+            interactAction.performed -= OnInteractPerformed;
+
+        moveAction = null;
+        interactAction = null;
+    }
+
+    private void RebindInput()
+    {
+        UnbindInput();
+
+        if (GameInput.Instance.CurrentMode == GameInput.InputMode.Player)
+            BindInput();
+    }
+
+    // =====================================================
+    // UPDATE LOOP
+    // =====================================================
     private void Update()
     {
+        ReadMovement();          // ⭐ สำคัญที่สุด
         UpdateAnimator();
         HandleAFK();
         UpdateFootstepByInterval();
     }
 
-    // =========================
-    // INPUT
-    // =========================
-    private void OnMovePerformed(InputAction.CallbackContext ctx)
+    private void FixedUpdate()
     {
-        if (!movementEnabled)
+        if (!movementEnabled || isSleeping || isSnoring)
+            return;
+
+        rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
+    }
+
+    // =====================================================
+    // MOVEMENT (CORRECT PATTERN)
+    // =====================================================
+    private void ReadMovement()
+    {
+        if (!movementEnabled || isSleeping || isSnoring)
         {
             moveX = 0;
             return;
         }
 
-        moveX = ctx.ReadValue<Vector2>().x;
-        ResetAFK();
+        if (moveAction == null)
+        {
+            moveX = 0;
+            return;
+        }
+
+        Vector2 v = moveAction.ReadValue<Vector2>();
+        moveX = v.x;
+
+        if (Mathf.Abs(moveX) > 0.01f)
+            ResetAFK();
     }
 
-    private void OnMoveCanceled(InputAction.CallbackContext ctx)
-    {
-        moveX = 0;
-    }
-
+    // =====================================================
+    // INPUT CALLBACKS
+    // =====================================================
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
     {
         ResetAFK();
     }
 
-    // =========================
+    // =====================================================
     // ANIMATOR
-    // =========================
+    // =====================================================
     private void ResetAnimator()
     {
         animator.SetBool("IsWalking", false);
@@ -145,9 +189,9 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("AFK", isAFK);
     }
 
-    // =========================
-    // 👣 FOOTSTEP (FIXED)
-    // =========================
+    // =====================================================
+    // FOOTSTEP
+    // =====================================================
     private void UpdateFootstepByInterval()
     {
         if (!movementEnabled || isSleeping || isSnoring)
@@ -160,7 +204,6 @@ public class PlayerController : MonoBehaviour
         float speed = Mathf.Abs(rb.linearVelocity.x);
         bool isWalking = speed >= minSpeedToPlay;
 
-        // ✅ ก้าวแรก: ดังทันทีเมื่อเริ่มเดิน
         if (isWalking && !wasWalkingLastFrame)
         {
             footstepTimer = 0f;
@@ -168,19 +211,14 @@ public class PlayerController : MonoBehaviour
         }
 
         wasWalkingLastFrame = isWalking;
-
-        if (!isWalking)
-            return;
+        if (!isWalking) return;
 
         float speedRatio = Mathf.Clamp01(speed / moveSpeed);
-
         float stepInterval =
             Mathf.Lerp(minStepInterval, maxStepInterval, speedRatio)
             * stepIntervalMultiplier;
 
-        // กันรัวเกิน
         stepInterval = Mathf.Max(stepInterval, 0.35f);
-
         footstepTimer += Time.deltaTime;
 
         if (footstepTimer >= stepInterval)
@@ -201,9 +239,9 @@ public class PlayerController : MonoBehaviour
         );
     }
 
-    // =========================
+    // =====================================================
     // AFK / SLEEP
-    // =========================
+    // =====================================================
     private void HandleAFK()
     {
         inactivityTimer += Time.deltaTime;
@@ -222,29 +260,10 @@ public class PlayerController : MonoBehaviour
         StopSleepSound();
     }
 
-    public void Anim_SleepStart()
-    {
-        isSleeping = true;
-        StartSleepSound();
-    }
-
-    public void Anim_SleepEnd()
-    {
-        isSleeping = false;
-        StopSleepSound();
-    }
-
-    public void Anim_SnoreStart()
-    {
-        isSnoring = true;
-        StartSleepSound();
-    }
-
-    public void Anim_SnoreEnd()
-    {
-        isSnoring = false;
-        StopSleepSound();
-    }
+    public void Anim_SleepStart() { isSleeping = true; StartSleepSound(); }
+    public void Anim_SleepEnd() { isSleeping = false; StopSleepSound(); }
+    public void Anim_SnoreStart() { isSnoring = true; StartSleepSound(); }
+    public void Anim_SnoreEnd() { isSnoring = false; StopSleepSound(); }
 
     public void Anim_WakeEnd()
     {
@@ -254,9 +273,17 @@ public class PlayerController : MonoBehaviour
         StopSleepSound();
     }
 
-    // =========================
-    // 😴 SLEEP SOUND
-    // =========================
+    // =====================================================
+    // AUDIO
+    // =====================================================
+    private void SetupAudio()
+    {
+        sleepSource = gameObject.AddComponent<AudioSource>();
+        sleepSource.loop = true;
+        sleepSource.playOnAwake = false;
+        sleepSource.spatialBlend = 0f;
+    }
+
     private void StartSleepSound()
     {
         if (sleepSource.isPlaying) return;
@@ -277,9 +304,9 @@ public class PlayerController : MonoBehaviour
             sleepSource.Stop();
     }
 
-    // =========================
+    // =====================================================
     // OTHER
-    // =========================
+    // =====================================================
     public void SetCooking(bool cooking)
     {
         animator.SetBool("IsCooking", cooking);

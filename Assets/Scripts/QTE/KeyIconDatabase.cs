@@ -4,109 +4,96 @@ using UnityEngine.InputSystem;
 
 public static class KeyIconDatabase
 {
-    private static Dictionary<string, Sprite> icons;
+    private static Dictionary<string, Sprite> icons = new();
 
     static KeyIconDatabase()
     {
-        icons = new Dictionary<string, Sprite>();
-
-        void Map(string key, string file)
+        void Map(LogicalInput key, string device, string spriteName)
         {
-            Sprite s = Resources.Load<Sprite>("KeyIcons/" + file);
-            if (s != null) icons[key] = s;
+            Sprite s = Resources.Load<Sprite>("KeyIcons/" + spriteName);
+            if (s != null)
+                icons[$"{key}_{device}"] = s;
         }
 
-        // =======================
-        // KEYBOARD ICONS
-        // =======================
-        Map("confirm_keyboard", "Keyboard_E");
-        Map("interact_keyboard", "Keyboard_E");
-        Map("space_keyboard", "Keyboard_Space");
-        Map("q_keyboard", "Keyboard_Q");
+        // ===== KEYBOARD =====
+        Map(LogicalInput.Interact, "keyboard", "Keyboard_E");
+        Map(LogicalInput.QTEConfirm, "keyboard", "Keyboard_SpaceBar");
+        Map(LogicalInput.UISubmit, "keyboard", "Keyboard_Enter");
+        Map(LogicalInput.UICancel, "keyboard", "Keyboard_Backspace");
+        Map(LogicalInput.CancelQTE, "keyboard", "Keyboard_Esc");
+        Map(LogicalInput.Pause, "keyboard", "Keyboard_Esc");
 
-        Map("up_keyboard", "Keyboard_ArrowUp");
-        Map("down_keyboard", "Keyboard_ArrowDown");
-        Map("left_keyboard", "Keyboard_ArrowLeft");
-        Map("right_keyboard", "Keyboard_ArrowRight");
+        Map(LogicalInput.Up, "keyboard", "Keyboard_ArrowUp");
+        Map(LogicalInput.Down, "keyboard", "Keyboard_ArrowDown");
+        Map(LogicalInput.Left, "keyboard", "Keyboard_ArrowLeft");
+        Map(LogicalInput.Right, "keyboard", "Keyboard_ArrowRight");
 
-        // =======================
-        // PLAYSTATION ICONS
-        // =======================
-        Map("confirm_ps", "PS_Cross");
-        Map("interact_ps", "PS_Cross");
+        // ===== PLAYSTATION =====
+        Map(LogicalInput.Interact, "ps", "PS_Cross");
+        Map(LogicalInput.QTEConfirm, "ps", "PS_Cross");
+        Map(LogicalInput.UISubmit, "ps", "PS_Cross");
 
-        Map("up_ps", "PS_DPadUp");
-        Map("down_ps", "PS_DPadDown");
-        Map("left_ps", "PS_DPadLeft");
-        Map("right_ps", "PS_DPadRight");
+        Map(LogicalInput.UICancel, "ps", "PS_Circle");
+        Map(LogicalInput.CancelQTE, "ps", "PS_Circle");
+        Map(LogicalInput.Pause, "ps", "PS_Options");
 
-        // =======================
-        // XBOX ICONS
-        // =======================
-        Map("confirm_xbox", "XBox_A");
-        Map("interact_xbox", "XBox_A");
+        Map(LogicalInput.Up, "ps", "PS_DPadUp");
+        Map(LogicalInput.Down, "ps", "PS_DPadDown");
+        Map(LogicalInput.Left, "ps", "PS_DPadLeft");
+        Map(LogicalInput.Right, "ps", "PS_DPadRight");
 
-        Map("up_xbox", "XBox_Up");
-        Map("down_xbox", "XBox_Down");
-        Map("left_xbox", "XBox_Left");
-        Map("right_xbox", "XBox_Right");
+        // ===== XBOX =====
+        Map(LogicalInput.Interact, "xbox", "Xbox_A");
+        Map(LogicalInput.QTEConfirm, "xbox", "Xbox_A");
+        Map(LogicalInput.UISubmit, "xbox", "Xbox_A");
+
+        Map(LogicalInput.UICancel, "xbox", "Xbox_B");
+        Map(LogicalInput.CancelQTE, "xbox", "Xbox_B");
+        Map(LogicalInput.Pause, "xbox", "Xbox_Start");
+
+        Map(LogicalInput.Up, "xbox", "Xbox_DPadUp");
+        Map(LogicalInput.Down, "xbox", "Xbox_DPadDown");
+        Map(LogicalInput.Left, "xbox", "Xbox_DPadLeft");
+        Map(LogicalInput.Right, "xbox", "Xbox_DPadRight");
     }
 
-    // ===========================
-    //  AUTO DETECT CONTROLLER TYPE
-    // ===========================
-    private static string Prefix
+    private static string CurrentDevice
     {
         get
         {
             if (Gamepad.current != null)
             {
                 if (Gamepad.current is UnityEngine.InputSystem.DualShock.DualShockGamepad)
-                    return "_ps";
-
-                if (Gamepad.current is UnityEngine.InputSystem.XInput.XInputController)
-                    return "_xbox";
-
-                return "_xbox";
+                    return "ps";
+                return "xbox";
             }
-            return "_keyboard";
+            return "keyboard";
         }
     }
 
-    // ===========================
-    // GET ICON FOR A LOGICAL INPUT
-    // ===========================
-    public static Sprite GetIcon(string logicalKey)
+    public static Sprite GetIcon(LogicalInput key)
     {
-        if (string.IsNullOrEmpty(logicalKey)) return null;
-
-        string finalKey = logicalKey.ToLower() + Prefix;
-
-        if (icons.TryGetValue(finalKey, out Sprite s))
-            return s;
-
-        return null;
+        string id = $"{key}_{CurrentDevice}";
+        icons.TryGetValue(id, out Sprite s);
+        return s;
     }
 
-    // ===========================
-    // MAP INPUT CALLBACK -> LOGICAL KEY
-    // ===========================
-    public static string GetLogicalFromContext(InputAction.CallbackContext ctx)
+    public static LogicalInput GetLogicalFromContext(InputAction.CallbackContext ctx)
     {
-        if (ctx.control == null) return null;
+        if (ctx.control == null)
+            return LogicalInput.QTEConfirm;
 
-        string n = ctx.control.name.ToLower();
+        string name = ctx.control.name.ToLower();
 
-        if (n.Contains("space")) return "space";
-        if (n == "e" || n.Contains("interact")) return "confirm";
-        if (n == "q") return "q";
+        if (name.Contains("space")) return LogicalInput.QTEConfirm;
+        if (name == "enter") return LogicalInput.UISubmit;
+        if (name == "escape") return LogicalInput.CancelQTE;
 
-        // ARROWS / DPAD
-        if (n.Contains("up")) return "up";
-        if (n.Contains("down")) return "down";
-        if (n.Contains("left")) return "left";
-        if (n.Contains("right")) return "right";
+        if (name.Contains("up")) return LogicalInput.Up;
+        if (name.Contains("down")) return LogicalInput.Down;
+        if (name.Contains("left")) return LogicalInput.Left;
+        if (name.Contains("right")) return LogicalInput.Right;
 
-        return "confirm";
+        return LogicalInput.QTEConfirm;
     }
 }

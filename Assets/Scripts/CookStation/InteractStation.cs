@@ -7,22 +7,20 @@ public abstract class InteractStation : MonoBehaviour
     public GameObject promptUI;
     public GameObject highlightObj;
 
-    protected bool isPlayerInside = false;
+    protected bool isPlayerInside;
     protected PlayerInventory playerInv;
 
-    public static bool interactionLocked = false;
+    public static bool interactionLocked;
 
-    private InputAction interactAction;
+    protected virtual void Awake()
+    {
+        interactionLocked = false;
+    }
 
     protected virtual void Start()
     {
-        if (promptUI != null) promptUI.SetActive(false);
-        if (highlightObj != null) highlightObj.SetActive(false);
-
-        if (GameInput.Instance != null)
-        {
-            interactAction = GameInput.Instance.InteractAction;
-        }
+        if (promptUI) promptUI.SetActive(false);
+        if (highlightObj) highlightObj.SetActive(false);
     }
 
     protected virtual void OnTriggerEnter2D(Collider2D other)
@@ -32,11 +30,7 @@ public abstract class InteractStation : MonoBehaviour
         playerInv = other.GetComponent<PlayerInventory>();
         isPlayerInside = true;
 
-        if (!interactionLocked)
-        {
-            if (promptUI != null) promptUI.SetActive(true);
-            if (highlightObj != null) highlightObj.SetActive(true);
-        }
+        RefreshPrompt();
     }
 
     protected virtual void OnTriggerExit2D(Collider2D other)
@@ -44,51 +38,52 @@ public abstract class InteractStation : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         isPlayerInside = false;
-
-        if (promptUI != null) promptUI.SetActive(false);
-        if (highlightObj != null) highlightObj.SetActive(false);
-
         playerInv = null;
+
+        if (promptUI) promptUI.SetActive(false);
+        if (highlightObj) highlightObj.SetActive(false);
     }
 
     private void Update()
     {
         if (!isPlayerInside) return;
         if (interactionLocked) return;
+        if (GameInput.Instance == null) return;
+
+        var interactAction = GameInput.Instance.InteractAction;
         if (interactAction == null) return;
 
         if (interactAction.WasPerformedThisFrame())
         {
-            if (promptUI != null) promptUI.SetActive(false);
-            if (highlightObj != null) highlightObj.SetActive(false);
-
-            TryInteract();
+            HidePrompt();
+            Interact(playerInv);
         }
     }
 
-    private void TryInteract()
+    protected void RefreshPrompt()
     {
-        if (playerInv != null)
-            Interact(playerInv);
+        if (!isPlayerInside || interactionLocked) return;
+
+        if (promptUI) promptUI.SetActive(true);
+        if (highlightObj) highlightObj.SetActive(true);
+    }
+
+    protected void HidePrompt()
+    {
+        if (promptUI) promptUI.SetActive(false);
+        if (highlightObj) highlightObj.SetActive(false);
     }
 
     public void LockInteraction()
     {
         interactionLocked = true;
-
-        if (promptUI != null) promptUI.SetActive(false);
-        if (highlightObj != null) highlightObj.SetActive(false);
+        HidePrompt();
     }
 
     public void UnlockInteraction()
     {
         interactionLocked = false;
-
-        if (isPlayerInside)
-        {
-            if (promptUI != null) promptUI.SetActive(true);
-            if (highlightObj != null) highlightObj.SetActive(true);
-        }
+        RefreshPrompt();
     }
 
     public abstract void Interact(PlayerInventory player);

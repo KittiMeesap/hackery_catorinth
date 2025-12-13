@@ -312,17 +312,6 @@ public partial class @InputManager: IInputActionCollection2, IDisposable
             ""bindings"": [
                 {
                     ""name"": """",
-                    ""id"": ""56fe7334-708b-4d95-95db-d28efcec0e1d"",
-                    ""path"": ""<Keyboard>/q"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""ConfirmHit"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""3289f14f-c635-491e-9594-59dfa39faff5"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",

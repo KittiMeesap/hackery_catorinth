@@ -22,8 +22,10 @@ public class Oven : InteractStation
 
     private AudioSource loopSource;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         loopSource = gameObject.AddComponent<AudioSource>();
         loopSource.playOnAwake = false;
         loopSource.loop = true;

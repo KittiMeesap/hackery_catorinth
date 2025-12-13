@@ -32,7 +32,10 @@ public class Pantry : InteractStation
     {
         if (!player.HasBowl())
         {
-            Debug.Log("Need a bowl.");
+            NotificationUI.Instance.Show(
+                "You need a bowl first!",
+                NotifyType.Warning
+            );
             return;
         }
 
@@ -43,6 +46,7 @@ public class Pantry : InteractStation
         var items = PantryDatabase.Instance.GetAllIngredients();
         pantryUI.Open(items.ToArray(), player, this);
     }
+
 
     public void OnPantryClosed()
     {

@@ -1,29 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum LogicalInput
-{
-    // PLAYER
-    Interact,
-    Pause,
-
-    // UI
-    UISubmit,
-    UICancel,
-
-    // QTE
-    QTEConfirm,
-    CancelQTE,
-
-    // DIRECTION
-    Up,
-    Down,
-    Left,
-    Right
-}
-
-
-
 public class UIKeyIconUpdater : MonoBehaviour
 {
     public LogicalInput logicalInput;

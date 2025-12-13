@@ -19,7 +19,7 @@ public static class KeyIconDatabase
         Map(LogicalInput.Interact, "keyboard", "Keyboard_E");
         Map(LogicalInput.QTEConfirm, "keyboard", "Keyboard_SpaceBar");
         Map(LogicalInput.UISubmit, "keyboard", "Keyboard_Enter");
-        Map(LogicalInput.UICancel, "keyboard", "Keyboard_Backspace");
+        Map(LogicalInput.UICancel, "keyboard", "Keyboard_BackSpace");
         Map(LogicalInput.CancelQTE, "keyboard", "Keyboard_Esc");
         Map(LogicalInput.Pause, "keyboard", "Keyboard_Esc");
 

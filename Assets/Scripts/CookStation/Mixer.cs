@@ -20,9 +20,32 @@ public class Mixer : InteractStation
 
     public override void Interact(PlayerInventory player)
     {
-        if (isMixing) return;
-        if (!player.HasBowl()) return;
-        if (!RecipeManager.Instance.CanMix(player.bowl.contents)) return;
+        if (isMixing)
+        {
+            NotificationUI.Instance?.Show(
+                "Already mixing!",
+                NotifyType.Info
+            );
+            return;
+        }
+
+        if (!player.HasBowl())
+        {
+            NotificationUI.Instance?.Show(
+                "You need a bowl first!",
+                NotifyType.Warning
+            );
+            return;
+        }
+
+        if (!RecipeManager.Instance.CanMix(player.bowl.contents))
+        {
+            NotificationUI.Instance?.Show(
+                "These ingredients can't be mixed yet",
+                NotifyType.Error
+            );
+            return;
+        }
 
         isMixing = true;
         currentPlayer = player;
@@ -48,7 +71,16 @@ public class Mixer : InteractStation
         UnlockInteraction();
 
         if (result == QTEResult.Success)
+        {
             currentPlayer.bowl.TryMix();
+        }
+        else
+        {
+            NotificationUI.Instance?.Show(
+                "Mixing failed!",
+                NotifyType.Warning
+            );
+        }
 
         isMixing = false;
     }

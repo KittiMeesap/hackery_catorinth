@@ -30,32 +30,45 @@ public class TrashBin : InteractStation
 
         PlayerController pc = player.GetComponent<PlayerController>();
 
+        // DISCARD SERVE BOX
         if (player.HasServeBox())
         {
             player.serveBox = null;
             player.OnInventoryChanged?.Invoke();
-            pc?.RefreshCarryAnimation();
 
-            Debug.Log("TrashBin: Serve box discarded.");
+            pc?.RefreshCarryAnimation();
+            pc?.ForceIdle();
             return;
         }
 
+        // DISCARD INGREDIENTS IN BOWL
         if (player.HasBowl())
         {
             if (player.bowl.contents.Count > 0)
             {
                 player.bowl.Clear();
                 player.OnInventoryChanged?.Invoke();
-                pc?.RefreshCarryAnimation();
 
-                Debug.Log("TrashBin: Ingredients cleared.");
+                pc?.RefreshCarryAnimation();
+                pc?.ForceIdle();
                 return;
             }
 
-            Debug.Log("TrashBin: Bowl is empty, nothing to discard.");
+            NotificationUI.Instance?.Show(
+                "The bowl is already empty",
+                NotifyType.Info
+            );
+
+            pc?.ForceIdle();
             return;
         }
 
-        Debug.Log("TrashBin: Nothing to discard.");
+        // NOTHING TO DISCARD
+        NotificationUI.Instance?.Show(
+            "Nothing to discard",
+            NotifyType.Info
+        );
+
+        pc?.ForceIdle();
     }
 }

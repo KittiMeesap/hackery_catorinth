@@ -1,23 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-
-public enum CustomerPersonality
-{
-    Chill,
-    Normal,
-    Impatient,
-    VIP
-}
-
-public enum CustomerToolType
-{
-    Mixer,
-    Oven,
-    Fridge,
-    Slice,
-    FryPan
-}
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class CustomerController : MonoBehaviour
@@ -35,6 +19,9 @@ public class CustomerController : MonoBehaviour
     public CustomerPersonality personality = CustomerPersonality.Normal;
     public float moveSpeed = 2f;
     public float baseWaitTime = 20f;
+
+    [Header("Leave Delay")]
+    public float leaveDelay = 0.5f;
 
     [Header("Queue")]
     public int queueIndex = -1;
@@ -61,19 +48,19 @@ public class CustomerController : MonoBehaviour
     [HideInInspector] public RecipeSO currentRecipe;
     [HideInInspector] public bool hasActiveOrder = false;
 
+    [HideInInspector] public CustomerQueueManager queueManager;
+    [HideInInspector] public string prefabId;
+
     private State state = State.WalkingToQueue;
     private float waitTimer;
     private float waitDuration;
 
-    [HideInInspector] public CustomerQueueManager queueManager;
-
-    // NEW — direct InputAction
     private InputAction interactAction;
+    private Coroutine leaveRoutine;
 
     private void Awake()
     {
         if (!rb) rb = GetComponent<Rigidbody2D>();
-        queueManager = FindFirstObjectByType<CustomerQueueManager>();
 
         if (emotionIcon != null)
             emotionIcon.enabled = false;
@@ -81,14 +68,27 @@ public class CustomerController : MonoBehaviour
         if (interactUI)
             interactUI.SetActive(false);
 
-        // NEW — get input action directly
         if (GameInput.Instance != null)
             interactAction = GameInput.Instance.InteractAction;
     }
 
     private void OnEnable()
     {
+        // reset runtime flags when reused from pool
+        hasActiveOrder = false;
+        if (emotionIcon != null) emotionIcon.enabled = false;
+        SetInteractVisible(false);
+
         SetState(State.WalkingToQueue);
+    }
+
+    private void OnDisable()
+    {
+        if (leaveRoutine != null)
+        {
+            StopCoroutine(leaveRoutine);
+            leaveRoutine = null;
+        }
     }
 
     private void FixedUpdate()
@@ -104,22 +104,24 @@ public class CustomerController : MonoBehaviour
         UpdateInteractVisibility();
     }
 
-    // ===== INITIALIZE =====
+    // INITIALIZE
     public void Initialize(RecipeSO orderRecipe, Sprite faceIcon, Vector3 queueTarget, int index)
     {
         currentRecipe = orderRecipe;
         customerFaceIcon = faceIcon;
         targetPosition = queueTarget;
         queueIndex = index;
+
         hasActiveOrder = false;
 
         if (emotionIcon != null)
             emotionIcon.enabled = false;
 
+        SetInteractVisible(false);
         SetState(State.WalkingToQueue);
     }
 
-    // ===== STATE MACHINE =====
+    // STATE MACHINE
     public void SetState(State newState)
     {
         state = newState;
@@ -143,19 +145,19 @@ public class CustomerController : MonoBehaviour
                 if (emotionIcon != null)
                     emotionIcon.enabled = true;
 
-                CustomerOrderPanel.Instance.Show(this, currentRecipe, customerFaceIcon);
-                CustomerOrderPanel.Instance.UpdateTimer(1f);
+                CustomerOrderPanel.Instance?.Show(this, currentRecipe, customerFaceIcon);
+                CustomerOrderPanel.Instance?.UpdateTimer(1f);
                 break;
 
             case State.Leaving:
                 SetInteractVisible(false);
-                if (emotionIcon != null) emotionIcon.enabled = false;
-                CustomerOrderPanel.Instance.Hide();
+                CustomerOrderPanel.Instance?.Hide();
+                // IMPORTANT: Do NOT disable emotion here (we want it visible while walking away)
                 break;
         }
     }
 
-    // ===== MOVEMENT =====
+    // MOVEMENT
     private void HandleMovement()
     {
         if (state == State.WalkingToQueue || state == State.Leaving)
@@ -170,11 +172,13 @@ public class CustomerController : MonoBehaviour
                 rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
                 if (state == State.WalkingToQueue)
+                {
                     SetState(State.InQueueIdle);
+                }
                 else if (state == State.Leaving)
                 {
                     queueManager?.OnCustomerLeft(this);
-                    Destroy(gameObject);
+                    // NO Destroy() — pooled object
                 }
 
                 return;
@@ -207,7 +211,7 @@ public class CustomerController : MonoBehaviour
             animator.SetBool("IsWalking", Mathf.Abs(rb.linearVelocity.x) > 0.05f);
     }
 
-    // ===== INTERACT INPUT =====
+    // INPUT & INTERACT
     private bool IsCustomerAtServicePoint =>
         ServiceTrigger.Instance != null &&
         ServiceTrigger.Instance.currentCustomer == this;
@@ -226,7 +230,6 @@ public class CustomerController : MonoBehaviour
         if (InteractStation.interactionLocked) return;
         if (interactAction == null) return;
 
-        // NEW — direct input call
         if (!interactAction.WasPerformedThisFrame()) return;
 
         if (state == State.InQueueIdle || state == State.WaitingOrder)
@@ -252,7 +255,7 @@ public class CustomerController : MonoBehaviour
         SetInteractVisible(visible);
     }
 
-    // ===== ORDER SYSTEM =====
+    // ORDER FLOW
     private void OnPlayerAcceptOrder()
     {
         if (hasActiveOrder) return;
@@ -279,7 +282,15 @@ public class CustomerController : MonoBehaviour
 
         var player = CurrentPlayerInventory;
         if (player == null) return;
-        if (!player.HasServeBox()) return;
+
+        if (!player.HasServeBox())
+        {
+            NotificationUI.Instance?.Show(
+                "You need the correct order to serve",
+                NotifyType.Warning
+            );
+            return;
+        }
 
         bool correct =
             player.serveBox != null &&
@@ -290,69 +301,92 @@ public class CustomerController : MonoBehaviour
         player.GetComponent<PlayerController>()?.RefreshCarryAnimation();
 
         if (correct) HandleServeSuccess();
-        else HandleServeFail();
+        else HandleServeFailWrongOrder();
     }
 
     private void HandleServeSuccess()
     {
         ShowEmotion(emotionHappy);
-        CustomerOrderPanel.Instance.Hide();
+        CustomerOrderPanel.Instance?.Hide();
 
         GameManager.Instance.RegisterOrderSuccess();
 
         if (personality == CustomerPersonality.VIP)
-        {
             MichelinStarSystem.Instance.GainStar(1);
-            GameManager.Instance.RegisterOrderSuccess();
-        }
 
-        StartLeave();
+        StartLeaveWithDelay();
     }
 
-    private void HandleServeFail()
+    private void HandleServeFailWrongOrder()
     {
+        NotificationUI.Instance?.Show(
+            "This is not what I ordered",
+            NotifyType.Info
+        );
+
         ShowEmotion(emotionAngry);
-        CustomerOrderPanel.Instance.Hide();
+        CustomerOrderPanel.Instance?.Hide();
 
         if (personality == CustomerPersonality.VIP)
             MichelinStarSystem.Instance.LoseStar(1);
 
         GameManager.Instance.RegisterOrderFail();
-        StartLeave();
+        StartLeaveWithDelay();
     }
 
-    // ===== LEAVING =====
-    private void StartLeave()
+    private void HandleServeFailTimeout()
+    {
+        // No "wrong order" message here (player didn't serve anything)
+        ShowEmotion(emotionAngry);
+        CustomerOrderPanel.Instance?.Hide();
+
+        if (personality == CustomerPersonality.VIP)
+            MichelinStarSystem.Instance.LoseStar(1);
+
+        GameManager.Instance.RegisterOrderFail();
+        StartLeaveWithDelay();
+    }
+
+    // LEAVING (WITH DELAY)
+    private void StartLeaveWithDelay()
     {
         hasActiveOrder = false;
         SetInteractVisible(false);
 
-        if (emotionIcon != null)
-            emotionIcon.enabled = false;
+        if (leaveRoutine != null)
+            StopCoroutine(leaveRoutine);
+
+        leaveRoutine = StartCoroutine(LeaveAfterDelay());
+    }
+
+    private IEnumerator LeaveAfterDelay()
+    {
+        yield return new WaitForSeconds(leaveDelay);
 
         if (spriteRenderer != null)
             spriteRenderer.flipX = !spriteRenderer.flipX;
 
-        if (queueManager?.exitPoint != null)
+        if (queueManager != null && queueManager.exitPoint != null)
             targetPosition = queueManager.exitPoint.position;
         else
-            targetPosition = transform.position + new Vector3(spriteRenderer.flipX ? -5f : 5f, 0, 0);
+            targetPosition = transform.position +
+                             new Vector3(spriteRenderer != null && spriteRenderer.flipX ? -5f : 5f, 0, 0);
 
         SetState(State.Leaving);
+        leaveRoutine = null;
     }
 
-    // ===== WAIT TIMER =====
+    // WAIT TIMER
     private void HandleWaitingTimer()
     {
         if (state != State.WaitingServe) return;
 
         waitTimer -= Time.deltaTime;
         float normalized = Mathf.Clamp01(waitTimer / waitDuration);
-
-        CustomerOrderPanel.Instance.UpdateTimer(normalized);
+        CustomerOrderPanel.Instance?.UpdateTimer(normalized);
 
         if (waitTimer <= 0f)
-            HandleServeFail();
+            HandleServeFailTimeout();
     }
 
     private float GetWaitDurationByPersonality()
@@ -367,7 +401,7 @@ public class CustomerController : MonoBehaviour
         };
     }
 
-    // ===== EMOTION UI =====
+    // UI HELPERS
     private void ShowEmotion(Sprite sprite)
     {
         if (emotionIcon == null) return;

@@ -23,9 +23,7 @@ public class PlayerController : MonoBehaviour
     public float stepIntervalMultiplier = 1.2f;
     public float minSpeedToPlay = 0.15f;
 
-    // =====================================================
     // RUNTIME
-    // =====================================================
     private Rigidbody2D rb;
 
     private float moveX;
@@ -45,9 +43,7 @@ public class PlayerController : MonoBehaviour
     // Audio
     private AudioSource sleepSource;
 
-    // =====================================================
     // LIFECYCLE
-    // =====================================================
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -80,9 +76,7 @@ public class PlayerController : MonoBehaviour
             GameInput.Instance.ControlSchemeChanged -= RebindInput;
     }
 
-    // =====================================================
     // INPUT BINDING
-    // =====================================================
     private void BindInput()
     {
         var input = GameInput.Instance;
@@ -112,12 +106,10 @@ public class PlayerController : MonoBehaviour
             BindInput();
     }
 
-    // =====================================================
     // UPDATE LOOP
-    // =====================================================
     private void Update()
     {
-        ReadMovement();          // ⭐ สำคัญที่สุด
+        ReadMovement();
         UpdateAnimator();
         HandleAFK();
         UpdateFootstepByInterval();
@@ -131,9 +123,7 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
     }
 
-    // =====================================================
     // MOVEMENT (CORRECT PATTERN)
-    // =====================================================
     private void ReadMovement()
     {
         if (!movementEnabled || isSleeping || isSnoring)
@@ -155,17 +145,13 @@ public class PlayerController : MonoBehaviour
             ResetAFK();
     }
 
-    // =====================================================
     // INPUT CALLBACKS
-    // =====================================================
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
     {
         ResetAFK();
     }
 
-    // =====================================================
     // ANIMATOR
-    // =====================================================
     private void ResetAnimator()
     {
         animator.SetBool("IsWalking", false);
@@ -189,9 +175,7 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("AFK", isAFK);
     }
 
-    // =====================================================
     // FOOTSTEP
-    // =====================================================
     private void UpdateFootstepByInterval()
     {
         if (!movementEnabled || isSleeping || isSnoring)
@@ -239,9 +223,7 @@ public class PlayerController : MonoBehaviour
         );
     }
 
-    // =====================================================
     // AFK / SLEEP
-    // =====================================================
     private void HandleAFK()
     {
         inactivityTimer += Time.deltaTime;
@@ -273,9 +255,7 @@ public class PlayerController : MonoBehaviour
         StopSleepSound();
     }
 
-    // =====================================================
     // AUDIO
-    // =====================================================
     private void SetupAudio()
     {
         sleepSource = gameObject.AddComponent<AudioSource>();
@@ -304,9 +284,7 @@ public class PlayerController : MonoBehaviour
             sleepSource.Stop();
     }
 
-    // =====================================================
     // OTHER
-    // =====================================================
     public void SetCooking(bool cooking)
     {
         animator.SetBool("IsCooking", cooking);
@@ -320,6 +298,16 @@ public class PlayerController : MonoBehaviour
 
         animator.SetBool("IsCarryingContainer", hasBowl);
         animator.SetBool("IsCarryingServeBox", hasServe);
+    }
+
+    public void ForceIdle()
+    {
+        if (rb == null) return;
+
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+
+        if (animator != null)
+            animator.SetBool("IsWalking", false);
     }
 
     public void DisableMovement()

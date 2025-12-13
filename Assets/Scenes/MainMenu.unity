@@ -437,7 +437,6 @@ GameObject:
   - component: {fileID: 84291024}
   - component: {fileID: 84291023}
   - component: {fileID: 84291022}
-  - component: {fileID: 84291025}
   m_Layer: 5
   m_Name: MasterVolume
   m_TagString: Untagged
@@ -530,18 +529,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 84291020}
   m_CullTransparentMesh: 1
---- !u!114 &84291025
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 84291020}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a9dca08e96a5be4cb26f36eddb35765, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SliderGamepadController
 --- !u!1 &114888094
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,7 +606,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 988457830}
 --- !u!1 &131198711
 GameObject:
@@ -7277,7 +7264,6 @@ GameObject:
   - component: {fileID: 544213823}
   - component: {fileID: 544213822}
   - component: {fileID: 544213821}
-  - component: {fileID: 544213824}
   m_Layer: 5
   m_Name: SFXVolume
   m_TagString: Untagged
@@ -7370,18 +7356,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 544213819}
   m_CullTransparentMesh: 1
---- !u!114 &544213824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 544213819}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a9dca08e96a5be4cb26f36eddb35765, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SliderGamepadController
 --- !u!1 &589353379
 GameObject:
   m_ObjectHideFlags: 0
@@ -7459,7 +7433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: close
+  logicalInput: 0
   iconImage: {fileID: 255923349}
 --- !u!1 &689694726
 GameObject:
@@ -8174,7 +8148,6 @@ GameObject:
   - component: {fileID: 750006606}
   - component: {fileID: 750006605}
   - component: {fileID: 750006604}
-  - component: {fileID: 750006607}
   m_Layer: 5
   m_Name: MusicVolume
   m_TagString: Untagged
@@ -8267,18 +8240,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 750006602}
   m_CullTransparentMesh: 1
---- !u!114 &750006607
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 750006602}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a9dca08e96a5be4cb26f36eddb35765, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SliderGamepadController
 --- !u!1 &778163266
 GameObject:
   m_ObjectHideFlags: 0
@@ -10162,7 +10123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: close
+  logicalInput: 0
   iconImage: {fileID: 1213522937}
 --- !u!1 &1298133626
 GameObject:

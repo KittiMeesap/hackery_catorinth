@@ -16,8 +16,8 @@ public class QTEManager : MonoBehaviour
     public QTE_SequenceUI sequenceUI;
 
     [Header("Mash Settings")]
-    public float mashFillPerHit = 0.08f;
-    public float mashDrainPerSec = 0.6f;
+    public float mashFillPerHit = 0.12f;
+    public float mashDrainPerSec = 0.4f;
     public float mashSuccessValue = 1f;
 
     public bool IsRunning { get; private set; }
@@ -26,6 +26,9 @@ public class QTEManager : MonoBehaviour
     private InputAction cancelQTEAction;
     private bool cancelBound;
 
+    // =====================================================
+    // LIFECYCLE
+    // =====================================================
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -53,10 +56,7 @@ public class QTEManager : MonoBehaviour
         BindCancel();
     }
 
-    private void OnDisable()
-    {
-        UnbindCancel();
-    }
+    private void OnDisable() => UnbindCancel();
 
     private void OnDestroy()
     {
@@ -65,6 +65,9 @@ public class QTEManager : MonoBehaviour
             Instance = null;
     }
 
+    // =====================================================
+    // CANCEL QTE
+    // =====================================================
     private void BindCancel()
     {
         if (cancelBound) return;
@@ -97,10 +100,14 @@ public class QTEManager : MonoBehaviour
             CancelCurrentQTE();
     }
 
-    // ==============================
-    // START QTE
-    // ==============================
-    public void StartMashQTE(string logicalKey = "confirm")
+    // =====================================================
+    // START QTE (NEW API)
+    // =====================================================
+
+    /// <summary>
+    /// Mash QTE (Space)
+    /// </summary>
+    public void StartMashQTE()
     {
         if (IsRunning) return;
 
@@ -109,7 +116,6 @@ public class QTEManager : MonoBehaviour
 
         mashUI.gameObject.SetActive(true);
         mashUI.Begin(
-            logicalKey,
             mashFillPerHit,
             mashDrainPerSec,
             mashSuccessValue,
@@ -117,7 +123,10 @@ public class QTEManager : MonoBehaviour
         );
     }
 
-    public void StartTimingQTE(float speed, float zoneSize, string logicalKey = "confirm")
+    /// <summary>
+    /// Timing QTE (Space)
+    /// </summary>
+    public void StartTimingQTE(float speed, float zoneSize)
     {
         if (IsRunning) return;
 
@@ -125,20 +134,40 @@ public class QTEManager : MonoBehaviour
         GameInput.Instance.SetModeQTE();
 
         timingUI.gameObject.SetActive(true);
-        timingUI.Begin(logicalKey, speed, zoneSize, FinishInternal);
+        timingUI.Begin(
+            speed,
+            zoneSize,
+            FinishInternal
+        );
     }
 
-    public void StartSequenceQTE(string[] sequence, float timePerKey = 2f)
+    /// <summary>
+    /// Sequence QTE (Arrow / D-Pad)
+    /// </summary>
+    public void StartSequenceQTE(LogicalInput[] sequence, float timePerKey)
     {
         if (IsRunning) return;
+
+        if (sequence == null || sequence.Length == 0)
+        {
+            Debug.LogError("QTEManager: Sequence is empty");
+            return;
+        }
 
         IsRunning = true;
         GameInput.Instance.SetModeQTE();
 
         sequenceUI.gameObject.SetActive(true);
-        sequenceUI.Begin(sequence, timePerKey, FinishInternal);
+        sequenceUI.Begin(
+            sequence,
+            timePerKey,
+            FinishInternal
+        );
     }
 
+    // =====================================================
+    // FINISH / CANCEL
+    // =====================================================
     private void FinishInternal(QTEResult result)
     {
         IsRunning = false;

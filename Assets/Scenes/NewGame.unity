@@ -1712,7 +1712,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 235288980}
 --- !u!1 &249489570
 GameObject:
@@ -2157,7 +2157,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 10}
   m_SizeDelta: {x: 64, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &279792504
@@ -4401,7 +4401,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 445228946}
 --- !u!1 &461857461
 GameObject:
@@ -4929,6 +4929,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4368398519861116144, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 1664261974}
     - target: {fileID: 7323349239095205498, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_Size.x
       value: 0.9375
@@ -4944,6 +4948,10 @@ PrefabInstance:
     - target: {fileID: 7323349239095205498, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
       propertyPath: m_Offset.y
       value: 0.578125
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160877972832773245, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
+      propertyPath: m_GravityScale
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5302,7 +5310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 255936091}
 --- !u!1 &549322144
 GameObject:
@@ -7313,7 +7321,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -26.5, y: 0}
+  m_AnchoredPosition: {x: -26.5, y: 10}
   m_SizeDelta: {x: 16, y: 16}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &803542199
@@ -7366,7 +7374,6 @@ GameObject:
   - component: {fileID: 819212387}
   - component: {fileID: 819212386}
   - component: {fileID: 819212385}
-  - component: {fileID: 819212384}
   m_Layer: 5
   m_Name: SFXVolume
   m_TagString: Untagged
@@ -7395,18 +7402,6 @@ RectTransform:
   m_AnchoredPosition: {x: 740, y: -710}
   m_SizeDelta: {x: 1480, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &819212384
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 819212382}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a9dca08e96a5be4cb26f36eddb35765, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SliderGamepadController
 --- !u!114 &819212385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8208,7 +8203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: cancel
+  logicalInput: 0
   iconImage: {fileID: 786116927}
 --- !u!114 &905918121
 MonoBehaviour:
@@ -9398,6 +9393,7 @@ MonoBehaviour:
   timePerKey: 1.2
   sfxOvenLoop: SFX_Oven_Loop
   sfxOvenSuccess: SFX_Oven_Success
+  sfxOvenFail: SFX_Food_Burn
 --- !u!1 &1026130872
 GameObject:
   m_ObjectHideFlags: 0
@@ -9780,7 +9776,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: close
+  logicalInput: 0
   iconImage: {fileID: 90590610}
 --- !u!114 &1071092010
 MonoBehaviour:
@@ -9932,14 +9928,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86e9b33163122604582b0fe5fa9012a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QTE_SequenceUI
-  root: {fileID: 675595829}
   keyIcon: {fileID: 1902864960}
-  textLabel: {fileID: 926402857}
-  bgFill: {fileID: 847728423}
-  stepPunchScale: 1.15
-  stepPunchDuration: 0.08
-  failShakeMagnitude: 40
-  failShakeDuration: 0.08
+  timerFill: {fileID: 847728423}
 --- !u!1 &1108920740
 GameObject:
   m_ObjectHideFlags: 0
@@ -10474,7 +10464,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Mixer
   promptUI: {fileID: 1458573234}
   highlightObj: {fileID: 778139316}
-  mashKey: Q
   sfxMixLoop: SFX_Mixer_Loop
 --- !u!1 &1152015056
 GameObject:
@@ -12025,7 +12014,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 322250718}
 --- !u!114 &1351743048
 MonoBehaviour:
@@ -12352,7 +12341,6 @@ GameObject:
   - component: {fileID: 1392084936}
   - component: {fileID: 1392084935}
   - component: {fileID: 1392084934}
-  - component: {fileID: 1392084933}
   m_Layer: 5
   m_Name: MasterVolume
   m_TagString: Untagged
@@ -12381,18 +12369,6 @@ RectTransform:
   m_AnchoredPosition: {x: 740, y: -490}
   m_SizeDelta: {x: 1480, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1392084933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1392084931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a9dca08e96a5be4cb26f36eddb35765, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SliderGamepadController
 --- !u!114 &1392084934
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12456,6 +12432,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1392084931}
+  m_CullTransparentMesh: 1
+--- !u!1 &1396443367
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1396443368}
+  - component: {fileID: 1396443370}
+  - component: {fileID: 1396443369}
+  m_Layer: 5
+  m_Name: KeyIcon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1396443368
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396443367}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2125315645}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -47}
+  m_SizeDelta: {x: 50, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1396443369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396443367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 7640484556002510630, guid: fee8766d5d6139546839f5d073b67683, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1396443370
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396443367}
   m_CullTransparentMesh: 1
 --- !u!1 &1412647604
 GameObject:
@@ -12653,7 +12704,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 1417922059}
 --- !u!1 &1433048880
 GameObject:
@@ -13081,7 +13132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 1458573236}
 --- !u!1 &1468151786
 GameObject:
@@ -14422,16 +14473,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfbcfb54097774c4ab783a7cad961b87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QTE_MashUI
-  root: {fileID: 1191754403}
-  canvasGroup: {fileID: 1622498018}
   barFill: {fileID: 268475403}
   keyIcon: {fileID: 1152015058}
-  labelText: {fileID: 434247643}
-  fadeInDuration: 0.15
-  hitPunchScale: 1.15
-  hitPunchDuration: 0.08
-  sfxMashHit: SFX_Mixer_Mash
-  sfxSuccess: SFX_Mixer_Success
+  barRoot: {fileID: 1622498016}
+  graceAfterHit: 0.15
+  drainMultiplier: 0.75
+  comboBoost: 0.05
+  comboWindow: 0.22
+  bounceScale: 1.15
+  bounceSpeed: 16
+  returnSpeed: 10
 --- !u!225 &1622498018
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -14971,7 +15022,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 1653057533}
 --- !u!4 &1654455849 stripped
 Transform:
@@ -15412,7 +15463,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1672758344
 MonoBehaviour:
@@ -15426,12 +15477,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c1cabbd1e8efb2409a27fb6ca17f6d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QTE_TimingUI
-  root: {fileID: 2125315645}
-  pointer: {fileID: 803542199}
+  pointer: {fileID: 803542198}
   successZone: {fileID: 1472875626}
-  keyIcon: {fileID: 0}
-  shakeMagnitude: 8
-  shakeDuration: 0.15
+  keyIcon: {fileID: 1396443369}
 --- !u!1 &1680809063
 GameObject:
   m_ObjectHideFlags: 0
@@ -16651,7 +16699,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 1774368785}
 --- !u!1 &1778511839
 GameObject:
@@ -17141,7 +17189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 1830985182}
 --- !u!1 &1834264762
 GameObject:
@@ -17700,7 +17748,6 @@ GameObject:
   - component: {fileID: 1882522227}
   - component: {fileID: 1882522226}
   - component: {fileID: 1882522225}
-  - component: {fileID: 1882522224}
   m_Layer: 5
   m_Name: MusicVolume
   m_TagString: Untagged
@@ -17729,18 +17776,6 @@ RectTransform:
   m_AnchoredPosition: {x: 740, y: -600}
   m_SizeDelta: {x: 1480, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1882522224
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1882522222}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a9dca08e96a5be4cb26f36eddb35765, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SliderGamepadController
 --- !u!114 &1882522225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18110,7 +18145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalKey: confirm
+  logicalInput: 0
   iconImage: {fileID: 1925152067}
 --- !u!1 &1928315094
 GameObject:
@@ -20058,12 +20093,13 @@ RectTransform:
   m_Children:
   - {fileID: 279792503}
   - {fileID: 803542198}
+  - {fileID: 1396443368}
   m_Father: {fileID: 1672758343}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2136107721
 GameObject:

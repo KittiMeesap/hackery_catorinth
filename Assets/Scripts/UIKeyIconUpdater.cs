@@ -1,16 +1,42 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum LogicalInput
+{
+    // PLAYER
+    Interact,
+    Pause,
+
+    // UI
+    UISubmit,
+    UICancel,
+
+    // QTE
+    QTEConfirm,
+    CancelQTE,
+
+    // DIRECTION
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+
+
 public class UIKeyIconUpdater : MonoBehaviour
 {
-    public string logicalKey = "confirm";
+    public LogicalInput logicalInput;
     public Image iconImage;
 
-    private void OnEnable()
+    private void Awake()
     {
         if (!iconImage)
             iconImage = GetComponent<Image>();
+    }
 
+    private void OnEnable()
+    {
         UpdateIcon();
 
         if (GameInput.Instance != null)
@@ -27,8 +53,8 @@ public class UIKeyIconUpdater : MonoBehaviour
     {
         if (!iconImage) return;
 
-        Sprite icon = KeyIconDatabase.GetIcon(logicalKey);
-        if (icon != null)
-            iconImage.sprite = icon;
+        Sprite s = KeyIconDatabase.GetIcon(logicalInput);
+        if (s != null)
+            iconImage.sprite = s;
     }
 }

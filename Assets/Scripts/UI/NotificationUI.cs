@@ -135,9 +135,7 @@ public class NotificationUI : MonoBehaviour
         }
     }
 
-    // =================================================
     // HELPERS
-    // =================================================
     private Color GetColor(NotifyType type)
     {
         return type switch

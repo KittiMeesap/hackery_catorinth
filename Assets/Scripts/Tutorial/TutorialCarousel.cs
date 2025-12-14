@@ -130,7 +130,7 @@ public class TutorialCarousel : MonoBehaviour
 
     private void LoadGameScene()
     {
-        SceneManager.LoadScene("NewGame");
+        SceneManager.LoadScene("Map1");
     }
 
     private void UpdatePageDots(int index)

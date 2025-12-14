@@ -109,6 +109,9 @@ public class PlayerController : MonoBehaviour
     // UPDATE LOOP
     private void Update()
     {
+        if (GameManager.Instance.CurrentState != GameState.Playing)
+            return;
+
         ReadMovement();
         UpdateAnimator();
         HandleAFK();

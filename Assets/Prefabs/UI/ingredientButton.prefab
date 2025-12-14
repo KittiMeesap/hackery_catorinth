@@ -68,8 +68,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 6136787850211888019, guid: da3519e32b6193b4c8c4212ca24dde04, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -140,6 +140,7 @@ MonoBehaviour:
   highlightColor: {r: 0.75, g: 0.9, b: 1, a: 1}
   selectedColor: {r: 0.65, g: 1, b: 0.65, a: 1}
   lockedColor: {r: 0.45, g: 0.45, b: 0.45, a: 1}
+  selectedHighlightColor: {r: 0.35, g: 0.85, b: 0.35, a: 1}
 --- !u!1 &5019023993427888970
 GameObject:
   m_ObjectHideFlags: 0

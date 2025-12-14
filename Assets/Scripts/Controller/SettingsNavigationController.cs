@@ -20,6 +20,9 @@ public class SettingsNavigationController : MonoBehaviour
     public ScrollRect scrollRect;
     public bool autoScroll = true;
 
+    [Header("Scroll Content")]
+    public RectTransform contentRect;
+
     [Header("Display Mode & Resolution")]
     public TextMeshProUGUI displayModeValueText;
     public TextMeshProUGUI resolutionValueText;
@@ -249,11 +252,41 @@ public class SettingsNavigationController : MonoBehaviour
 
     private void UpdateScrollPosition()
     {
-        if (!autoScroll || rowImages.Length <= 1) return;
+        if (!autoScroll || scrollRect == null || contentRect == null)
+            return;
 
-        float t = 1f - (float)currentRowIndex / (rowImages.Length - 1);
-        scrollRect.verticalNormalizedPosition = Mathf.Clamp01(t);
+        RectTransform row = rowImages[currentRowIndex].rectTransform;
+
+        Canvas.ForceUpdateCanvases();
+
+        float contentHeight = contentRect.rect.height;
+        float viewportHeight = scrollRect.viewport.rect.height;
+
+        if (contentHeight <= viewportHeight)
+            return;
+
+        // row position (top-based)
+        float rowTop = -row.anchoredPosition.y;
+        float rowBottom = rowTop - row.rect.height;
+
+        float viewTop = contentRect.anchoredPosition.y;
+        float viewBottom = viewTop + viewportHeight;
+
+        float offset = 0f;
+
+        if (rowTop > viewTop)
+            offset = rowTop - viewTop;
+        else if (rowBottom < viewBottom)
+            offset = rowBottom - viewBottom;
+
+        if (Mathf.Abs(offset) > 0.01f)
+        {
+            Vector2 pos = contentRect.anchoredPosition;
+            pos.y += offset;
+            contentRect.anchoredPosition = pos;
+        }
     }
+
 
     private void RefreshDisplayTexts()
     {

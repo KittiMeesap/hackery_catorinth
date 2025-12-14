@@ -41,4 +41,11 @@ public class ServiceTrigger : MonoBehaviour
             playerInventory = null;
         }
     }
+
+    public void ClearCurrentCustomer()
+    {
+        currentCustomer = null;
+        playerInside = false;
+    }
+
 }

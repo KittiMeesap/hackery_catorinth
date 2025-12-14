@@ -13,6 +13,7 @@ public class PackingTable : InteractStation
     private PlayerInventory currentPlayer;
     private PlayerController currentController;
     private AudioSource loopSource;
+    private bool isPacking;
 
     protected override void Awake()
     {
@@ -24,12 +25,41 @@ public class PackingTable : InteractStation
 
     public override void Interact(PlayerInventory player)
     {
-        if (!player.HasBowl()) return;
+        // ---- spam guard ----
+        if (isPacking)
+        {
+            NotificationUI.Instance?.Show(
+                "Already packing!",
+                NotifyType.Info
+            );
+            return;
+        }
+
+        // ---- no bowl ----
+        if (!player.HasBowl())
+        {
+            NotificationUI.Instance?.Show(
+                "You need a bowl first!",
+                NotifyType.Warning
+            );
+            return;
+        }
 
         var bowl = player.bowl;
+
+        // ---- not finished dish ----
         if (bowl.state != ContainerData.ContainerState.Finished &&
             bowl.state != ContainerData.ContainerState.Sliced)
+        {
+            NotificationUI.Instance?.Show(
+                "This dish is not ready to pack",
+                NotifyType.Warning
+            );
             return;
+        }
+
+        // ---- start packing ----
+        isPacking = true;
 
         currentPlayer = player;
         currentController = player.GetComponent<PlayerController>();
@@ -73,14 +103,26 @@ public class PackingTable : InteractStation
         currentController.EnableMovement();
         UnlockInteraction();
 
-        if (result == QTEResult.Fail) return;
+        isPacking = false;
 
+        // ---- FAIL ----
+        if (result == QTEResult.Fail)
+        {
+            NotificationUI.Instance?.Show(
+                "Packing failed!",
+                NotifyType.Warning
+            );
+            return;
+        }
+
+        // ---- SUCCESS ----
         currentPlayer.ConvertToServeBox();
 
         ContainerData empty = new ContainerData
         {
             state = ContainerData.ContainerState.Empty
         };
+
         currentPlayer.ReturnBowlToLastCounter(empty);
         currentPlayer.OnInventoryChanged?.Invoke();
 
@@ -97,7 +139,8 @@ public class PackingTable : InteractStation
         if (clip == null) return;
 
         loopSource.clip = clip;
-        loopSource.volume = AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
+        loopSource.volume =
+            AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
         loopSource.Play();
     }
 

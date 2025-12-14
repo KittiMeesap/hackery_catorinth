@@ -18,7 +18,7 @@ public class Counter : InteractStation
     {
         PlayerController pc = player.GetComponent<PlayerController>();
 
-        // === PLAYER PLACES BOWL ===
+        // PLAYER PLACES BOWL
         if (player.HasBowl() && bowlOnCounter == null)
         {
             bowlOnCounter = player.TakeBowl();
@@ -32,14 +32,17 @@ public class Counter : InteractStation
             return;
         }
 
-        // === PLAYER TRIES TO TAKE BOWL WHILE HOLDING SERVE BOX ===
+        // PLAYER TRIES TO TAKE BOWL WHILE HOLDING SERVE BOX
         if (player.HasServeBox())
         {
-            Debug.Log("Counter: Cannot take bowl while holding a serve box!");
+            NotificationUI.Instance?.Show(
+                "Put the serve box down first!",
+                NotifyType.Warning
+            );
             return;
         }
 
-        // === PLAYER TAKES BOWL BACK ===
+        // PLAYER TAKES BOWL BACK
         if (!player.HasBowl() && bowlOnCounter != null)
         {
             player.GiveBowl(bowlOnCounter);
@@ -54,6 +57,7 @@ public class Counter : InteractStation
         }
     }
 
+    // RETURN BOWL
     public void ReceiveReturnedBowl(ContainerData data)
     {
         bowlOnCounter = data;
@@ -65,7 +69,5 @@ public class Counter : InteractStation
         }
 
         iconUI?.Refresh(bowlOnCounter);
-
-        Debug.Log("Counter: Received returned bowl.");
     }
 }

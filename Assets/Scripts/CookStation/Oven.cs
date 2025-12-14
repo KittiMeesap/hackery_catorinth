@@ -21,10 +21,9 @@ public class Oven : InteractStation
     private PlayerInventory currentPlayer;
     private PlayerController currentController;
     private AudioSource loopSource;
+    private bool isBaking;
 
-    // =====================================================
     // LIFECYCLE
-    // =====================================================
     protected override void Awake()
     {
         base.Awake();
@@ -50,13 +49,41 @@ public class Oven : InteractStation
             animator.SetTrigger(Close);
     }
 
-    // =====================================================
     // INTERACT
-    // =====================================================
     public override void Interact(PlayerInventory player)
     {
-        if (!player.HasBowl() || !player.bowl.CanBake())
+        //  spam guard 
+        if (isBaking)
+        {
+            NotificationUI.Instance?.Show(
+                "Already baking!",
+                NotifyType.Info
+            );
             return;
+        }
+
+        //  no bowl 
+        if (!player.HasBowl())
+        {
+            NotificationUI.Instance?.Show(
+                "You need a bowl first!",
+                NotifyType.Warning
+            );
+            return;
+        }
+
+        //  cannot bake yet 
+        if (!player.bowl.CanBake())
+        {
+            NotificationUI.Instance?.Show(
+                "This dish is not ready to bake",
+                NotifyType.Warning
+            );
+            return;
+        }
+
+        //  start baking 
+        isBaking = true;
 
         currentPlayer = player;
         currentController = player.GetComponent<PlayerController>();
@@ -75,9 +102,7 @@ public class Oven : InteractStation
         );
     }
 
-    // =====================================================
     // QTE
-    // =====================================================
     private LogicalInput[] GenerateSequence(int count)
     {
         LogicalInput[] pool =
@@ -106,7 +131,9 @@ public class Oven : InteractStation
         currentController.EnableMovement();
         UnlockInteraction();
 
-        // ================= SUCCESS =================
+        isBaking = false;
+
+        // SUCCESS
         if (result == QTEResult.Success)
         {
             currentPlayer.bowl.DoBake();
@@ -117,16 +144,21 @@ public class Oven : InteractStation
                 transform.position,
                 true
             );
+
             return;
         }
 
-        // ================= FAIL =================
+        // FAIL
         if (result == QTEResult.Fail)
         {
             currentPlayer.bowl.Clear();
             currentPlayer.bowl.state = ContainerData.ContainerState.Empty;
-
             currentPlayer.OnInventoryChanged?.Invoke();
+
+            NotificationUI.Instance?.Show(
+                "The food is burnt!",
+                NotifyType.Error
+            );
 
             AudioManager.Instance?.PlaySFXAt(
                 sfxOvenFail,

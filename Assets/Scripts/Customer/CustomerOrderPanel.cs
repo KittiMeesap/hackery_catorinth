@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class CustomerOrderPanel : MonoBehaviour
 {
     public static CustomerOrderPanel Instance { get; private set; }
+    public CustomerController CurrentCustomer { get; private set; }
+
 
     [Header("Root")]
     public GameObject panelRoot;
@@ -15,6 +17,17 @@ public class CustomerOrderPanel : MonoBehaviour
 
     [Header("Timer")]
     public Image timerFill;
+
+    [Header("Timer Colors")]
+    public Color timerNormalColor = new Color(0.3f, 1f, 0.4f);
+    public Color timerWarningColor = new Color(1f, 0.85f, 0.3f);
+    public Color timerDangerColor = new Color(1f, 0.35f, 0.35f);
+
+    [Tooltip("Below this value -> warning color")]
+    [Range(0f, 1f)] public float warningThreshold = 0.5f;
+
+    [Tooltip("Below this value -> danger color")]
+    [Range(0f, 1f)] public float dangerThreshold = 0.25f;
 
     [Header("Groups")]
     public Transform recipeGroup;
@@ -63,34 +76,57 @@ public class CustomerOrderPanel : MonoBehaviour
         }
     }
 
+    // PUBLIC API
     public void Show(CustomerController customer, RecipeSO recipe, Sprite customerSprite)
     {
-        if (panelRoot != null)
-            panelRoot.SetActive(true);
+        CurrentCustomer = customer;
 
-        if (customerIcon != null)
-            customerIcon.sprite = customerSprite;
+        panelRoot.SetActive(true);
 
-        if (recipeIcon != null && recipe != null)
-            recipeIcon.sprite = recipe.outputIcon;
+        customerIcon.sprite = customerSprite;
+        recipeIcon.sprite = recipe.outputIcon;
 
         BuildRecipeIcons(recipe);
         BuildToolIcons(recipe);
+
         UpdateTimer(1f);
     }
 
     public void Hide()
     {
+        CurrentCustomer = null;
+
         if (panelRoot != null)
             panelRoot.SetActive(false);
     }
 
     public void UpdateTimer(float normalized)
     {
-        if (timerFill != null)
-            timerFill.fillAmount = Mathf.Clamp01(normalized);
+        normalized = Mathf.Clamp01(normalized);
+
+        if (timerFill == null) return;
+
+        timerFill.fillAmount = normalized;
+        timerFill.color = GetTimerColor(normalized);
     }
 
+    // =========================
+    // TIMER COLOR LOGIC
+    // =========================
+    private Color GetTimerColor(float normalized)
+    {
+        if (normalized <= dangerThreshold)
+            return timerDangerColor;
+
+        if (normalized <= warningThreshold)
+            return timerWarningColor;
+
+        return timerNormalColor;
+    }
+
+    // =========================
+    // ICON BUILDERS
+    // =========================
     private void BuildRecipeIcons(RecipeSO recipe)
     {
         foreach (Transform c in recipeGroup)
@@ -116,11 +152,7 @@ public class CustomerOrderPanel : MonoBehaviour
 
         List<CustomerToolType> tools = new();
 
-        if (recipe.flow == ProcessFlow.None)
-        {
-            // Sliced items have no required tools
-        }
-        else
+        if (recipe.flow != ProcessFlow.None)
         {
             if (showMixerIcon)
                 tools.Add(CustomerToolType.Mixer);
@@ -174,5 +206,4 @@ public class CustomerOrderPanel : MonoBehaviour
                 img.sprite = sprite;
         }
     }
-
 }

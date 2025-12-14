@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0225e7ff53c7c814eb6740aee0e29624, type: 3}
   m_Name: Map0_UnlockData
   m_EditorClassIdentifier: Assembly-CSharp::UnlockDatabaseSO
-  dayUnlockTable: []
+  dayUnlockTable:
+  - dayIndex: 2
+    unlocks: []
+  - dayIndex: 3
+    unlocks: []
+  - dayIndex: 4
+    unlocks: []
+  - dayIndex: 5
+    unlocks: []
+  - dayIndex: 6
+    unlocks: []
+  - dayIndex: 7
+    unlocks: []

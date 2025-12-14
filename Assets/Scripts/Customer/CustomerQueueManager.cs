@@ -19,207 +19,256 @@ public class CustomerQueueManager : MonoBehaviour
     public Transform spawnPoint;
     public Transform exitPoint;
 
-    [Header("Wave Settings")]
-    public float waveDelay = 4f;
-    public int[] waveSizes = new int[] { 2, 3, 2 };
-
-    [Header("Spawn Settings")]
-    public float spawnInterval = 1.5f;
-    public int poolSize = 10;
+    [Header("Spawn Clamp")]
+    public float minSpawnInterval = 1.2f;
+    public float maxSpawnInterval = 5f;
 
     [Header("Customer Prefabs")]
     public List<CustomerPrefabEntry> customerPrefabs = new();
 
-    private float spawnTimer;
-    private float waveTimer;
-    private int currentWave = 0;
-    private int waveSpawnedCount = 0;
-
-    private readonly Queue<CustomerController> pool = new();
+    private readonly List<CustomerController> pool = new();
     private readonly List<CustomerController> activeCustomers = new();
+
+    private int requiredCustomers;
+    private int spawnedToday;
+    private float spawnInterval;
+    private float spawnTimer;
+
+    private float adaptiveSpawnMultiplier = 1f;
+    private float adaptiveVipBonus = 0f;
 
     private void Start()
     {
-        spawnTimer = spawnInterval;
-        waveTimer = waveDelay;
-
         CreatePool();
     }
 
     private void Update()
     {
-        if (currentWave >= waveSizes.Length)
+        if (GameManager.Instance == null ||
+            GameManager.Instance.CurrentState != GameState.Playing)
             return;
 
-        if (waveTimer > 0)
-        {
-            waveTimer -= Time.deltaTime;
+        if (spawnedToday >= requiredCustomers)
             return;
-        }
 
         spawnTimer -= Time.deltaTime;
+        if (spawnTimer > 0f) return;
 
-        if (spawnTimer <= 0f)
-        {
-            TrySpawnCustomer();
-            spawnTimer = spawnInterval;
-        }
+        TrySpawnCustomer();
+        spawnTimer = spawnInterval * adaptiveSpawnMultiplier;
     }
 
-    // POOL
-    private void CreatePool()
+    // DAY SETUP
+    public void SetupForDay(int targetOrders, int dayIndex, float dayHours)
     {
-        if (customerPrefabs.Count == 0)
-        {
-            Debug.LogError("CustomerQueueManager: No NPC Prefabs!");
-            return;
-        }
+        spawnedToday = 0;
+        activeCustomers.Clear();
 
-        for (int i = 0; i < poolSize; i++)
-        {
-            var entry = customerPrefabs[Random.Range(0, customerPrefabs.Count)];
-            var obj = Instantiate(entry.prefab);
-            obj.SetActive(false);
+        requiredCustomers =
+            Mathf.CeilToInt(targetOrders / 0.7f);
 
-            var ctrl = obj.GetComponent<CustomerController>();
-            if (ctrl == null)
-            {
-                Debug.LogError("Prefab Didn't have CustomerController!");
-                Destroy(obj);
-                continue;
-            }
+        requiredCustomers =
+            Mathf.CeilToInt(requiredCustomers * (1f + dayIndex * 0.08f));
 
-            ctrl.queueManager = this;
-            pool.Enqueue(ctrl);
-        }
+        float totalSeconds = dayHours * 3600f;
+
+        spawnInterval = Mathf.Clamp(
+            totalSeconds / requiredCustomers,
+            minSpawnInterval,
+            maxSpawnInterval
+        );
+
+        spawnTimer = spawnInterval;
+        adaptiveSpawnMultiplier = 1f;
+        adaptiveVipBonus = 0f;
+
+        Debug.Log(
+            $"[Day {dayIndex}] Orders:{targetOrders} " +
+            $"Customers:{requiredCustomers} Interval:{spawnInterval:0.00}s"
+        );
     }
 
-    private CustomerController GetCustomerFromPool(CustomerPrefabEntry entry)
+    // ADAPTIVE DIFFICULTY
+    public void ApplyAdaptiveDifficulty(
+        float playerOrdersPerHour,
+        float requiredOrdersPerHour)
     {
-        CustomerController ctrl = null;
+        float diff = playerOrdersPerHour - requiredOrdersPerHour;
 
-        if (pool.Count > 0)
-        {
-            ctrl = pool.Dequeue();
-            ctrl.gameObject.SetActive(true);
-        }
-        else
-        {
-            var obj = Instantiate(entry.prefab);
-            ctrl = obj.GetComponent<CustomerController>();
-        }
+        adaptiveSpawnMultiplier = Mathf.Clamp(
+            1f - diff * 0.4f,
+            0.75f,
+            1.25f
+        );
 
-        ctrl.personality = entry.personality;
-        ctrl.queueManager = this;
-        return ctrl;
+        adaptiveVipBonus = Mathf.Clamp(
+            diff * 0.25f,
+            -0.15f,
+            0.25f
+        );
     }
 
-    private void ReturnToPool(CustomerController ctrl)
-    {
-        ctrl.gameObject.SetActive(false);
-        pool.Enqueue(ctrl);
-    }
-
-    // SPAWN LOGIC
+    // SPAWN
     private void TrySpawnCustomer()
     {
-        if (currentWave >= waveSizes.Length) return;
+        int index = GetFirstFreeQueueIndex();
+        if (index == -1) return;
 
-        int waveLimit = waveSizes[currentWave];
-        if (waveSpawnedCount >= waveLimit)
-        {
-            currentWave++;
-            waveSpawnedCount = 0;
-            waveTimer = waveDelay;
-            return;
-        }
+        var recipe = GetRandomRecipe();
+        if (recipe == null) return;
 
-        int freeIndex = GetFirstFreeQueueIndex();
-        if (freeIndex == -1) return;
-
-        var entry = PickRandomCustomerEntry();
+        var entry = PickCustomer();
         if (entry == null) return;
 
-        var ctrl = GetCustomerFromPool(entry);
-        Vector3 spawnPos = spawnPoint ? spawnPoint.position : queuePoints[freeIndex].position;
+        var ctrl = GetFromPool(entry);
+        ctrl.transform.position =
+            spawnPoint ? spawnPoint.position : queuePoints[index].position;
 
-        ctrl.transform.position = spawnPos;
-
-        RecipeSO recipe = null;
-        if (RecipeManager.Instance != null && RecipeManager.Instance.recipes.Count > 0)
-        {
-            int idx = Random.Range(0, RecipeManager.Instance.recipes.Count);
-            recipe = RecipeManager.Instance.recipes[idx];
-        }
-
-        ctrl.Initialize(recipe, ctrl.customerFaceIcon, queuePoints[freeIndex].position, freeIndex);
+        ctrl.Initialize(
+            recipe,
+            ctrl.customerFaceIcon,
+            queuePoints[index].position,
+            index
+        );
 
         activeCustomers.Add(ctrl);
-        waveSpawnedCount++;
+        spawnedToday++;
+
+        GameManager.Instance.NotifyCustomerSpawned();
     }
 
-    private int GetFirstFreeQueueIndex()
+    private CustomerPrefabEntry PickCustomer()
     {
-        if (queuePoints.Length == 0) return -1;
+        var day = GameManager.Instance.CurrentDayConfig;
 
-        bool[] used = new bool[queuePoints.Length];
+        float vipChance = Mathf.Clamp01(
+            day.vipSpawnChance + adaptiveVipBonus
+        );
 
-        foreach (var c in activeCustomers)
-        {
-            if (c == null) continue;
-            if (c.queueIndex >= 0 && c.queueIndex < used.Length)
-                used[c.queueIndex] = true;
-        }
+        bool wantVIP = Random.value < vipChance;
 
-        for (int i = 0; i < used.Length; i++)
-        {
-            if (!used[i])
-                return i;
-        }
-
-        return -1;
-    }
-
-    private CustomerPrefabEntry PickRandomCustomerEntry()
-    {
         float total = 0f;
         foreach (var e in customerPrefabs)
-            total += Mathf.Max(0, e.weight);
-
-        if (total <= 0f) return null;
+        {
+            if (wantVIP && e.personality != CustomerPersonality.VIP) continue;
+            if (!wantVIP && e.personality == CustomerPersonality.VIP) continue;
+            total += e.weight;
+        }
 
         float r = Random.value * total;
         float sum = 0f;
 
         foreach (var e in customerPrefabs)
         {
-            sum += Mathf.Max(0, e.weight);
+            if (wantVIP && e.personality != CustomerPersonality.VIP) continue;
+            if (!wantVIP && e.personality == CustomerPersonality.VIP) continue;
+
+            sum += e.weight;
             if (r <= sum) return e;
         }
 
-        return customerPrefabs[0];
+        return null;
     }
 
-    // CUSTOMER LEAVE
+    // POOL & QUEUE
+    private void CreatePool()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            var entry = customerPrefabs[i % customerPrefabs.Count];
+            var obj = Instantiate(entry.prefab);
+            obj.SetActive(false);
+
+            var ctrl = obj.GetComponent<CustomerController>();
+            ctrl.queueManager = this;
+            ctrl.prefabId = entry.id;
+            ctrl.personality = entry.personality;
+
+            pool.Add(ctrl);
+        }
+    }
+
+    private CustomerController GetFromPool(CustomerPrefabEntry entry)
+    {
+        for (int i = 0; i < pool.Count; i++)
+        {
+            if (pool[i].prefabId == entry.id)
+            {
+                var c = pool[i];
+                pool.RemoveAt(i);
+                c.gameObject.SetActive(true);
+                c.enabled = true;
+                return c;
+            }
+        }
+
+        var obj = Instantiate(entry.prefab);
+        var ctrl = obj.GetComponent<CustomerController>();
+        ctrl.queueManager = this;
+        ctrl.prefabId = entry.id;
+        ctrl.personality = entry.personality;
+        return ctrl;
+    }
+
     public void OnCustomerLeft(CustomerController ctrl)
     {
-        if (activeCustomers.Contains(ctrl))
-            activeCustomers.Remove(ctrl);
-
-        ReturnToPool(ctrl);
-
+        activeCustomers.Remove(ctrl);
+        ctrl.gameObject.SetActive(false);
+        pool.Add(ctrl);
         ReorderQueue();
     }
 
     private void ReorderQueue()
     {
-        activeCustomers.RemoveAll(c => c == null);
-
         activeCustomers.Sort((a, b) => a.queueIndex.CompareTo(b.queueIndex));
-
-        for (int i = 0; i < activeCustomers.Count; i++)
-        {
+        for (int i = 0; i < activeCustomers.Count && i < queuePoints.Length; i++)
             activeCustomers[i].SetQueueSlot(i, queuePoints[i].position);
+    }
+
+    private int GetFirstFreeQueueIndex()
+    {
+        bool[] used = new bool[queuePoints.Length];
+        foreach (var c in activeCustomers)
+            used[c.queueIndex] = true;
+
+        for (int i = 0; i < used.Length; i++)
+            if (!used[i]) return i;
+
+        return -1;
+    }
+
+    private RecipeSO GetRandomRecipe()
+    {
+        if (RecipeManager.Instance == null ||
+            RecipeManager.Instance.recipes.Count == 0)
+            return null;
+
+        return RecipeManager.Instance.recipes[
+            Random.Range(0, RecipeManager.Instance.recipes.Count)
+        ];
+    }
+
+    public void FreezeAllCustomers()
+    {
+        foreach (var c in activeCustomers)
+        {
+            if (c == null) continue;
+            c.Freeze();
         }
     }
+
+    public void ClearAllCustomers()
+    {
+        foreach (var c in activeCustomers)
+        {
+            if (c == null) continue;
+
+            c.ResetForPool();
+            c.gameObject.SetActive(false);
+            pool.Add(c);
+        }
+
+        activeCustomers.Clear();
+    }
+
 }

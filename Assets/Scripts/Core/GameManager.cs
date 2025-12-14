@@ -1,11 +1,18 @@
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 
+public enum GameState
+{
+    Playing,
+    EndingDay,
+    EndDayUI
+}
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+    public GameState CurrentState { get; private set; } = GameState.Playing;
 
     [Header("References")]
     public TimeOfDaySystem timeSystem;
@@ -13,6 +20,7 @@ public class GameManager : MonoBehaviour
     public EndDayUI endDayUI;
     public OrderGoalSystem orderGoalSystem;
     public OrderUI orderUI;
+    [SerializeField] private CustomerQueueManager queueManager;
 
     [Header("HUD")]
     public TextMeshProUGUI dayLabel;
@@ -20,8 +28,18 @@ public class GameManager : MonoBehaviour
     private DayConfigSO currentDayConfig;
     private bool dayRunning = false;
 
+    private int spawnedCustomersToday;
+    private int failedOrdersToday;
+
+    public DayConfigSO CurrentDayConfig => currentDayConfig;
+
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
     }
 
@@ -34,108 +52,159 @@ public class GameManager : MonoBehaviour
     // START DAY
     public void StartDay(DayConfigSO config)
     {
+        Time.timeScale = 1f;
+        queueManager?.ClearAllCustomers();
+        InteractStation.interactionLocked = false;
+
+        CurrentState = GameState.Playing;
         currentDayConfig = config;
         dayRunning = true;
 
-        // Reset stars
+        spawnedCustomersToday = 0;
+        failedOrdersToday = 0;
+
         starSystem.ResetStars();
-
-        // Setup order goal
         orderGoalSystem.Initialize(config.targetOrders);
+        orderUI?.Initialize(config.targetOrders);
 
-        // Setup UI
-        if (orderUI != null)
-            orderUI.Initialize(config.targetOrders);
-
-        // Reset time
         timeSystem.StartDay(config.startHour24);
-
-        // HUD
-        dayLabel.text = $"Day: {config.dayIndex}";
+        if (dayLabel != null) dayLabel.text = $"Day: {config.dayIndex}";
 
         endDayUI.HideImmediate();
-
-        // Input mode: gameplay
         GameInput.Instance.SetModePlayer();
+
+        SetupDayDifficulty();
     }
 
-    // END DAY
-    private void EndDay(bool success, string reason)
+    public void SetupDayDifficulty()
     {
+        if (queueManager == null)
+        {
+            Debug.LogError("GameManager: CustomerQueueManager not assigned");
+            return;
+        }
+
+        queueManager.SetupForDay(
+            currentDayConfig.targetOrders,
+            currentDayConfig.dayIndex,
+            timeSystem.dayLengthGameHours
+        );
+    }
+
+    public void NotifyCustomerSpawned()
+    {
+        spawnedCustomersToday++;
+        ApplyDynamicDifficulty();
+    }
+
+    private void ApplyDynamicDifficulty()
+    {
+        if (spawnedCustomersToday < 3) return;
+
+        float playedHours = Mathf.Max(0.1f, timeSystem.CurrentPlayedHours);
+
+        float playerOrdersPerHour = orderGoalSystem.CompletedOrders / playedHours;
+        float requiredOrdersPerHour = currentDayConfig.targetOrders / timeSystem.dayLengthGameHours;
+
+        queueManager.ApplyAdaptiveDifficulty(playerOrdersPerHour, requiredOrdersPerHour);
+    }
+
+    public void RegisterOrderSuccess()
+    {
+        if (CurrentState != GameState.Playing)
+            return;
+
+        orderGoalSystem.AddOrderSuccess();
+        orderUI?.SetValue(orderGoalSystem.CompletedOrders);
+
+        if (orderGoalSystem.IsGoalReached())
+            EndDay(GetWinResult());
+    }
+
+    public void RegisterOrderFail(CustomerPersonality personality)
+    {
+        if (CurrentState != GameState.Playing)
+            return;
+
+        failedOrdersToday++;
+
+        int baseLose = personality == CustomerPersonality.VIP ? 2 : 1;
+        int dayPenalty = Mathf.FloorToInt(currentDayConfig.dayIndex * 0.2f);
+        int loseAmount = Mathf.Clamp(baseLose + dayPenalty, 1, 3);
+
+        starSystem.LoseStar(loseAmount);
+
+        if (starSystem.CurrentStars <= 0)
+            EndDay(EndDayResult.LoseDay);
+    }
+
+    private void EndDay(EndDayResult result)
+    {
+        if (CurrentState != GameState.Playing)
+            return;
+
+        CurrentState = GameState.EndingDay;
         dayRunning = false;
+
+        Time.timeScale = 0f;
+
         timeSystem.StopDay();
+        ServiceTrigger.Instance?.ClearCurrentCustomer();
+        queueManager?.ClearAllCustomers();
+        InteractStation.interactionLocked = false;
 
         GameInput.Instance.SetModeUI();
 
-        bool hasNextDay = DayManager.Instance.HasNextDay();
-
         endDayUI.ShowSummary(
-            success,
+            result,
             currentDayConfig.dayIndex,
             orderGoalSystem.CompletedOrders,
             orderGoalSystem.TargetOrders,
             starSystem.CurrentStars,
             starSystem.maxStars,
-            timeSystem.CurrentPlayedHours,
-            hasNextDay
+            timeSystem.CurrentPlayedHours
         );
+
+        CurrentState = GameState.EndDayUI;
     }
 
-    // EVENT: Time finished
     private void OnDayTimeOver()
     {
         if (!dayRunning) return;
 
-        if (orderGoalSystem.IsGoalReached())
-            EndDay(true, "Completed orders just in time!");
-        else
-            EndDay(false, "Out of time");
+        EndDay(orderGoalSystem.IsGoalReached()
+            ? GetWinResult()
+            : EndDayResult.LoseDay);
     }
 
-    // ORDER EVENTS
-    public void RegisterOrderSuccess()
+    private EndDayResult GetWinResult()
     {
-        if (!dayRunning) return;
-
-        orderGoalSystem.AddOrderSuccess();
-
-        if (orderUI != null)
-            orderUI.SetValue(orderGoalSystem.CompletedOrders);
-
-        if (orderGoalSystem.IsGoalReached())
-            EndDay(true, "All orders completed!");
+        return DayManager.Instance.HasNextDay()
+            ? EndDayResult.WinDay
+            : EndDayResult.WeekComplete;
     }
 
-    public void RegisterOrderFail()
+    public void OnEndDayNextButton(EndDayResult result)
     {
-        if (!dayRunning) return;
+        Time.timeScale = 1f;
 
-        starSystem.LoseStar(1);
-
-        if (starSystem.CurrentStars <= 0)
-            EndDay(false, "Lost all stars");
-    }
-
-    // END DAY BUTTONS
-    public void OnEndDayNextButton()
-    {
-        bool success = orderGoalSystem.IsGoalReached();
-
-        if (success)
+        switch (result)
         {
-            if (DayManager.Instance.HasNextDay())
+            case EndDayResult.WinDay:
                 DayManager.Instance.StartNextDay();
-            else
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // finish
-        }
-        else
-        {
-            DayManager.Instance.RestartCurrentDay(); // retry same day
+                break;
+            case EndDayResult.LoseDay:
+                DayManager.Instance.RestartCurrentDay();
+                break;
+            case EndDayResult.WeekComplete:
+                SceneManager.LoadScene("EndDemo");
+                break;
         }
     }
 
     public void OnEndDayQuitButton()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
     }
 }

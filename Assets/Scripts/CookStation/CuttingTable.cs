@@ -12,10 +12,37 @@ public class CuttingTable : InteractStation
 
     public override void Interact(PlayerInventory player)
     {
-        if (isRunningQTE) return;
-        if (!player.HasBowl()) return;
-        if (!player.bowl.CanSlice()) return;
+        //  spam guard 
+        if (isRunningQTE)
+        {
+            NotificationUI.Instance?.Show(
+                "Already cutting!",
+                NotifyType.Info
+            );
+            return;
+        }
 
+        //  no bowl 
+        if (!player.HasBowl())
+        {
+            NotificationUI.Instance?.Show(
+                "You need a bowl first!",
+                NotifyType.Warning
+            );
+            return;
+        }
+
+        //  cannot slice yet 
+        if (!player.bowl.CanSlice())
+        {
+            NotificationUI.Instance?.Show(
+                "This dish can't be sliced yet",
+                NotifyType.Warning
+            );
+            return;
+        }
+
+        //  start cutting 
         currentPlayer = player;
         currentController = player.GetComponent<PlayerController>();
         isRunningQTE = true;
@@ -37,6 +64,17 @@ public class CuttingTable : InteractStation
         currentController.EnableMovement();
         UnlockInteraction();
 
+        //  FAIL 
+        if (result == QTEResult.Fail)
+        {
+            NotificationUI.Instance?.Show(
+                "Cutting failed!",
+                NotifyType.Warning
+            );
+            return;
+        }
+
+        //  SUCCESS
         if (result == QTEResult.Success)
         {
             currentPlayer.bowl.DoSlice();

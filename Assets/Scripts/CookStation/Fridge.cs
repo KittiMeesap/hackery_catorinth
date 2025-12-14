@@ -30,7 +30,10 @@ public class Fridge : InteractStation
         coolingBowl.currentCoolingTime += Time.deltaTime;
 
         float progress = coolingBowl.currentCoolingTime / recipe.coolingDuration;
-        timerUI.UpdateUI(progress, recipe.coolingDuration - coolingBowl.currentCoolingTime);
+        timerUI.UpdateUI(
+            progress,
+            recipe.coolingDuration - coolingBowl.currentCoolingTime
+        );
 
         if (coolingBowl.currentCoolingTime >= recipe.coolingDuration)
         {
@@ -45,11 +48,10 @@ public class Fridge : InteractStation
         if (!collision.CompareTag("Player")) return;
 
         animator.SetTrigger(Open);
-
-        isCooling = false; // stop cooling when opened
+        isCooling = false;
     }
 
-    // PLAYER LEAVES — fridge closes — START COOLING IF POSSIBLE
+    // PLAYER LEAVES — fridge closes — START COOLING
     protected override void OnTriggerExit2D(Collider2D collision)
     {
         base.OnTriggerExit2D(collision);
@@ -66,34 +68,49 @@ public class Fridge : InteractStation
         }
     }
 
+    // INTERACT
     public override void Interact(PlayerInventory player)
     {
+        // ---- take finished item ----
         if (coolingBowl != null && coolingBowl.IsFullyFinished())
         {
             TakeCooledItem(player);
             return;
         }
 
+        //  fridge already occupied 
         if (coolingBowl != null)
         {
-            Debug.Log("Fridge: Already cooling something.");
+            NotificationUI.Instance?.Show(
+                "The fridge is already in use",
+                NotifyType.Info
+            );
             return;
         }
 
+        //  no bowl 
         if (!player.HasBowl())
         {
-            Debug.Log("Fridge: Need a bowl.");
+            NotificationUI.Instance?.Show(
+                "You need a bowl first!",
+                NotifyType.Warning
+            );
             return;
         }
 
         var bowl = player.bowl;
 
+        //  cannot cool yet 
         if (!bowl.CanCool())
         {
-            Debug.Log("Fridge: This recipe cannot be cooled now.");
+            NotificationUI.Instance?.Show(
+                "This dish can't be cooled yet",
+                NotifyType.Warning
+            );
             return;
         }
 
+        //  place bowl in fridge 
         coolingBowl = player.TakeBowl();
         coolingBowl.currentCoolingTime = 0f;
 
@@ -102,13 +119,16 @@ public class Fridge : InteractStation
 
         iconUI.Refresh(coolingBowl);
 
-        Debug.Log("Fridge: Bowl placed inside. Waiting for player to step back...");
+        NotificationUI.Instance?.Show(
+            "Step back to start cooling",
+            NotifyType.Info
+        );
     }
 
+    // COOLING FLOW
     private void StartCooling()
     {
         isCooling = true;
-        Debug.Log("Fridge: Cooling started.");
     }
 
     private void CompleteCooling()
@@ -117,21 +137,33 @@ public class Fridge : InteractStation
 
         var recipe = coolingBowl.matchedRecipe;
 
-        if (recipe.flow == ProcessFlow.CoolOnly)
+        if (recipe.flow == ProcessFlow.CoolOnly ||
+            recipe.flow == ProcessFlow.BakeThenCool)
+        {
             coolingBowl.state = ContainerData.ContainerState.Finished;
-        else if (recipe.flow == ProcessFlow.BakeThenCool)
-            coolingBowl.state = ContainerData.ContainerState.Finished;
+        }
         else if (recipe.flow == ProcessFlow.CoolThenBake)
+        {
             coolingBowl.state = ContainerData.ContainerState.Cooling;
-
-        Debug.Log("Fridge: Cooling completed!");
+        }
 
         iconUI.Refresh(coolingBowl);
         timerUI.Hide();
     }
 
+    // TAKE ITEM
     private void TakeCooledItem(PlayerInventory player)
     {
+        // optional hint: taking too early
+        if (!coolingBowl.IsFullyFinished())
+        {
+            NotificationUI.Instance?.Show(
+                "Cooling is not finished yet",
+                NotifyType.Info
+            );
+            return;
+        }
+
         player.GiveBowl(coolingBowl);
 
         coolingBowl = null;
@@ -139,7 +171,5 @@ public class Fridge : InteractStation
 
         timerUI.Hide();
         iconUI.Clear();
-
-        Debug.Log("Fridge: Player took cooled item.");
     }
 }

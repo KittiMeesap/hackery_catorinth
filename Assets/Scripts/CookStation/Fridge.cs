@@ -172,4 +172,9 @@ public class Fridge : InteractStation
         timerUI.Hide();
         iconUI.Clear();
     }
+    private void OnDisable()
+    {
+        isCooling = false;
+    }
+
 }

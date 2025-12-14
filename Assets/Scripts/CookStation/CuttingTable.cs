@@ -57,15 +57,20 @@ public class CuttingTable : InteractStation
 
     private void OnQTEFinished(QTEResult result)
     {
-        QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+
         isRunningQTE = false;
 
-        currentController.SetCooking(false);
-        currentController.EnableMovement();
+        if (currentController != null)
+        {
+            currentController.SetCooking(false);
+            currentController.EnableMovement();
+        }
+
         UnlockInteraction();
 
-        //  FAIL 
-        if (result == QTEResult.Fail)
+        if (result != QTEResult.Success)
         {
             NotificationUI.Instance?.Show(
                 "Cutting failed!",
@@ -74,11 +79,32 @@ public class CuttingTable : InteractStation
             return;
         }
 
-        //  SUCCESS
-        if (result == QTEResult.Success)
+        if (currentPlayer != null && currentPlayer.bowl != null)
         {
             currentPlayer.bowl.DoSlice();
             currentPlayer.OnInventoryChanged?.Invoke();
         }
+    }
+
+
+    private void OnDisable()
+    {
+        Cleanup();
+    }
+
+    private void Cleanup()
+    {
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+
+        if (currentController != null)
+        {
+            currentController.SetCooking(false);
+            currentController.EnableMovement();
+            currentController.ForceIdle();
+        }
+
+        UnlockInteraction();
+        isRunningQTE = false;
     }
 }

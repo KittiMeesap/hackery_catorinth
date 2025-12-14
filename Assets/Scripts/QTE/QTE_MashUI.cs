@@ -148,5 +148,5 @@ public class QTE_MashUI : MonoBehaviour
         finishCallback?.Invoke(result);
     }
 
-    public void ForceStop() => Finish(QTEResult.Fail);
+    public void ForceStop() => Finish(QTEResult.Canceled);
 }

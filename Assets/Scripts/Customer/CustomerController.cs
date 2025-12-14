@@ -430,7 +430,13 @@ public class CustomerController : MonoBehaviour
 
         player.serveBox = null;
         player.OnInventoryChanged?.Invoke();
-        player.GetComponent<PlayerController>()?.RefreshCarryAnimation();
+
+        var pc = player.GetComponent<PlayerController>();
+        if (pc != null)
+        {
+            pc.RefreshCarryAnimation();
+            pc.ForceIdle();
+        }
 
         if (correct) HandleServeSuccess();
         else HandleServeFailWrongOrder();

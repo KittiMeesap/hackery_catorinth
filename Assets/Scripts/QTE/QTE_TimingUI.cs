@@ -52,7 +52,7 @@ public class QTE_TimingUI : MonoBehaviour
         float angle = pointer.eulerAngles.z;
         bool success = angle >= zoneStart && angle <= zoneEnd;
 
-        Finish(success ? QTEResult.Success : QTEResult.Fail);
+        Finish(success ? QTEResult.Success : QTEResult.FailWrongInput);
     }
 
     private void UpdateKeyIcon()
@@ -71,5 +71,5 @@ public class QTE_TimingUI : MonoBehaviour
         finishCallback?.Invoke(result);
     }
 
-    public void ForceStop() => Finish(QTEResult.Fail);
+    public void ForceStop() => Finish(QTEResult.Canceled);
 }

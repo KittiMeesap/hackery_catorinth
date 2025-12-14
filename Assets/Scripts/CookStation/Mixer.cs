@@ -73,6 +73,8 @@ public class Mixer : InteractStation
         if (result == QTEResult.Success)
         {
             currentPlayer.bowl.TryMix();
+
+            currentPlayer.OnInventoryChanged?.Invoke();
         }
         else
         {
@@ -84,6 +86,7 @@ public class Mixer : InteractStation
 
         isMixing = false;
     }
+
 
     private void StartMixerLoop()
     {
@@ -100,4 +103,27 @@ public class Mixer : InteractStation
         if (loopSource.isPlaying)
             loopSource.Stop();
     }
+    private void OnDisable()
+    {
+        Cleanup();
+    }
+
+    private void Cleanup()
+    {
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+
+        StopMixerLoop();
+
+        if (currentController != null)
+        {
+            currentController.SetCooking(false);
+            currentController.EnableMovement();
+            currentController.ForceIdle();
+        }
+
+        UnlockInteraction();
+        isMixing = false;
+    }
+
 }

@@ -54,4 +54,11 @@ public class Pantry : InteractStation
 
         UnlockInteraction();
     }
+
+    private void OnDisable()
+    {
+        UnlockInteraction();
+
+        animator?.SetTrigger(AnimClose);
+    }
 }

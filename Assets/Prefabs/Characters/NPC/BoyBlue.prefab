@@ -205,7 +205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CustomerController
   personality: 1
   moveSpeed: 2
-  baseWaitTime: 20
+  baseWaitTime: 40
   leaveDelay: 0.5
   queueIndex: -1
   targetPosition: {x: 0, y: 0, z: 0}

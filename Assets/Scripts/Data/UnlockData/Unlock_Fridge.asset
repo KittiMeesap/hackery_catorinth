@@ -15,4 +15,4 @@ MonoBehaviour:
   type: 2
   ingredient: {fileID: 0}
   recipe: {fileID: 0}
-  applianceID: 
+  applianceID: FridgeUnlock

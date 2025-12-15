@@ -35,6 +35,14 @@ public class ContainerData
         return state == ContainerState.Finished;
     }
 
+    public bool IsProcessed()
+    {
+        return state == ContainerState.Mixed ||
+               state == ContainerState.Baked ||
+               state == ContainerState.Cooling ||
+               state == ContainerState.Finished;
+    }
+
 
     // ===== BAKE LOGIC =====
     public bool CanBake()

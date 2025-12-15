@@ -10,6 +10,12 @@ public class RecipeManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
     }
 
@@ -47,22 +53,26 @@ public class RecipeManager : MonoBehaviour
     // ===== ALLOWED INGREDIENTS HELPER =====
     public List<IngredientItemSO> GetAllowedIngredients(List<IngredientItemSO> selected)
     {
+        if (recipes.Count == 0)
+            return new List<IngredientItemSO>();
+
         List<IngredientItemSO> allowed = new();
 
         foreach (var recipe in recipes)
         {
-            if (recipe.MatchesSelected(selected))
+            if (!recipe.MatchesSelected(selected))
+                continue;
+
+            foreach (var ing in recipe.ingredients)
             {
-                foreach (var ing in recipe.ingredients)
-                {
-                    if (!allowed.Contains(ing))
-                        allowed.Add(ing);
-                }
+                if (!allowed.Contains(ing))
+                    allowed.Add(ing);
             }
         }
 
         return allowed;
     }
+
 
     // ===== EXACT MATCH CHECK =====
     public bool CanMix(List<IngredientItemSO> contents)

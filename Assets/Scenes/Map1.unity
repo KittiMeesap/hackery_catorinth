@@ -1424,7 +1424,6 @@ GameObject:
   - component: {fileID: 151235168}
   - component: {fileID: 151235169}
   - component: {fileID: 151235170}
-  - component: {fileID: 151235172}
   - component: {fileID: 151235173}
   - component: {fileID: 151235174}
   m_Layer: 0
@@ -1481,6 +1480,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RecipeManager
   recipes:
   - {fileID: 11400000, guid: 72ecd6460e069e84283cfefbaab014e8, type: 2}
+  - {fileID: 11400000, guid: b13f3eb4d626fa947b1720d7f4a5f744, type: 2}
+  - {fileID: 11400000, guid: 61845ef6312867841814f26eb147a667, type: 2}
 --- !u!114 &151235167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1564,21 +1565,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 023dfc7a8bf6fdf49a9b6692ac65491e, type: 2}
   - {fileID: 11400000, guid: f0bf3d6f8d487974193551aab40b6e5f, type: 2}
   - {fileID: 11400000, guid: 3666ade2995b9e149984d4fe45771154, type: 2}
---- !u!114 &151235172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 151235162}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3975bcf1b05b5f24ab06a3333705b9b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UnlockManager
-  database: {fileID: 11400000, guid: 4d7ecfd331e4840428467eb5fa6d51bb, type: 2}
-  pantryDatabase: {fileID: 151235173}
-  recipeManager: {fileID: 151235166}
 --- !u!114 &151235173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1595,6 +1581,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1cae6e1b6897ce440841a480aef9b85a, type: 2}
   - {fileID: 11400000, guid: 2bbc2f89269a07841a664c7b5645149d, type: 2}
   - {fileID: 11400000, guid: aec81f460db5b9b4ba3d7b193011d917, type: 2}
+  - {fileID: 11400000, guid: cb47bf9ee8475814a979a0da60d0a488, type: 2}
+  - {fileID: 11400000, guid: 0a297c618123e394f9d033aceea467ab, type: 2}
 --- !u!114 &151235174
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4334,7 +4322,6 @@ GameObject:
   - component: {fileID: 436107178}
   - component: {fileID: 436107177}
   - component: {fileID: 436107179}
-  - component: {fileID: 436107180}
   m_Layer: 0
   m_Name: Fridge
   m_TagString: Untagged
@@ -4501,19 +4488,6 @@ MonoBehaviour:
   promptUI: {fileID: 1417922057}
   highlightObj: {fileID: 1255530277}
   animator: {fileID: 436107178}
---- !u!114 &436107180
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 436107174}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00447c8b31804754b973d4e90db514fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UnlockableAppliance
-  unlockID: FridgeUnlock
 --- !u!4 &437677024 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2597237571904471592, guid: 5e3e3fc06df2a914c8cebaba09a57764, type: 3}
@@ -13705,7 +13679,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 10}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1564142032
 MonoBehaviour:
@@ -13741,8 +13715,8 @@ MonoBehaviour:
   m_ChildAlignment: 4
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 64, y: 64}
-  m_Spacing: {x: 10, y: 10}
+  m_CellSize: {x: 128, y: 128}
+  m_Spacing: {x: 80, y: 80}
   m_Constraint: 1
   m_ConstraintCount: 3
 --- !u!4 &1581165200 stripped

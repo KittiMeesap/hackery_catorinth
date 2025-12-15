@@ -13,11 +13,6 @@ MonoBehaviour:
   m_Name: Map0_UnlockData
   m_EditorClassIdentifier: Assembly-CSharp::UnlockDatabaseSO
   dayUnlockTable:
-  - dayIndex: 1
-    unlocks:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
   - dayIndex: 2
     unlocks:
     - {fileID: 11400000, guid: 2c68d40ade47bf64db0c17223b8af1e3, type: 2}

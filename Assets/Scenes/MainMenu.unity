@@ -6007,6 +6007,7 @@ GameObject:
   - component: {fileID: 255923348}
   - component: {fileID: 255923350}
   - component: {fileID: 255923349}
+  - component: {fileID: 255923351}
   m_Layer: 5
   m_Name: KeyIcon
   m_TagString: Untagged
@@ -6071,6 +6072,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 255923347}
   m_CullTransparentMesh: 1
+--- !u!114 &255923351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 255923347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
+  logicalInput: 3
+  squareHeight: 64
+  wideHeight: 48
+  worldScaleMultiplier: 0.01
 --- !u!1 &256011826
 GameObject:
   m_ObjectHideFlags: 0
@@ -7372,9 +7389,6 @@ GameObject:
   m_Component:
   - component: {fileID: 589353380}
   - component: {fileID: 589353381}
-  - component: {fileID: 589353382}
-  - component: {fileID: 589353384}
-  - component: {fileID: 589353383}
   m_Layer: 5
   m_Name: Close
   m_TagString: Untagged
@@ -7429,60 +7443,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &589353382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 589353379}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53d650ffcd2d5314fad55e54d6c03762, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
-  logicalInput: 0
-  squareSize: {x: 64, y: 64}
-  wideSize: {x: 128, y: 64}
-  worldScaleMultiplier: 0.01
---- !u!114 &589353383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 589353379}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &589353384
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 589353379}
-  m_CullTransparentMesh: 1
 --- !u!1 &689694726
 GameObject:
   m_ObjectHideFlags: 0
@@ -9538,8 +9498,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
   logicalInput: 2
-  squareSize: {x: 64, y: 64}
-  wideSize: {x: 128, y: 64}
+  squareHeight: 64
+  wideHeight: 48
   worldScaleMultiplier: 0.01
 --- !u!1 &1088094347
 GameObject:
@@ -10137,8 +10097,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIKeyIconUpdater
   logicalInput: 3
-  squareSize: {x: 64, y: 64}
-  wideSize: {x: 128, y: 64}
+  squareHeight: 64
+  wideHeight: 48
   worldScaleMultiplier: 0.01
 --- !u!1 &1284058866
 GameObject:

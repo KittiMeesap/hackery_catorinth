@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum OvenFailReason
+{
+    Timeout,
+    WrongInput
+}
+
 public class Oven : InteractStation
 {
     [Header("Animator")]
@@ -22,6 +28,8 @@ public class Oven : InteractStation
     private PlayerController currentController;
     private AudioSource loopSource;
     private bool isBaking;
+    private float qteStartTime;
+    private float qteMaxDuration;
 
     // LIFECYCLE
     protected override void Awake()
@@ -52,39 +60,31 @@ public class Oven : InteractStation
     // INTERACT
     public override void Interact(PlayerInventory player)
     {
-        //  spam guard 
         if (isBaking)
         {
-            NotificationUI.Instance?.Show(
-                "Already baking!",
-                NotifyType.Info
-            );
+            NotificationUI.Instance?.Show("Already baking!", NotifyType.Info);
             return;
         }
 
-        //  no bowl 
         if (!player.HasBowl())
         {
-            NotificationUI.Instance?.Show(
-                "You need a bowl first!",
-                NotifyType.Warning
-            );
+            NotificationUI.Instance?.Show("You need a bowl first!", NotifyType.Warning);
             return;
         }
 
-        //  cannot bake yet 
         if (!player.bowl.CanBake())
         {
-            NotificationUI.Instance?.Show(
-                "This dish is not ready to bake",
-                NotifyType.Warning
-            );
+            NotificationUI.Instance?.Show("This dish is not ready to bake", NotifyType.Warning);
             return;
         }
 
-        //  start baking 
-        isBaking = true;
+        if (QTEManager.Instance == null)
+        {
+            Debug.LogError("Oven: QTEManager.Instance is null");
+            return;
+        }
 
+        isBaking = true;
         currentPlayer = player;
         currentController = player.GetComponent<PlayerController>();
 
@@ -95,12 +95,16 @@ public class Oven : InteractStation
 
         StartOvenLoop();
 
+        qteStartTime = Time.unscaledTime;
+        qteMaxDuration = arrowCount * timePerKey;
+
         QTEManager.Instance.OnQTEFinished += OnQTEFinished;
         QTEManager.Instance.StartSequenceQTE(
             GenerateSequence(arrowCount),
             timePerKey
         );
     }
+
 
     // QTE
     private LogicalInput[] GenerateSequence(int count)
@@ -122,16 +126,24 @@ public class Oven : InteractStation
 
     private void OnQTEFinished(QTEResult result)
     {
-        QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
 
         StopOvenLoop();
 
         animator.SetBool(IsBaking, false);
-        currentController.SetCooking(false);
-        currentController.EnableMovement();
-        UnlockInteraction();
 
+        if (currentController != null)
+        {
+            currentController.SetCooking(false);
+            currentController.EnableMovement();
+        }
+
+        UnlockInteraction();
         isBaking = false;
+
+        if (currentPlayer == null || currentPlayer.bowl == null)
+            return;
 
         // SUCCESS
         if (result == QTEResult.Success)
@@ -139,34 +151,36 @@ public class Oven : InteractStation
             currentPlayer.bowl.DoBake();
             currentPlayer.OnInventoryChanged?.Invoke();
 
-            AudioManager.Instance?.PlaySFXAt(
-                sfxOvenSuccess,
-                transform.position,
-                true
-            );
-
+            AudioManager.Instance?.PlaySFXAt(sfxOvenSuccess, transform.position, true);
             return;
         }
 
         // FAIL
-        if (result == QTEResult.Fail)
+        if (result == QTEResult.FailTimeout)
         {
             currentPlayer.bowl.Clear();
             currentPlayer.bowl.state = ContainerData.ContainerState.Empty;
             currentPlayer.OnInventoryChanged?.Invoke();
 
-            NotificationUI.Instance?.Show(
-                "The food is burnt!",
-                NotifyType.Error
-            );
-
-            AudioManager.Instance?.PlaySFXAt(
-                sfxOvenFail,
-                transform.position,
-                true
-            );
+            NotificationUI.Instance?.Show("The food is burnt!", NotifyType.Error);
+            AudioManager.Instance?.PlaySFXAt(sfxOvenFail, transform.position, true);
+            return;
         }
+
+        if (result == QTEResult.FailWrongInput)
+        {
+            NotificationUI.Instance?.Show("Wrong input! Try again.", NotifyType.Warning);
+            return;
+        }
+
+        if (result == QTEResult.Canceled)
+        {
+            NotificationUI.Instance?.Show("Canceled.", NotifyType.Info);
+            return;
+        }
+
     }
+
 
     // AUDIO
     private void StartOvenLoop()

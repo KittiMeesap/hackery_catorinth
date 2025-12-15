@@ -1,66 +1,75 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DayManager : MonoBehaviour
 {
-    public static DayManager Instance { get; private set; }
+    public static DayManager Instance;
 
-    [Header("Configs")]
-    public DayConfigSO[] dayConfigs;
+    [Header("Day Configs")]
+    public List<DayConfigSO> days;
 
     private int currentDayIndex = 0;
 
-    public DayConfigSO CurrentDay => dayConfigs[currentDayIndex];
-    public int CurrentDayNumber => CurrentDay.dayIndex;
-
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
         Instance = this;
     }
 
+    // RESET
+    public void ResetToDayOne()
+    {
+        currentDayIndex = 0;
+        Debug.Log("[DayManager] ResetToDayOne");
+    }
+
+    // START
     public void StartFirstDay()
     {
-        UnlockSaveManager.Instance.Load();
+        if (days == null || days.Count == 0)
+        {
+            Debug.LogError(
+                "[DayManager] No DayConfigSO assigned! Check Inspector."
+            );
+            return;
+        }
 
-        int dayToLoad = UnlockSaveManager.Instance.Data.lastUnlockedDay;
-        currentDayIndex = dayToLoad - 1;
-
-        UnlockManager.Instance.ApplyUnlocksForDay(dayToLoad);
-
-        GameManager.Instance.StartDay(dayConfigs[currentDayIndex]);
+        currentDayIndex = 0;
+        StartCurrentDay();
     }
 
     public void StartNextDay()
     {
-        if (currentDayIndex + 1 < dayConfigs.Length)
-        {
-            currentDayIndex++;
-
-            UnlockManager.Instance.ApplyUnlocksForDay(CurrentDay.dayIndex);
-            GameManager.Instance.StartDay(CurrentDay);
-        }
-        else
-        {
-            Debug.Log("Game completed.");
-        }
+        currentDayIndex++;
+        StartCurrentDay();
     }
 
     public void RestartCurrentDay()
     {
-        GameManager.Instance.StartDay(CurrentDay);
+        StartCurrentDay();
+    }
+
+    private void StartCurrentDay()
+    {
+        if (days == null || days.Count == 0)
+        {
+            Debug.LogError("[DayManager] Days list is empty!");
+            return;
+        }
+
+        if (currentDayIndex < 0 || currentDayIndex >= days.Count)
+        {
+            Debug.LogError(
+                $"[DayManager] Invalid day index {currentDayIndex} / {days.Count}"
+            );
+            return;
+        }
+
+        Debug.Log($"[DayManager] Start Day {days[currentDayIndex].dayIndex}");
+        GameManager.Instance.StartDay(days[currentDayIndex]);
     }
 
     public bool HasNextDay()
     {
-        return currentDayIndex + 1 < dayConfigs.Length;
-    }
-
-    public int GetNextDayIndex()
-    {
-        return HasNextDay() ? dayConfigs[currentDayIndex + 1].dayIndex : CurrentDay.dayIndex;
+        return days != null && currentDayIndex + 1 < days.Count;
     }
 }

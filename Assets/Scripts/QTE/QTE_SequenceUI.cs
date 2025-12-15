@@ -30,8 +30,10 @@ public class QTE_SequenceUI : MonoBehaviour
         ShowKey();
 
         GameInput.Instance.SetModeQTE();
+
         directionAction = GameInput.Instance.QTEDirectionAction;
-        directionAction.performed += OnDirection;
+        if (directionAction != null)
+            directionAction.performed += OnDirection;
     }
 
     private void Update()
@@ -39,14 +41,18 @@ public class QTE_SequenceUI : MonoBehaviour
         if (!active) return;
 
         timer -= Time.unscaledDeltaTime;
-        timerFill.fillAmount = timer / timePerKey;
+        timerFill.fillAmount = Mathf.Clamp01(timer / timePerKey);
 
-        if (timer <= 0)
-            Finish(QTEResult.Fail);
+        if (timer <= 0f)
+        {
+            Finish(QTEResult.FailTimeout);
+        }
     }
 
     private void OnDirection(InputAction.CallbackContext ctx)
     {
+        if (!active) return;
+
         LogicalInput pressed = KeyIconDatabase.GetLogicalFromContext(ctx);
 
         if (pressed == sequence[index])
@@ -65,28 +71,33 @@ public class QTE_SequenceUI : MonoBehaviour
         }
         else
         {
-            index = 0;
-            timer = timePerKey;
-            ShowKey();
+            Finish(QTEResult.FailWrongInput);
         }
     }
 
-
     private void ShowKey()
     {
-        keyIcon.sprite = KeyIconDatabase.GetIcon(sequence[index]);
+        if (keyIcon != null && sequence != null && index < sequence.Length)
+            keyIcon.sprite = KeyIconDatabase.GetIcon(sequence[index]);
     }
 
     private void Finish(QTEResult result)
     {
+        if (!active) return;
+
         active = false;
 
         if (directionAction != null)
             directionAction.performed -= OnDirection;
 
+        directionAction = null;
+
         gameObject.SetActive(false);
         finishCallback?.Invoke(result);
     }
 
-    public void ForceStop() => Finish(QTEResult.Fail);
+    public void ForceStop()
+    {
+        Finish(QTEResult.Canceled);
+    }
 }

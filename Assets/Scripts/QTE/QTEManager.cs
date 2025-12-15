@@ -4,7 +4,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 public enum QTEType { None, Mash, Timing, Sequence }
-public enum QTEResult { Success, Fail }
+public enum QTEResult
+{
+    Success,
+    FailWrongInput,
+    FailTimeout,
+    Canceled
+}
+
 
 public class QTEManager : MonoBehaviour
 {
@@ -185,5 +192,6 @@ public class QTEManager : MonoBehaviour
 
         IsRunning = false;
         GameInput.Instance.SetModePlayer();
+        OnQTEFinished?.Invoke(QTEResult.Canceled);
     }
 }

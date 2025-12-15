@@ -63,6 +63,11 @@ public class GameManager : MonoBehaviour
         spawnedCustomersToday = 0;
         failedOrdersToday = 0;
 
+        if (UnlockManager.Instance != null)
+        {
+            UnlockManager.Instance.ApplyUnlocksForDay(config.dayIndex);
+        }
+
         starSystem.ResetStars();
         orderGoalSystem.Initialize(config.targetOrders);
         orderUI?.Initialize(config.targetOrders);
@@ -75,6 +80,7 @@ public class GameManager : MonoBehaviour
 
         SetupDayDifficulty();
     }
+
 
     public void SetupDayDifficulty()
     {

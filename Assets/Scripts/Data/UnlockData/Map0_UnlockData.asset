@@ -22,8 +22,3 @@ MonoBehaviour:
     unlocks:
     - {fileID: 11400000, guid: 03842b5247d0c3f459486a954fc8504d, type: 2}
     - {fileID: 11400000, guid: d5364aa6971b3784c929aa15aa606f02, type: 2}
-  - dayIndex: 4
-    unlocks:
-    - {fileID: 11400000, guid: 2598f973cacb91e4a93e1210acae5e10, type: 2}
-    - {fileID: 11400000, guid: d925e45648f67e941b6e6cdc0a3d7728, type: 2}
-    - {fileID: 11400000, guid: 40c57c6000bd37f42823ab4b4e8ed1a3, type: 2}

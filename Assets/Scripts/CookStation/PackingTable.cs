@@ -48,8 +48,7 @@ public class PackingTable : InteractStation
         var bowl = player.bowl;
 
         // ---- not finished dish ----
-        if (bowl.state != ContainerData.ContainerState.Finished &&
-            bowl.state != ContainerData.ContainerState.Sliced)
+        if (bowl.state != ContainerData.ContainerState.Finished)
         {
             NotificationUI.Instance?.Show(
                 "This dish is not ready to pack",
@@ -96,17 +95,21 @@ public class PackingTable : InteractStation
 
     private void OnQTEFinished(QTEResult result)
     {
-        QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
 
         StopPackingLoop();
-        currentController.SetCooking(false);
-        currentController.EnableMovement();
-        UnlockInteraction();
 
+        if (currentController != null)
+        {
+            currentController.SetCooking(false);
+            currentController.EnableMovement();
+        }
+
+        UnlockInteraction();
         isPacking = false;
 
-        // ---- FAIL ----
-        if (result == QTEResult.Fail)
+        if (result != QTEResult.Success)
         {
             NotificationUI.Instance?.Show(
                 "Packing failed!",
@@ -115,7 +118,8 @@ public class PackingTable : InteractStation
             return;
         }
 
-        // ---- SUCCESS ----
+        if (currentPlayer == null) return;
+
         currentPlayer.ConvertToServeBox();
 
         ContainerData empty = new ContainerData
@@ -133,6 +137,7 @@ public class PackingTable : InteractStation
         );
     }
 
+
     private void StartPackingLoop()
     {
         var clip = AudioManager.Instance?.GetClipByKey(sfxPackingLoop);
@@ -148,5 +153,28 @@ public class PackingTable : InteractStation
     {
         if (loopSource.isPlaying)
             loopSource.Stop();
+    }
+
+    private void OnDisable()
+    {
+        Cleanup();
+    }
+
+    private void Cleanup()
+    {
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+
+        StopPackingLoop();
+
+        if (currentController != null)
+        {
+            currentController.SetCooking(false);
+            currentController.EnableMovement();
+            currentController.ForceIdle();
+        }
+
+        UnlockInteraction();
+        isPacking = false;
     }
 }

@@ -305,13 +305,18 @@ public class PlayerController : MonoBehaviour
 
     public void ForceIdle()
     {
-        if (rb == null) return;
+        moveX = 0f;
 
-        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        if (rb != null)
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
         if (animator != null)
+        {
             animator.SetBool("IsWalking", false);
+            animator.SetBool("IsIdle", true);
+        }
     }
+
 
     public void DisableMovement()
     {

@@ -2,30 +2,30 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
+[RequireComponent(typeof(Image))]
 public class UIKeyIconUpdater : MonoBehaviour
 {
     public LogicalInput logicalInput;
-    public Image iconImage;
 
-    [Header("Size Settings")]
-    public Vector2 squareSize = new Vector2(64, 64);
-    public Vector2 wideSize = new Vector2(128, 64);
+    [Header("Height Based Sizing")]
+    public float squareHeight = 64f;
+    public float wideHeight = 48f;
 
     [Header("World Space Settings")]
-    [Tooltip("Scale multiplier for World Space Canvas")]
     public float worldScaleMultiplier = 0.01f;
 
     private RectTransform rect;
+    private Image iconImage;
     private Canvas parentCanvas;
 
     private void Awake()
     {
         rect = GetComponent<RectTransform>();
-
-        if (!iconImage)
-            iconImage = GetComponent<Image>();
-
+        iconImage = GetComponent<Image>();
         parentCanvas = GetComponentInParent<Canvas>();
+
+        iconImage.type = Image.Type.Simple;
+        iconImage.preserveAspect = true;
     }
 
     private void OnEnable()
@@ -46,33 +46,35 @@ public class UIKeyIconUpdater : MonoBehaviour
     {
         if (!iconImage) return;
 
-        // SET SPRITE
-        Sprite s = KeyIconDatabase.GetIcon(logicalInput);
-        if (s != null)
-            iconImage.sprite = s;
+        Sprite sprite = KeyIconDatabase.GetIcon(logicalInput);
+        if (sprite == null) return;
 
-        // SET SIZE
-        ApplySize();
+        iconImage.sprite = sprite;
+        ApplySize(sprite);
     }
 
-    private void ApplySize()
+    private void ApplySize(Sprite sprite)
     {
         if (parentCanvas == null) return;
 
         KeyIconSizeType sizeType = KeyIconDatabase.GetSizeType(logicalInput);
-        Vector2 targetSize = sizeType == KeyIconSizeType.Wide128
-            ? wideSize
-            : squareSize;
 
+        // LOCK HEIGHT
+        float targetHeight =
+            sizeType == KeyIconSizeType.Wide128
+                ? wideHeight
+                : squareHeight;
+
+        // CALCULATE WIDTH FROM ASPECT
+        float aspect = sprite.rect.width / sprite.rect.height;
+        float targetWidth = targetHeight * aspect;
+
+        rect.sizeDelta = new Vector2(targetWidth, targetHeight);
+
+        // World space scaling
         if (parentCanvas.renderMode == RenderMode.WorldSpace)
-        {
-            rect.sizeDelta = targetSize;
             rect.localScale = Vector3.one * worldScaleMultiplier;
-        }
         else
-        {
             rect.localScale = Vector3.one;
-            rect.sizeDelta = targetSize;
-        }
     }
 }

@@ -176,22 +176,6 @@ public class CustomerOrderPanel : MonoBehaviour
                     tools.Add(CustomerToolType.Fridge);
                     tools.Add(CustomerToolType.Oven);
                     break;
-
-                case ProcessFlow.BakeCoolSlice:
-                    tools.Add(CustomerToolType.Oven);
-                    tools.Add(CustomerToolType.Fridge);
-                    tools.Add(CustomerToolType.Slice);
-                    break;
-
-                case ProcessFlow.BakeSlice:
-                    tools.Add(CustomerToolType.Oven);
-                    tools.Add(CustomerToolType.Slice);
-                    break;
-
-                case ProcessFlow.CoolSlice:
-                    tools.Add(CustomerToolType.Fridge);
-                    tools.Add(CustomerToolType.Slice);
-                    break;
             }
         }
 

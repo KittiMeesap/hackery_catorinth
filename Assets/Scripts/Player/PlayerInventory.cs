@@ -83,20 +83,6 @@ public class PlayerInventory : MonoBehaviour
 
         RecipeSO finalRecipe = bowl.matchedRecipe;
 
-        if (bowl.state == ContainerData.ContainerState.Sliced)
-        {
-            if (bowl.matchedRecipe.slicedVariant != null)
-            {
-                finalRecipe = bowl.matchedRecipe.slicedVariant;
-            }
-            else
-            {
-                Debug.LogWarning(
-                    $"ConvertToServeBox: Container is Sliced but recipe '{bowl.matchedRecipe.name}' has no slicedVariant assigned. Using base recipe."
-                );
-            }
-        }
-
         serveBox = new ServeBoxItem
         {
             resultRecipe = finalRecipe

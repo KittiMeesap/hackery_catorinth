@@ -22,18 +22,21 @@ public class Mixer : InteractStation
     {
         if (isMixing)
         {
-            NotificationUI.Instance?.Show(
-                "Already mixing!",
-                NotifyType.Info
-            );
+            NotificationUI.Instance?.Show("Already mixing!", NotifyType.Info);
             return;
         }
 
         if (!player.HasBowl())
         {
+            NotificationUI.Instance?.Show("You need a bowl first!", NotifyType.Warning);
+            return;
+        }
+
+        if (player.bowl.IsAlreadyMixed())
+        {
             NotificationUI.Instance?.Show(
-                "You need a bowl first!",
-                NotifyType.Warning
+                "This dish has already been mixed",
+                NotifyType.Info
             );
             return;
         }
@@ -73,6 +76,8 @@ public class Mixer : InteractStation
         if (result == QTEResult.Success)
         {
             currentPlayer.bowl.TryMix();
+
+            currentPlayer.OnInventoryChanged?.Invoke();
         }
         else
         {
@@ -84,6 +89,7 @@ public class Mixer : InteractStation
 
         isMixing = false;
     }
+
 
     private void StartMixerLoop()
     {
@@ -100,4 +106,27 @@ public class Mixer : InteractStation
         if (loopSource.isPlaying)
             loopSource.Stop();
     }
+    private void OnDisable()
+    {
+        Cleanup();
+    }
+
+    private void Cleanup()
+    {
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
+
+        StopMixerLoop();
+
+        if (currentController != null)
+        {
+            currentController.SetCooking(false);
+            currentController.EnableMovement();
+            currentController.ForceIdle();
+        }
+
+        UnlockInteraction();
+        isMixing = false;
+    }
+
 }

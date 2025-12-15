@@ -20,9 +20,6 @@ public class SettingsNavigationController : MonoBehaviour
     public ScrollRect scrollRect;
     public bool autoScroll = true;
 
-    [Header("Scroll Content")]
-    public RectTransform contentRect;
-
     [Header("Display Mode & Resolution")]
     public TextMeshProUGUI displayModeValueText;
     public TextMeshProUGUI resolutionValueText;
@@ -56,6 +53,7 @@ public class SettingsNavigationController : MonoBehaviour
     private int resolutionIndex;
 
     private bool isDirty = false;
+    private bool rowChangedThisFrame = false;
 
     private readonly string[] displayModeNames = { "Windowed", "Borderless", "Fullscreen" };
 
@@ -103,6 +101,7 @@ public class SettingsNavigationController : MonoBehaviour
 
     private void Update()
     {
+        // HOLD LEFT / RIGHT
         if (holdDirection != 0)
         {
             holdTimer -= Time.unscaledDeltaTime;
@@ -112,13 +111,20 @@ public class SettingsNavigationController : MonoBehaviour
                 holdTimer = repeatRate;
             }
         }
+
+        // SCROLL ONLY WHEN ROW CHANGED
+        if (rowChangedThisFrame)
+        {
+            UpdateScrollPositionNormalized();
+            rowChangedThisFrame = false;
+        }
     }
 
     private void LoadSettings()
     {
-        resolutions = Screen.resolutions;
-        if (resolutions.Length == 0)
-            resolutions = new Resolution[] { Screen.currentResolution };
+        resolutions = Screen.resolutions.Length > 0
+            ? Screen.resolutions
+            : new Resolution[] { Screen.currentResolution };
 
         data = SettingsSaveManager.Load() ?? new SettingsData
         {
@@ -143,16 +149,13 @@ public class SettingsNavigationController : MonoBehaviour
 
         Vector2 nav = ctx.ReadValue<Vector2>();
 
-        // vertical navigation
         if (nav.y > 0.5f) MoveRow(-1);
         else if (nav.y < -0.5f) MoveRow(+1);
 
-        // horizontal adjust
         if (Mathf.Abs(nav.x) > 0.5f)
         {
             holdDirection = nav.x > 0 ? +1 : -1;
             holdTimer = holdDelay;
-
             AdjustCurrentRow(holdDirection);
         }
         else
@@ -164,7 +167,6 @@ public class SettingsNavigationController : MonoBehaviour
     private void OnSubmit(InputAction.CallbackContext ctx)
     {
         if (confirmPanel != null && confirmPanel.activeSelf) return;
-
         SaveSettings();
         ApplyGraphicsSettings();
     }
@@ -203,9 +205,12 @@ public class SettingsNavigationController : MonoBehaviour
 
     private void MoveRow(int delta)
     {
-        currentRowIndex = Mathf.Clamp(currentRowIndex + delta, 0, rowImages.Length - 1);
+        int newIndex = Mathf.Clamp(currentRowIndex + delta, 0, rowImages.Length - 1);
+        if (newIndex == currentRowIndex) return;
+
+        currentRowIndex = newIndex;
+        rowChangedThisFrame = true;
         RefreshRowHighlight();
-        UpdateScrollPosition();
     }
 
     private void AdjustCurrentRow(int dir)
@@ -214,34 +219,31 @@ public class SettingsNavigationController : MonoBehaviour
         {
             case RowType.DisplayMode:
                 displayModeIndex = Mathf.Clamp(displayModeIndex + dir, 0, displayModeNames.Length - 1);
-                isDirty = true;
                 RefreshDisplayTexts();
                 break;
 
             case RowType.Resolution:
                 resolutionIndex = Mathf.Clamp(resolutionIndex + dir, 0, resolutions.Length - 1);
-                isDirty = true;
                 RefreshDisplayTexts();
                 break;
 
             case RowType.MasterVolume:
                 masterSlider.value = Mathf.Clamp01(masterSlider.value + dir * volumeStep);
-                isDirty = true;
                 RefreshVolumeTexts();
                 break;
 
             case RowType.MusicVolume:
                 musicSlider.value = Mathf.Clamp01(musicSlider.value + dir * volumeStep);
-                isDirty = true;
                 RefreshVolumeTexts();
                 break;
 
             case RowType.SfxVolume:
                 sfxSlider.value = Mathf.Clamp01(sfxSlider.value + dir * volumeStep);
-                isDirty = true;
                 RefreshVolumeTexts();
                 break;
         }
+
+        isDirty = true;
     }
 
     private void RefreshRowHighlight()
@@ -250,48 +252,24 @@ public class SettingsNavigationController : MonoBehaviour
             rowImages[i].color = (i == currentRowIndex) ? selectedRowColor : normalRowColor;
     }
 
-    private void UpdateScrollPosition()
+    private void UpdateScrollPositionNormalized()
     {
-        if (!autoScroll || scrollRect == null || contentRect == null)
+        if (!autoScroll || scrollRect == null) return;
+
+        if (rowImages.Length <= 1) return;
+
+        // row 0 = top (1), last = bottom (0)
+        float target = 1f - (float)currentRowIndex / (rowImages.Length - 1);
+
+        if (Mathf.Abs(scrollRect.verticalNormalizedPosition - target) < 0.01f)
             return;
 
-        RectTransform row = rowImages[currentRowIndex].rectTransform;
-
-        Canvas.ForceUpdateCanvases();
-
-        float contentHeight = contentRect.rect.height;
-        float viewportHeight = scrollRect.viewport.rect.height;
-
-        if (contentHeight <= viewportHeight)
-            return;
-
-        // row position (top-based)
-        float rowTop = -row.anchoredPosition.y;
-        float rowBottom = rowTop - row.rect.height;
-
-        float viewTop = contentRect.anchoredPosition.y;
-        float viewBottom = viewTop + viewportHeight;
-
-        float offset = 0f;
-
-        if (rowTop > viewTop)
-            offset = rowTop - viewTop;
-        else if (rowBottom < viewBottom)
-            offset = rowBottom - viewBottom;
-
-        if (Mathf.Abs(offset) > 0.01f)
-        {
-            Vector2 pos = contentRect.anchoredPosition;
-            pos.y += offset;
-            contentRect.anchoredPosition = pos;
-        }
+        scrollRect.verticalNormalizedPosition = target;
     }
-
 
     private void RefreshDisplayTexts()
     {
         displayModeValueText.text = displayModeNames[displayModeIndex];
-
         Resolution r = resolutions[resolutionIndex];
         resolutionValueText.text = $"{r.width} x {r.height}";
     }
@@ -314,7 +292,6 @@ public class SettingsNavigationController : MonoBehaviour
         RefreshDisplayTexts();
         RefreshVolumeTexts();
         RefreshRowHighlight();
-        UpdateScrollPosition();
     }
 
     private void SaveSettings()
@@ -362,5 +339,4 @@ public class SettingsNavigationController : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(main.firstSelectedMain);
         }
     }
-
 }

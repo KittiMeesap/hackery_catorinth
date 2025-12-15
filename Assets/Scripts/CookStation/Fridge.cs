@@ -7,88 +7,14 @@ public class Fridge : InteractStation
     private static readonly int Open = Animator.StringToHash("Open");
     private static readonly int Close = Animator.StringToHash("Close");
 
-    [Header("UI")]
-    public CoolingTimerUI timerUI;
-    public FridgeIconUI iconUI;
-
-    private ContainerData coolingBowl = null;
-    private bool isCooling = false;
-
-    protected override void Start()
-    {
-        base.Start();
-        timerUI.Hide();
-        iconUI.Clear();
-    }
-
-    private void Update()
-    {
-        if (coolingBowl == null) return;
-        if (!isCooling) return;
-
-        var recipe = coolingBowl.matchedRecipe;
-        coolingBowl.currentCoolingTime += Time.deltaTime;
-
-        float progress = coolingBowl.currentCoolingTime / recipe.coolingDuration;
-        timerUI.UpdateUI(
-            progress,
-            recipe.coolingDuration - coolingBowl.currentCoolingTime
-        );
-
-        if (coolingBowl.currentCoolingTime >= recipe.coolingDuration)
-        {
-            CompleteCooling();
-        }
-    }
-
-    // PLAYER NEAR — fridge opens — STOP COOLING
-    protected override void OnTriggerEnter2D(Collider2D collision)
-    {
-        base.OnTriggerEnter2D(collision);
-        if (!collision.CompareTag("Player")) return;
-
-        animator.SetTrigger(Open);
-        isCooling = false;
-    }
-
-    // PLAYER LEAVES — fridge closes — START COOLING
-    protected override void OnTriggerExit2D(Collider2D collision)
-    {
-        base.OnTriggerExit2D(collision);
-        if (!collision.CompareTag("Player")) return;
-
-        animator.SetTrigger(Close);
-
-        if (coolingBowl == null) return;
-
-        if (coolingBowl.state == ContainerData.ContainerState.Mixed ||
-            coolingBowl.state == ContainerData.ContainerState.Baked)
-        {
-            StartCooling();
-        }
-    }
+    private ContainerData currentBowl;
+    private PlayerInventory currentPlayer;
+    private PlayerController currentController;
 
     // INTERACT
     public override void Interact(PlayerInventory player)
     {
-        // ---- take finished item ----
-        if (coolingBowl != null && coolingBowl.IsFullyFinished())
-        {
-            TakeCooledItem(player);
-            return;
-        }
-
-        //  fridge already occupied 
-        if (coolingBowl != null)
-        {
-            NotificationUI.Instance?.Show(
-                "The fridge is already in use",
-                NotifyType.Info
-            );
-            return;
-        }
-
-        //  no bowl 
+        // NO BOWL
         if (!player.HasBowl())
         {
             NotificationUI.Instance?.Show(
@@ -100,7 +26,7 @@ public class Fridge : InteractStation
 
         var bowl = player.bowl;
 
-        //  cannot cool yet 
+        // NOT READY TO COOL
         if (!bowl.CanCool())
         {
             NotificationUI.Instance?.Show(
@@ -110,66 +36,82 @@ public class Fridge : InteractStation
             return;
         }
 
-        //  place bowl in fridge 
-        coolingBowl = player.TakeBowl();
-        coolingBowl.currentCoolingTime = 0f;
+        // MOVE BOWL INTO FRIDGE
+        currentBowl = player.TakeBowl();
+        currentPlayer = player;
+        currentController = player.GetComponent<PlayerController>();
 
-        timerUI.Show();
-        timerUI.UpdateUI(0f, coolingBowl.matchedRecipe.coolingDuration);
+        // LOCK PLAYER
+        LockInteraction();
+        currentController.DisableMovement();
+        currentController.SetCooking(true);
 
-        iconUI.Refresh(coolingBowl);
+        animator.SetTrigger(Open);
 
-        NotificationUI.Instance?.Show(
-            "Step back to start cooling",
-            NotifyType.Info
-        );
+        // START MASH QTE
+        QTEManager.Instance.OnQTEFinished += OnQTEFinished;
+        QTEManager.Instance.StartMashQTE();
     }
 
-    // COOLING FLOW
-    private void StartCooling()
+    // QTE RESULT
+    private void OnQTEFinished(QTEResult result)
     {
-        isCooling = true;
-    }
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
 
-    private void CompleteCooling()
-    {
-        isCooling = false;
+        animator.SetTrigger(Close);
 
-        var recipe = coolingBowl.matchedRecipe;
+        currentController.EnableMovement();
+        currentController.SetCooking(false);
+        UnlockInteraction();
 
-        if (recipe.flow == ProcessFlow.CoolOnly ||
-            recipe.flow == ProcessFlow.BakeThenCool)
+        // FAIL / CANCEL
+        if (result != QTEResult.Success)
         {
-            coolingBowl.state = ContainerData.ContainerState.Finished;
-        }
-        else if (recipe.flow == ProcessFlow.CoolThenBake)
-        {
-            coolingBowl.state = ContainerData.ContainerState.Cooling;
-        }
+            currentPlayer.GiveBowl(currentBowl);
+            currentBowl = null;
 
-        iconUI.Refresh(coolingBowl);
-        timerUI.Hide();
-    }
-
-    // TAKE ITEM
-    private void TakeCooledItem(PlayerInventory player)
-    {
-        // optional hint: taking too early
-        if (!coolingBowl.IsFullyFinished())
-        {
             NotificationUI.Instance?.Show(
-                "Cooling is not finished yet",
-                NotifyType.Info
+                "Cooling failed",
+                NotifyType.Warning
             );
             return;
         }
 
-        player.GiveBowl(coolingBowl);
+        // SUCCESS
+        ApplyCoolingResult();
 
-        coolingBowl = null;
-        isCooling = false;
+        currentPlayer.GiveBowl(currentBowl);
+        currentBowl = null;
 
-        timerUI.Hide();
-        iconUI.Clear();
+        NotificationUI.Instance?.Show(
+            "Cooling complete!",
+            NotifyType.Info
+        );
+    }
+
+    // APPLY RESULT
+    private void ApplyCoolingResult()
+    {
+        var recipe = currentBowl.matchedRecipe;
+        if (recipe == null) return;
+
+        switch (recipe.flow)
+        {
+            case ProcessFlow.CoolOnly:
+            case ProcessFlow.BakeThenCool:
+                currentBowl.state = ContainerData.ContainerState.Finished;
+                break;
+
+            case ProcessFlow.CoolThenBake:
+                currentBowl.state = ContainerData.ContainerState.Cooling;
+                break;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (QTEManager.Instance != null)
+            QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
     }
 }

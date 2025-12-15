@@ -155,8 +155,12 @@ public class MainMenu : MonoBehaviour
         isTransitioning = true;
 
         PlayClick();
+
+        GameResetUtility.ResetAll();
+
         StartCoroutine(FadeAndLoad("Tutorial"));
     }
+
 
     IEnumerator FadeAndLoad(string sceneName)
     {

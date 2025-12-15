@@ -9,10 +9,6 @@ public enum ProcessFlow
     CoolOnly,       // Mix -> Cool -> Finish
     CoolThenBake,   // Mix -> Cool -> Bake -> Finish
     BakeThenCool,   // Mix -> Bake -> Cool -> Finish
-
-    BakeCoolSlice,  // Mix -> Bake -> Cool -> Slice -> Finish
-    BakeSlice,      // Mix -> Bake -> Slice -> Finish
-    CoolSlice       // Mix -> Cool -> Slice -> Finish
 }
 
 
@@ -34,14 +30,6 @@ public class RecipeSO : ScriptableObject
 
     [Header("Cooling Settings")]
     public float coolingDuration = 5f;
-
-    [Header("Slice Settings")]
-    public bool canBeSliced = false;
-    public Sprite sliceIcon;
-
-    [Header("Slice Variant Mapping")]
-    [Tooltip("If this recipe is the whole cake, assign the sliced RecipeSO here.")]
-    public RecipeSO slicedVariant;
 
     // ===== MATCH CHECK (SUBSET) =====
     public bool MatchesSelected(List<IngredientItemSO> selected)

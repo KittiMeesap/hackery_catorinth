@@ -20,6 +20,11 @@ public class RecipeManager : MonoBehaviour
             recipes.Add(recipe);
     }
 
+    public void ResetRecipes()
+    {
+        recipes.Clear();
+    }
+
     // ===== FIND RECIPE FROM INGREDIENTS (PREFER BASE/SLICEABLE) =====
     public RecipeSO GetRecipeFromIngredients(List<IngredientItemSO> selected)
     {
@@ -33,12 +38,6 @@ public class RecipeManager : MonoBehaviour
             if (best == null)
             {
                 best = recipe;
-            }
-            else
-            {
-                // Prefer recipe that can be sliced (base production recipe)
-                if (recipe.canBeSliced && !best.canBeSliced)
-                    best = recipe;
             }
         }
 

@@ -22,18 +22,21 @@ public class Mixer : InteractStation
     {
         if (isMixing)
         {
-            NotificationUI.Instance?.Show(
-                "Already mixing!",
-                NotifyType.Info
-            );
+            NotificationUI.Instance?.Show("Already mixing!", NotifyType.Info);
             return;
         }
 
         if (!player.HasBowl())
         {
+            NotificationUI.Instance?.Show("You need a bowl first!", NotifyType.Warning);
+            return;
+        }
+
+        if (player.bowl.IsAlreadyMixed())
+        {
             NotificationUI.Instance?.Show(
-                "You need a bowl first!",
-                NotifyType.Warning
+                "This dish has already been mixed",
+                NotifyType.Info
             );
             return;
         }

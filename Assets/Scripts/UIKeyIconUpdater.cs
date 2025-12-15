@@ -7,9 +7,9 @@ public class UIKeyIconUpdater : MonoBehaviour
 {
     public LogicalInput logicalInput;
 
-    [Header("Size Settings")]
-    public Vector2 squareSize = new Vector2(64, 64);
-    public Vector2 wideSize = new Vector2(128, 64);
+    [Header("Height Based Sizing")]
+    public float squareHeight = 64f;
+    public float wideHeight = 48f;
 
     [Header("World Space Settings")]
     public float worldScaleMultiplier = 0.01f;
@@ -46,26 +46,30 @@ public class UIKeyIconUpdater : MonoBehaviour
     {
         if (!iconImage) return;
 
-        // ===== SET SPRITE =====
         Sprite sprite = KeyIconDatabase.GetIcon(logicalInput);
-        if (sprite != null)
-            iconImage.sprite = sprite;
+        if (sprite == null) return;
 
-        ApplySize();
+        iconImage.sprite = sprite;
+        ApplySize(sprite);
     }
 
-    private void ApplySize()
+    private void ApplySize(Sprite sprite)
     {
         if (parentCanvas == null) return;
 
         KeyIconSizeType sizeType = KeyIconDatabase.GetSizeType(logicalInput);
 
-        Vector2 targetSize =
+        // LOCK HEIGHT
+        float targetHeight =
             sizeType == KeyIconSizeType.Wide128
-                ? wideSize
-                : squareSize;
+                ? wideHeight
+                : squareHeight;
 
-        rect.sizeDelta = targetSize;
+        // CALCULATE WIDTH FROM ASPECT
+        float aspect = sprite.rect.width / sprite.rect.height;
+        float targetWidth = targetHeight * aspect;
+
+        rect.sizeDelta = new Vector2(targetWidth, targetHeight);
 
         // World space scaling
         if (parentCanvas.renderMode == RenderMode.WorldSpace)

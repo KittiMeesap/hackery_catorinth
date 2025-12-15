@@ -14,8 +14,7 @@ public class ContainerData
         Mixed,
         Cooling,
         Baked,
-        Finished,
-        Sliced
+        Finished
     }
 
     public float currentCoolingTime = 0f;
@@ -28,39 +27,14 @@ public class ContainerData
         return state == ContainerState.Mixed ||
                state == ContainerState.Cooling ||
                state == ContainerState.Baked ||
-               state == ContainerState.Finished ||
-               state == ContainerState.Sliced;
+               state == ContainerState.Finished;
     }
 
     public bool IsFullyFinished()
     {
-        return state == ContainerState.Finished ||
-               state == ContainerState.Sliced;
-    }
-
-    // ===== SLICE LOGIC =====
-    public bool CanSlice()
-    {
-        if (matchedRecipe == null) return false;
-        if (!matchedRecipe.canBeSliced) return false;
-
         return state == ContainerState.Finished;
     }
 
-    public void DoSlice()
-    {
-        if (!CanSlice()) return;
-
-        state = ContainerState.Sliced;
-
-        // Switch to sliced recipe variant
-        if (matchedRecipe != null && matchedRecipe.slicedVariant != null)
-        {
-            matchedRecipe = matchedRecipe.slicedVariant;
-        }
-
-        Debug.Log("ContainerData: Cake sliced -> Sliced State");
-    }
 
     // ===== BAKE LOGIC =====
     public bool CanBake()
@@ -71,8 +45,6 @@ public class ContainerData
         {
             case ProcessFlow.BakeOnly:
             case ProcessFlow.BakeThenCool:
-            case ProcessFlow.BakeCoolSlice:
-            case ProcessFlow.BakeSlice:
                 return state == ContainerState.Mixed;
 
             case ProcessFlow.CoolThenBake:
@@ -100,14 +72,6 @@ public class ContainerData
             case ProcessFlow.CoolThenBake:
                 state = ContainerState.Finished;
                 break;
-
-            case ProcessFlow.BakeCoolSlice:
-                state = ContainerState.Baked;
-                break;
-
-            case ProcessFlow.BakeSlice:
-                state = ContainerState.Finished;
-                break;
         }
     }
 
@@ -120,11 +84,9 @@ public class ContainerData
         {
             case ProcessFlow.CoolOnly:
             case ProcessFlow.CoolThenBake:
-            case ProcessFlow.CoolSlice:
                 return state == ContainerState.Mixed;
 
             case ProcessFlow.BakeThenCool:
-            case ProcessFlow.BakeCoolSlice:
                 return state == ContainerState.Baked;
 
             default:
@@ -147,14 +109,6 @@ public class ContainerData
                 break;
 
             case ProcessFlow.BakeThenCool:
-                state = ContainerState.Finished;
-                break;
-
-            case ProcessFlow.BakeCoolSlice:
-                state = ContainerState.Finished;
-                break;
-
-            case ProcessFlow.CoolSlice:
                 state = ContainerState.Finished;
                 break;
         }
@@ -199,10 +153,6 @@ public class ContainerData
             ContainerState.Cooling => matchedRecipe.cooledIcon,
             ContainerState.Baked => matchedRecipe.outputIcon,
             ContainerState.Finished => matchedRecipe.outputIcon,
-
-            ContainerState.Sliced => matchedRecipe.sliceIcon != null
-                ? matchedRecipe.sliceIcon
-                : matchedRecipe.outputIcon,
 
             _ => null
         };

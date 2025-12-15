@@ -48,8 +48,7 @@ public class PackingTable : InteractStation
         var bowl = player.bowl;
 
         // ---- not finished dish ----
-        if (bowl.state != ContainerData.ContainerState.Finished &&
-            bowl.state != ContainerData.ContainerState.Sliced)
+        if (bowl.state != ContainerData.ContainerState.Finished)
         {
             NotificationUI.Instance?.Show(
                 "This dish is not ready to pack",

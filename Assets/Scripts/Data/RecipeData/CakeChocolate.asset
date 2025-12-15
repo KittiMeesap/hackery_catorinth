@@ -19,7 +19,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1cae6e1b6897ce440841a480aef9b85a, type: 2}
   - {fileID: 11400000, guid: 0a297c618123e394f9d033aceea467ab, type: 2}
   mixedIcon: {fileID: 7853997897297397499, guid: 96b0a8067c0b80b479122a3cf5420548, type: 3}
+  bakedIcon: {fileID: -7289848274232755473, guid: b36e1edfffe409c43894e440aabd471c, type: 3}
+  cooledIcon: {fileID: 0}
   outputIcon: {fileID: 6384937146217888707, guid: 58b2e56593a95014eaaeb82dacabb956, type: 3}
-  cooledIcon: {fileID: -7289848274232755473, guid: b36e1edfffe409c43894e440aabd471c, type: 3}
   flow: 4
   coolingDuration: 5

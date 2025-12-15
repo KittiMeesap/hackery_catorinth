@@ -18,11 +18,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aec81f460db5b9b4ba3d7b193011d917, type: 2}
   - {fileID: 11400000, guid: 1cae6e1b6897ce440841a480aef9b85a, type: 2}
   - {fileID: 11400000, guid: cb47bf9ee8475814a979a0da60d0a488, type: 2}
-  mixedIcon: {fileID: 0}
+  mixedIcon: {fileID: 5566262318351147612, guid: 2c57463959677b44b8b65e6f353b04b2, type: 3}
   outputIcon: {fileID: -6794305457321429515, guid: 689d5b5bcabaf7d4695cad409e1078cb, type: 3}
-  cooledIcon: {fileID: 0}
+  cooledIcon: {fileID: -5899905392675616929, guid: 79a3ee222ed491343afc239813e4a2c8, type: 3}
   flow: 4
   coolingDuration: 5
-  canBeSliced: 1
-  sliceIcon: {fileID: -4521209932689005035, guid: 252c67012d6485145be37919359a5379, type: 3}
-  slicedVariant: {fileID: 11400000, guid: a7cbf0e14520a974e8afcb9dae16c103, type: 2}

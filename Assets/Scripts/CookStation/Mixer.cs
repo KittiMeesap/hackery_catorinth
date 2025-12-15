@@ -4,17 +4,21 @@ public class Mixer : InteractStation
 {
     [Header("SFX Keys")]
     public string sfxMixLoop = "SFX_Mixer_Loop";
+    public string sfxMixSuccess = "SFX_Mixer_Success";
 
     private bool isMixing;
     private PlayerInventory currentPlayer;
     private PlayerController currentController;
+
     private AudioSource loopSource;
 
     protected override void Awake()
     {
         base.Awake();
+
         loopSource = gameObject.AddComponent<AudioSource>();
         loopSource.loop = true;
+        loopSource.playOnAwake = false;
         loopSource.spatialBlend = 1f;
     }
 
@@ -50,6 +54,9 @@ public class Mixer : InteractStation
             return;
         }
 
+        // =========================
+        // START MIXING
+        // =========================
         isMixing = true;
         currentPlayer = player;
         currentController = player.GetComponent<PlayerController>();
@@ -69,15 +76,18 @@ public class Mixer : InteractStation
         QTEManager.Instance.OnQTEFinished -= OnQTEFinished;
 
         StopMixerLoop();
-        currentController.EnableMovement();
+
         currentController.SetCooking(false);
+        currentController.EnableMovement();
         UnlockInteraction();
 
         if (result == QTEResult.Success)
         {
-            currentPlayer.bowl.TryMix();
-
-            currentPlayer.OnInventoryChanged?.Invoke();
+            if (currentPlayer.bowl.TryMix())
+            {
+                currentPlayer.OnInventoryChanged?.Invoke();
+                PlaySuccessSFX();
+            }
         }
         else
         {
@@ -90,14 +100,19 @@ public class Mixer : InteractStation
         isMixing = false;
     }
 
-
+    // =========================
+    // ?? LOOP SOUND
+    // =========================
     private void StartMixerLoop()
     {
-        var clip = AudioManager.Instance?.GetClipByKey(sfxMixLoop);
+        if (AudioManager.Instance == null) return;
+
+        var clip = AudioManager.Instance.GetClipByKey(sfxMixLoop);
         if (clip == null) return;
 
         loopSource.clip = clip;
-        loopSource.volume = AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
+        loopSource.volume =
+            AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
         loopSource.Play();
     }
 
@@ -106,6 +121,24 @@ public class Mixer : InteractStation
         if (loopSource.isPlaying)
             loopSource.Stop();
     }
+
+    // =========================
+    // ? SUCCESS ONE-SHOT
+    // =========================
+    private void PlaySuccessSFX()
+    {
+        if (AudioManager.Instance == null) return;
+
+        AudioManager.Instance.PlaySFXAt(
+            sfxMixSuccess,
+            transform.position,
+            true
+        );
+    }
+
+    // =========================
+    // CLEANUP
+    // =========================
     private void OnDisable()
     {
         Cleanup();
@@ -128,5 +161,4 @@ public class Mixer : InteractStation
         UnlockInteraction();
         isMixing = false;
     }
-
 }

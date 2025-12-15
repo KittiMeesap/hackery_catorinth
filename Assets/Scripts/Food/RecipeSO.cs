@@ -22,8 +22,9 @@ public class RecipeSO : ScriptableObject
 
     [Header("Icons")]
     public Sprite mixedIcon;
-    public Sprite outputIcon;
+    public Sprite bakedIcon;
     public Sprite cooledIcon;
+    public Sprite outputIcon;
 
     [Header("Production Flow")]
     public ProcessFlow flow;

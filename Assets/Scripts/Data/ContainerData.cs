@@ -158,9 +158,19 @@ public class ContainerData
         return state switch
         {
             ContainerState.Mixed => matchedRecipe.mixedIcon,
-            ContainerState.Cooling => matchedRecipe.cooledIcon,
-            ContainerState.Baked => matchedRecipe.outputIcon,
-            ContainerState.Finished => matchedRecipe.outputIcon,
+
+            ContainerState.Baked =>
+                matchedRecipe.bakedIcon != null
+                    ? matchedRecipe.bakedIcon
+                    : matchedRecipe.outputIcon, // fallback
+
+            ContainerState.Cooling =>
+                matchedRecipe.bakedIcon != null
+                    ? matchedRecipe.bakedIcon
+                    : matchedRecipe.outputIcon,
+
+            ContainerState.Finished =>
+                matchedRecipe.outputIcon,
 
             _ => null
         };

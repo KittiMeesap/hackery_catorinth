@@ -7,7 +7,6 @@ public class CustomerOrderPanel : MonoBehaviour
     public static CustomerOrderPanel Instance { get; private set; }
     public CustomerController CurrentCustomer { get; private set; }
 
-
     [Header("Root")]
     public GameObject panelRoot;
 
@@ -23,11 +22,12 @@ public class CustomerOrderPanel : MonoBehaviour
     public Color timerWarningColor = new Color(1f, 0.85f, 0.3f);
     public Color timerDangerColor = new Color(1f, 0.35f, 0.35f);
 
-    [Tooltip("Below this value -> warning color")]
     [Range(0f, 1f)] public float warningThreshold = 0.5f;
-
-    [Tooltip("Below this value -> danger color")]
     [Range(0f, 1f)] public float dangerThreshold = 0.25f;
+
+    [Header("Timer SFX Keys")]
+    public string sfxCountdownLoop = "SFX_Timer_Countdown";
+    public string sfxTimeUp = "SFX_Timer_Timeout";
 
     [Header("Groups")]
     public Transform recipeGroup;
@@ -44,6 +44,10 @@ public class CustomerOrderPanel : MonoBehaviour
     public bool showMixerIcon = false;
 
     private Dictionary<CustomerToolType, Sprite> toolIconMap;
+
+    // ?? AUDIO
+    private AudioSource countdownSource;
+    private bool timeUpPlayed;
 
     [System.Serializable]
     public class ToolIconEntry
@@ -62,7 +66,16 @@ public class CustomerOrderPanel : MonoBehaviour
 
         Instance = this;
         BuildToolIconMap();
+        SetupAudio();
         Hide();
+    }
+
+    private void SetupAudio()
+    {
+        countdownSource = gameObject.AddComponent<AudioSource>();
+        countdownSource.loop = true;
+        countdownSource.playOnAwake = false;
+        countdownSource.spatialBlend = 0f; // UI sound
     }
 
     private void BuildToolIconMap()
@@ -76,11 +89,12 @@ public class CustomerOrderPanel : MonoBehaviour
         }
     }
 
+    // =========================
     // PUBLIC API
+    // =========================
     public void Show(CustomerController customer, RecipeSO recipe, Sprite customerSprite)
     {
         CurrentCustomer = customer;
-
         panelRoot.SetActive(true);
 
         customerIcon.sprite = customerSprite;
@@ -89,11 +103,15 @@ public class CustomerOrderPanel : MonoBehaviour
         BuildRecipeIcons(recipe);
         BuildToolIcons(recipe);
 
+        timeUpPlayed = false;
+        StopCountdownLoop();
+
         UpdateTimer(1f);
     }
 
     public void Hide()
     {
+        StopCountdownLoop();
         CurrentCustomer = null;
 
         if (panelRoot != null)
@@ -108,10 +126,12 @@ public class CustomerOrderPanel : MonoBehaviour
 
         timerFill.fillAmount = normalized;
         timerFill.color = GetTimerColor(normalized);
+
+        HandleTimerSound(normalized);
     }
 
     // =========================
-    // TIMER COLOR LOGIC
+    // TIMER COLOR
     // =========================
     private Color GetTimerColor(float normalized)
     {
@@ -122,6 +142,52 @@ public class CustomerOrderPanel : MonoBehaviour
             return timerWarningColor;
 
         return timerNormalColor;
+    }
+
+    // =========================
+    // ?? TIMER SOUND LOGIC
+    // =========================
+    private void HandleTimerSound(float normalized)
+    {
+        if (AudioManager.Instance == null) return;
+
+        
+        if (normalized <= dangerThreshold && normalized > 0f)
+        {
+            StartCountdownLoop();
+        }
+        else
+        {
+            StopCountdownLoop();
+        }
+
+        
+        if (normalized <= 0f && !timeUpPlayed)
+        {
+            timeUpPlayed = true;
+            StopCountdownLoop();
+            AudioManager.Instance.PlayUI(sfxTimeUp);
+        }
+    }
+
+    private void StartCountdownLoop()
+    {
+        if (countdownSource.isPlaying) return;
+
+        var clip = AudioManager.Instance.GetClipByKey(sfxCountdownLoop);
+        if (clip == null) return;
+
+        countdownSource.clip = clip;
+        countdownSource.volume =
+            AudioManager.Instance.sfxVolume * AudioManager.Instance.masterVolume;
+
+        countdownSource.Play();
+    }
+
+    private void StopCountdownLoop()
+    {
+        if (countdownSource.isPlaying)
+            countdownSource.Stop();
     }
 
     // =========================
@@ -162,16 +228,13 @@ public class CustomerOrderPanel : MonoBehaviour
                 case ProcessFlow.BakeOnly:
                     tools.Add(CustomerToolType.Oven);
                     break;
-
                 case ProcessFlow.CoolOnly:
                     tools.Add(CustomerToolType.Fridge);
                     break;
-
                 case ProcessFlow.BakeThenCool:
                     tools.Add(CustomerToolType.Oven);
                     tools.Add(CustomerToolType.Fridge);
                     break;
-
                 case ProcessFlow.CoolThenBake:
                     tools.Add(CustomerToolType.Fridge);
                     tools.Add(CustomerToolType.Oven);

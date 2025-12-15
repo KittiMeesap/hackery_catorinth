@@ -23,7 +23,8 @@ public class MainMenu : MonoBehaviour
     public Image fadeOverlay;
     public float fadeDuration = 0.5f;
 
-    [Header("SFX Keys")]
+    [Header("Audio")]
+    public string mainMenuBGMKey = "BGM_MainMenu";
     public string clickKey = "UI_Click";
     public string hoverKey = "UI_Hover";
 
@@ -37,18 +38,24 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
+        // ===== INPUT MODE =====
         GameInput.Instance.SetModeUI();
 
         var map = GameInput.Instance.PlayerInputComponent.actions.FindActionMap("UI");
         cancelAction = map.FindAction("Cancel");
         cancelAction.performed += OnCancelPressed;
 
+        // ===== INIT FADE =====
         if (fadeOverlay != null)
         {
             var c = fadeOverlay.color;
             c.a = 0;
             fadeOverlay.color = c;
+            fadeOverlay.raycastTarget = false;
         }
+
+        // ===== PLAY BGM =====
+        AudioManager.Instance.PlayBGM(mainMenuBGMKey, crossfade: false);
 
         ShowMainMenu();
     }
@@ -59,13 +66,17 @@ public class MainMenu : MonoBehaviour
             cancelAction.performed -= OnCancelPressed;
     }
 
+    // =====================================================
     // UI LOCK SYSTEM
+    // =====================================================
     public void SetUILocked(bool locked)
     {
         uiLocked = locked;
     }
 
+    // =====================================================
     // CANCEL HANDLER
+    // =====================================================
     private void OnCancelPressed(InputAction.CallbackContext ctx)
     {
         if (uiLocked) return;
@@ -80,7 +91,9 @@ public class MainMenu : MonoBehaviour
             return;
     }
 
+    // =====================================================
     // BUTTON SELECT VISUAL
+    // =====================================================
     private void Update()
     {
         var current = EventSystem.current.currentSelectedGameObject;
@@ -100,11 +113,11 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    // =====================================================
     // UI NAVIGATION
+    // =====================================================
     public void ShowMainMenu()
     {
-        PlayHover();
-
         mainPanel.SetActive(true);
         settingPanel.SetActive(false);
         creditsPanel.SetActive(false);
@@ -126,7 +139,9 @@ public class MainMenu : MonoBehaviour
         settingPanel.SetActive(true);
         creditsPanel.SetActive(false);
 
-        EventSystem.current.SetSelectedGameObject(settingPanel.GetComponentInChildren<Button>().gameObject);
+        EventSystem.current.SetSelectedGameObject(
+            settingPanel.GetComponentInChildren<Button>().gameObject
+        );
     }
 
     public void ShowCredits()
@@ -138,7 +153,9 @@ public class MainMenu : MonoBehaviour
         settingPanel.SetActive(false);
         creditsPanel.SetActive(true);
 
-        EventSystem.current.SetSelectedGameObject(creditsPanel.GetComponentInChildren<Button>().gameObject);
+        EventSystem.current.SetSelectedGameObject(
+            creditsPanel.GetComponentInChildren<Button>().gameObject
+        );
     }
 
     public void CloseCredits()
@@ -148,21 +165,21 @@ public class MainMenu : MonoBehaviour
         ShowMainMenu();
     }
 
+    // =====================================================
     // SCENE LOAD
+    // =====================================================
     public void PlayGame()
     {
         if (isTransitioning) return;
         isTransitioning = true;
 
         PlayClick();
-
         GameResetUtility.ResetAll();
 
         StartCoroutine(FadeAndLoad("Tutorial"));
     }
 
-
-    IEnumerator FadeAndLoad(string sceneName)
+    private IEnumerator FadeAndLoad(string sceneName)
     {
         fadeOverlay.raycastTarget = true;
 
@@ -177,16 +194,24 @@ public class MainMenu : MonoBehaviour
             yield return null;
         }
 
+        // ===== STOP BGM BEFORE CHANGE SCENE =====
+        AudioManager.Instance.StopBGM();
+
         SceneManager.LoadScene(sceneName);
     }
 
+    // =====================================================
     // QUIT
+    // =====================================================
     public void QuitGame()
     {
         PlayClick();
         Application.Quit();
     }
 
+    // =====================================================
+    // SFX SHORTCUT
+    // =====================================================
     public void PlayHover() => AudioManager.Instance.PlaySFX(hoverKey);
     public void PlayClick() => AudioManager.Instance.PlaySFX(clickKey);
 }

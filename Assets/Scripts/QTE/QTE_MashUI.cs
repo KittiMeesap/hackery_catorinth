@@ -21,6 +21,10 @@ public class QTE_MashUI : MonoBehaviour
     public float bounceSpeed = 16f;
     public float returnSpeed = 10f;
 
+    [Header("SFX Keys")]
+    public string sfxMashHit = "SFX_Mash_Hit";
+    public string sfxMashSuccess = "SFX_Mash_Success";
+
     private float currentFill;
     private float fillPerHit;
     private float drainPerSec;
@@ -52,6 +56,9 @@ public class QTE_MashUI : MonoBehaviour
             hitAction.started -= OnHit;
     }
 
+    // =========================
+    // START QTE
+    // =========================
     public void Begin(
         float perHit,
         float drain,
@@ -109,15 +116,23 @@ public class QTE_MashUI : MonoBehaviour
 
         // ===== JUICE SCALE RETURN =====
         targetScale = Vector3.Lerp(targetScale, baseScale, returnSpeed * Time.unscaledDeltaTime);
-        barRoot.localScale = Vector3.Lerp(barRoot.localScale, targetScale, bounceSpeed * Time.unscaledDeltaTime);
+        barRoot.localScale =
+            Vector3.Lerp(barRoot.localScale, targetScale, bounceSpeed * Time.unscaledDeltaTime);
 
         if (currentFill >= successTarget)
             Finish(QTEResult.Success);
     }
 
+    // =========================
+    // ?? HIT (MASH)
+    // =========================
     private void OnHit(InputAction.CallbackContext ctx)
     {
         if (!active) return;
+
+        // ?? Mash hit sound (?????????????)
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayUI(sfxMashHit);
 
         // ===== COMBO =====
         comboCount = (comboTimer > 0f) ? comboCount + 1 : 1;
@@ -136,6 +151,9 @@ public class QTE_MashUI : MonoBehaviour
         targetScale = baseScale * Mathf.Lerp(1f, bounceScale, intensity);
     }
 
+    // =========================
+    // ? FINISH
+    // =========================
     private void Finish(QTEResult result)
     {
         active = false;
@@ -143,10 +161,17 @@ public class QTE_MashUI : MonoBehaviour
         if (hitAction != null)
             hitAction.started -= OnHit;
 
+        // ?? Success sound (??????????)
+        if (result == QTEResult.Success && AudioManager.Instance != null)
+            AudioManager.Instance.PlayUI(sfxMashSuccess);
+
         barRoot.localScale = baseScale;
         gameObject.SetActive(false);
         finishCallback?.Invoke(result);
     }
 
-    public void ForceStop() => Finish(QTEResult.Canceled);
+    public void ForceStop()
+    {
+        Finish(QTEResult.Canceled);
+    }
 }

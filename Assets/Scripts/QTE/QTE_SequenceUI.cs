@@ -5,8 +5,13 @@ using UnityEngine.UI;
 
 public class QTE_SequenceUI : MonoBehaviour
 {
+    [Header("UI")]
     public Image keyIcon;
     public Image timerFill;
+
+    [Header("SFX Keys")]
+    public string sfxArrowHit = "SFX_QTE_Arrow_Hit";        // ?????
+    public string sfxArrowWrong = "SFX_QTE_Arrow_Wrong";    // ?????
 
     private LogicalInput[] sequence;
     private int index;
@@ -17,6 +22,9 @@ public class QTE_SequenceUI : MonoBehaviour
     private Action<QTEResult> finishCallback;
     private bool active;
 
+    // =========================
+    // BEGIN
+    // =========================
     public void Begin(LogicalInput[] seq, float time, Action<QTEResult> callback)
     {
         sequence = seq;
@@ -45,10 +53,13 @@ public class QTE_SequenceUI : MonoBehaviour
 
         if (timer <= 0f)
         {
-            Finish(QTEResult.FailTimeout);
+            Finish(QTEResult.FailTimeout); // ? ??????????
         }
     }
 
+    // =========================
+    // INPUT
+    // =========================
     private void OnDirection(InputAction.CallbackContext ctx)
     {
         if (!active) return;
@@ -57,11 +68,13 @@ public class QTE_SequenceUI : MonoBehaviour
 
         if (pressed == sequence[index])
         {
+            PlayHit();
+
             index++;
 
             if (index >= sequence.Length)
             {
-                Finish(QTEResult.Success);
+                Finish(QTEResult.Success); // ? ??????????
             }
             else
             {
@@ -71,16 +84,23 @@ public class QTE_SequenceUI : MonoBehaviour
         }
         else
         {
+            PlayWrong();
             Finish(QTEResult.FailWrongInput);
         }
     }
 
+    // =========================
+    // UI
+    // =========================
     private void ShowKey()
     {
         if (keyIcon != null && sequence != null && index < sequence.Length)
             keyIcon.sprite = KeyIconDatabase.GetIcon(sequence[index]);
     }
 
+    // =========================
+    // FINISH
+    // =========================
     private void Finish(QTEResult result)
     {
         if (!active) return;
@@ -99,5 +119,20 @@ public class QTE_SequenceUI : MonoBehaviour
     public void ForceStop()
     {
         Finish(QTEResult.Canceled);
+    }
+
+    // =========================
+    // ?? SFX
+    // =========================
+    private void PlayHit()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayUI(sfxArrowHit);
+    }
+
+    private void PlayWrong()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayUI(sfxArrowWrong);
     }
 }

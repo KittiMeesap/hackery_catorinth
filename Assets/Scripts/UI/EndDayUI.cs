@@ -48,13 +48,15 @@ public class EndDayUI : MonoBehaviour
     [Header("Button Hover Scale")]
     public Vector3 hoverScale = new Vector3(1.1f, 1.1f, 1f);
 
-    [Header("SFX")]
-    public string hoverKey = "UI_Hover";
-    public string clickKey = "UI_Click";
+    [Header("SFX Keys")]
+    public string openKey = "UI_EndDay_Open";      // ?? ??? UI ???? (??????????)
+    public string hoverKey = "UI_Hover";           // ?? Hover
+    public string clickKey = "SFX_UI_Submit";      // ? ????????? (???????????)
 
     private EndDayResult currentResult;
     private GameObject lastSelected;
     private bool uiLocked;
+    private bool hasPlayedOpenSFX;
 
     private void Awake()
     {
@@ -86,25 +88,31 @@ public class EndDayUI : MonoBehaviour
         }
     }
 
+    // =========================
     // SHOW
+    // =========================
     public void ShowSummary(
-    EndDayResult result,
-    int dayIndex,
-    int ordersDone,
-    int ordersTarget,
-    int starsLeft,
-    int maxStars,
-    float hoursPlayed
-)
+        EndDayResult result,
+        int dayIndex,
+        int ordersDone,
+        int ordersTarget,
+        int starsLeft,
+        int maxStars,
+        float hoursPlayed
+    )
     {
         currentResult = result;
         uiLocked = false;
+        hasPlayedOpenSFX = false;
 
         root.SetActive(true);
 
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
         canvasGroup.interactable = true;
+
+        // ?? UI OPEN (??????????????)
+        PlayOpen();
 
         titleText.text = "Day Summary";
         dayCurrentText.text = dayIndex.ToString();
@@ -126,8 +134,9 @@ public class EndDayUI : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(targetButton.gameObject);
     }
 
-
+    // =========================
     // INTERNAL
+    // =========================
     private void RefreshStars(int starsLeft, int maxStars)
     {
         for (int i = 0; i < starIcons.Length; i++)
@@ -164,31 +173,22 @@ public class EndDayUI : MonoBehaviour
     {
         var label = nextDayButton.GetComponentInChildren<TextMeshProUGUI>();
 
-        switch (result)
+        label.text = result switch
         {
-            case EndDayResult.WinDay:
-                label.text = "Next Day";
-                nextDayButton.gameObject.SetActive(true);
-                nextDayButton.interactable = true;
-                break;
+            EndDayResult.WinDay => "Next Day",
+            EndDayResult.LoseDay => "Retry Day",
+            EndDayResult.WeekComplete => "Next Area",
+            _ => label.text
+        };
 
-            case EndDayResult.LoseDay:
-                label.text = "Retry Day";
-                nextDayButton.gameObject.SetActive(true);
-                nextDayButton.interactable = true;
-                break;
-
-            case EndDayResult.WeekComplete:
-                label.text = "Next Area";
-                nextDayButton.gameObject.SetActive(true);
-                nextDayButton.interactable = true;
-                break;
-        }
-
+        nextDayButton.gameObject.SetActive(true);
+        nextDayButton.interactable = true;
         mainMenuButton.interactable = true;
     }
 
+    // =========================
     // BUTTONS
+    // =========================
     private void OnNextDayClicked()
     {
         if (uiLocked) return;
@@ -207,7 +207,9 @@ public class EndDayUI : MonoBehaviour
         GameManager.Instance.OnEndDayQuitButton();
     }
 
+    // =========================
     // VISIBILITY
+    // =========================
     public void HideImmediate()
     {
         root.SetActive(false);
@@ -215,9 +217,21 @@ public class EndDayUI : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
         canvasGroup.interactable = false;
         lastSelected = null;
+        hasPlayedOpenSFX = false;
     }
 
-    // SFX
+    // =========================
+    // ?? SFX
+    // =========================
+    private void PlayOpen()
+    {
+        if (hasPlayedOpenSFX) return;
+        hasPlayedOpenSFX = true;
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(openKey);
+    }
+
     private void PlayHover()
     {
         if (AudioManager.Instance != null)
@@ -227,6 +241,6 @@ public class EndDayUI : MonoBehaviour
     private void PlayClick()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlaySFX(clickKey);
+            AudioManager.Instance.PlaySFX(clickKey); // ? SFX_UI_Submit
     }
 }

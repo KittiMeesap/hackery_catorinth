@@ -14,11 +14,17 @@ public class Counter : InteractStation
     [Header("UI Icon")]
     public CounterIconUI iconUI;
 
+    [Header("SFX Keys")]
+    public string sfxPlace = "SFX_Counter_Place";
+    public string sfxTake = "SFX_Counter_Take";
+
     public override void Interact(PlayerInventory player)
     {
         PlayerController pc = player.GetComponent<PlayerController>();
 
+        // =========================
         // PLAYER PLACES BOWL
+        // =========================
         if (player.HasBowl() && bowlOnCounter == null)
         {
             bowlOnCounter = player.TakeBowl();
@@ -27,12 +33,17 @@ public class Counter : InteractStation
             animator?.SetTrigger(AnimPlace);
             animator?.SetBool(HasBowl, true);
 
+            // ?? PLACE SOUND
+            PlaySFX(sfxPlace);
+
             iconUI?.Refresh(bowlOnCounter);
             pc?.RefreshCarryAnimation();
             return;
         }
 
-        // PLAYER TRIES TO TAKE BOWL WHILE HOLDING SERVE BOX
+        // =========================
+        // BLOCK: HOLDING SERVE BOX
+        // =========================
         if (player.HasServeBox())
         {
             NotificationUI.Instance?.Show(
@@ -42,7 +53,9 @@ public class Counter : InteractStation
             return;
         }
 
-        // PLAYER TAKES BOWL BACK
+        // =========================
+        // PLAYER TAKES BOWL
+        // =========================
         if (!player.HasBowl() && bowlOnCounter != null)
         {
             player.GiveBowl(bowlOnCounter);
@@ -51,13 +64,18 @@ public class Counter : InteractStation
             animator?.SetTrigger(AnimTake);
             animator?.SetBool(HasBowl, false);
 
+            // ?? TAKE SOUND
+            PlaySFX(sfxTake);
+
             iconUI?.Clear();
             pc?.RefreshCarryAnimation();
             return;
         }
     }
 
-    // RETURN BOWL
+    // =========================
+    // RETURN BOWL (AUTO)
+    // =========================
     public void ReceiveReturnedBowl(ContainerData data)
     {
         bowlOnCounter = data;
@@ -68,6 +86,23 @@ public class Counter : InteractStation
             animator.SetTrigger(AnimPlace);
         }
 
+        // ?? PLACE SOUND
+        PlaySFX(sfxPlace);
+
         iconUI?.Refresh(bowlOnCounter);
+    }
+
+    // =========================
+    // ?? SFX HELPER
+    // =========================
+    private void PlaySFX(string key)
+    {
+        if (AudioManager.Instance == null) return;
+
+        AudioManager.Instance.PlaySFXAt(
+            key,
+            transform.position,
+            true
+        );
     }
 }

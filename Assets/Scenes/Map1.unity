@@ -1501,6 +1501,8 @@ MonoBehaviour:
   orderUI: {fileID: 131422646}
   queueManager: {fileID: 1433048882}
   dayLabel: {fileID: 1189171166}
+  gameplayBGMKey: BGM_Gameplay
+  endDayBGMKey: BGM_EndDay
 --- !u!114 &151235168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8155,9 +8157,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f14f87150504d6d4fa5519869717c05c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneBGM
-  bgmKey: BGM1
-  loop: 1
-  crossfade: 1
 --- !u!1 &878791246
 GameObject:
   m_ObjectHideFlags: 0

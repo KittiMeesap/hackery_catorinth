@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class EndDemoUI : MonoBehaviour
@@ -14,16 +15,31 @@ public class EndDemoUI : MonoBehaviour
 
     private GameObject lastSelected;
 
+    // INPUT
+    private InputAction submitAction;
+
     private void OnEnable()
     {
         if (GameInput.Instance != null)
+        {
             GameInput.Instance.SetModeUI();
+
+            var map = GameInput.Instance.PlayerInputComponent.actions.FindActionMap("UI");
+            submitAction = map.FindAction("Submit");
+            submitAction.performed += OnSubmitPressed;
+        }
 
         if (EventSystem.current != null && mainButton != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(mainButton);
         }
+    }
+
+    private void OnDisable()
+    {
+        if (submitAction != null)
+            submitAction.performed -= OnSubmitPressed;
     }
 
     private void Update()
@@ -47,6 +63,21 @@ public class EndDemoUI : MonoBehaviour
         }
     }
 
+    // =====================================================
+    // SUBMIT (ENTER)
+    // =====================================================
+    private void OnSubmitPressed(InputAction.CallbackContext ctx)
+    {
+       
+        if (EventSystem.current.currentSelectedGameObject != mainButton)
+            return;
+
+        OnMainMenuPressed();
+    }
+
+    // =====================================================
+    // BUTTON ACTION
+    // =====================================================
     public void OnMainMenuPressed()
     {
         PlayClick();

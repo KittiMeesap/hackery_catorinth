@@ -35,8 +35,6 @@ MonoBehaviour:
     clip: {fileID: 0}
   - key: SFX_Mixer_Loop
     clip: {fileID: 8300000, guid: 45a4fe01e95d75b4495f6423739f3157, type: 3}
-  - key: SFX_Mixer_Mash
-    clip: {fileID: 8300000, guid: 4a76feb4cadda2940a9a81bb25dd752c, type: 3}
   - key: SFX_Mixer_Success
     clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
   - key: SFX_Timer_Countdown
@@ -48,7 +46,7 @@ MonoBehaviour:
   - key: SFX_Counter_Place
     clip: {fileID: 8300000, guid: 9801dc0cefc0d15438a3aae1907023a8, type: 3}
   - key: SFX_Mash_Hit
-    clip: {fileID: 8300000, guid: 57e6f2444c7f60d4db7167b890d1515f, type: 3}
+    clip: {fileID: 8300000, guid: 4a76feb4cadda2940a9a81bb25dd752c, type: 3}
   - key: SFX_Mash_Success
     clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
   - key: UI_EndDay_Open

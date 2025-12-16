@@ -47,6 +47,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
+        // ---------- Audio Sources ----------
         if (musicSourceA == null)
         {
             musicSourceA = gameObject.AddComponent<AudioSource>();
@@ -192,15 +193,13 @@ public class AudioManager : MonoBehaviour
     }
 
     // ============================================================
-    // STOP ALL AUDIO (NEW)
+    // STOP
     // ============================================================
     public void StopAllSFX()
     {
         foreach (var src in sfxPool)
-        {
             if (src != null)
                 src.Stop();
-        }
 
         if (uiSource != null)
             uiSource.Stop();
@@ -213,27 +212,34 @@ public class AudioManager : MonoBehaviour
     }
 
     // ============================================================
-    // Volume
+    // VOLUME
     // ============================================================
     public void SetMasterVolume(float value)
     {
-        masterVolume = value;
-        SetMixerSafe("MasterVol", value);
-        PlayerPrefs.SetFloat("MasterVol", value);
+        masterVolume = Mathf.Clamp01(value);
+        SetMixerSafe("MasterVol", masterVolume);
+        PlayerPrefs.SetFloat("MasterVol", masterVolume);
     }
 
     public void SetMusicVolume(float value)
     {
-        musicVolume = value;
-        SetMixerSafe("MusicVol", value);
-        PlayerPrefs.SetFloat("MusicVol", value);
+        musicVolume = Mathf.Clamp01(value);
+        SetMixerSafe("MusicVol", musicVolume);
+        PlayerPrefs.SetFloat("MusicVol", musicVolume);
     }
 
     public void SetSFXVolume(float value)
     {
-        sfxVolume = value;
-        SetMixerSafe("SFXVol", value);
-        PlayerPrefs.SetFloat("SFXVol", value);
+        sfxVolume = Mathf.Clamp01(value);
+        SetMixerSafe("SFXVol", sfxVolume);
+        PlayerPrefs.SetFloat("SFXVol", sfxVolume);
+    }
+
+    public void ApplyVolumePreview(float master, float music, float sfx)
+    {
+        SetMasterVolume(master);
+        SetMusicVolume(music);
+        SetSFXVolume(sfx);
     }
 
     private void LoadVolume()
@@ -271,6 +277,7 @@ public class AudioManager : MonoBehaviour
         return clip;
     }
 
+    // ? FIX: ??? API ????????????????????????
     public AudioClip GetClipByKey(string key)
     {
         return GetClipSafe(key);
@@ -279,9 +286,7 @@ public class AudioManager : MonoBehaviour
     private void SetMixerSafe(string param, float value)
     {
         if (mainMixer == null) return;
-
-        float db = VolumeToDb(value);
-        mainMixer.SetFloat(param, db);
+        mainMixer.SetFloat(param, VolumeToDb(value));
     }
 
     private AudioSource GetAvailableSFXSource()

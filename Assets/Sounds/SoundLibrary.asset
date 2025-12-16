@@ -54,7 +54,7 @@ MonoBehaviour:
   - key: SFX_Mash_Success
     clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
   - key: UI_EndDay_Open
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3051cdc789b80dd40a21eecdc1ffa71b, type: 3}
   - key: UI_Click
     clip: {fileID: 8300000, guid: 9801dc0cefc0d15438a3aae1907023a8, type: 3}
   - key: UI_Hover
@@ -63,7 +63,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: e8c1bbfd5bc9bce44aeb67cc81583ca6, type: 3}
   - key: SFX_QTE_Arrow_Wrong
     clip: {fileID: 8300000, guid: 9263ef99786161f4fb5cfbdb6e6506dd, type: 3}
-  - key: BGM1
+  - key: BGM_Gameplay
     clip: {fileID: 8300000, guid: f176be830f33c8341b43e95d7189d884, type: 3}
   - key: BGM_MainMenu
     clip: {fileID: 8300000, guid: db43fdeeddbf482459ce15cb6199752e, type: 3}

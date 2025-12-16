@@ -80,6 +80,9 @@ public class SettingsNavigationController : MonoBehaviour
         LoadSettings();
         RefreshAllUI();
 
+        // ? AUDIO: sync ?????????????????????
+        ApplyAudioPreview();
+
         if (confirmPanel != null)
             confirmPanel.SetActive(false);
 
@@ -101,7 +104,6 @@ public class SettingsNavigationController : MonoBehaviour
 
     private void Update()
     {
-        // HOLD LEFT / RIGHT
         if (holdDirection != 0)
         {
             holdTimer -= Time.unscaledDeltaTime;
@@ -112,7 +114,6 @@ public class SettingsNavigationController : MonoBehaviour
             }
         }
 
-        // SCROLL ONLY WHEN ROW CHANGED
         if (rowChangedThisFrame)
         {
             UpdateScrollPositionNormalized();
@@ -229,21 +230,39 @@ public class SettingsNavigationController : MonoBehaviour
 
             case RowType.MasterVolume:
                 masterSlider.value = Mathf.Clamp01(masterSlider.value + dir * volumeStep);
-                RefreshVolumeTexts();
                 break;
 
             case RowType.MusicVolume:
                 musicSlider.value = Mathf.Clamp01(musicSlider.value + dir * volumeStep);
-                RefreshVolumeTexts();
                 break;
 
             case RowType.SfxVolume:
                 sfxSlider.value = Mathf.Clamp01(sfxSlider.value + dir * volumeStep);
-                RefreshVolumeTexts();
                 break;
         }
 
         isDirty = true;
+        RefreshVolumeTexts();
+        ApplyAudioPreview(); // ? AUDIO
+    }
+
+    private void OnVolumeChanged()
+    {
+        isDirty = true;
+        RefreshVolumeTexts();
+        ApplyAudioPreview(); // ? AUDIO
+    }
+
+    // ? AUDIO: ????? AudioManager ????????
+    private void ApplyAudioPreview()
+    {
+        if (AudioManager.Instance == null) return;
+
+        AudioManager.Instance.ApplyVolumePreview(
+            masterSlider.value,
+            musicSlider.value,
+            sfxSlider.value
+        );
     }
 
     private void RefreshRowHighlight()
@@ -255,14 +274,10 @@ public class SettingsNavigationController : MonoBehaviour
     private void UpdateScrollPositionNormalized()
     {
         if (!autoScroll || scrollRect == null) return;
-
         if (rowImages.Length <= 1) return;
 
-        // row 0 = top (1), last = bottom (0)
         float target = 1f - (float)currentRowIndex / (rowImages.Length - 1);
-
-        if (Mathf.Abs(scrollRect.verticalNormalizedPosition - target) < 0.01f)
-            return;
+        if (Mathf.Abs(scrollRect.verticalNormalizedPosition - target) < 0.01f) return;
 
         scrollRect.verticalNormalizedPosition = target;
     }
@@ -272,12 +287,6 @@ public class SettingsNavigationController : MonoBehaviour
         displayModeValueText.text = displayModeNames[displayModeIndex];
         Resolution r = resolutions[resolutionIndex];
         resolutionValueText.text = $"{r.width} x {r.height}";
-    }
-
-    private void OnVolumeChanged()
-    {
-        isDirty = true;
-        RefreshVolumeTexts();
     }
 
     private void RefreshVolumeTexts()

@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
     [Header("Audio")]
     public string gameplayBGMKey = "BGM_Gameplay";
     public string endDayBGMKey = "BGM_EndDay"; // optional
+    public string orderSuccessSFXKey = "SFX_Order_Success"; // ? ?????: ??????????????????
 
     private DayConfigSO currentDayConfig;
     private bool dayRunning = false;
@@ -69,7 +70,7 @@ public class GameManager : MonoBehaviour
         spawnedCustomersToday = 0;
         failedOrdersToday = 0;
 
-        // ? AUDIO: PLAY GAMEPLAY BGM
+        // AUDIO: PLAY GAMEPLAY BGM
         AudioManager.Instance?.PlayBGM(gameplayBGMKey);
 
         if (UnlockManager.Instance != null)
@@ -123,6 +124,9 @@ public class GameManager : MonoBehaviour
         queueManager.ApplyAdaptiveDifficulty(playerOrdersPerHour, requiredOrdersPerHour);
     }
 
+    // =====================================================
+    // ORDER RESULT
+    // =====================================================
     public void RegisterOrderSuccess()
     {
         if (CurrentState != GameState.Playing)
@@ -130,6 +134,10 @@ public class GameManager : MonoBehaviour
 
         orderGoalSystem.AddOrderSuccess();
         orderUI?.SetValue(orderGoalSystem.CompletedOrders);
+
+        // ?? ?????????????????? (??? 1 ????? ??? 1 ???????)
+        if (!string.IsNullOrEmpty(orderSuccessSFXKey))
+            AudioManager.Instance?.PlaySFX(orderSuccessSFXKey);
 
         if (orderGoalSystem.IsGoalReached())
             EndDay(GetWinResult());
@@ -152,6 +160,9 @@ public class GameManager : MonoBehaviour
             EndDay(EndDayResult.LoseDay);
     }
 
+    // =====================================================
+    // END DAY
+    // =====================================================
     private void EndDay(EndDayResult result)
     {
         if (CurrentState != GameState.Playing)
@@ -162,7 +173,7 @@ public class GameManager : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        // ? AUDIO: CHANGE / STOP BGM
+        // AUDIO: CHANGE / STOP BGM
         if (!string.IsNullOrEmpty(endDayBGMKey))
             AudioManager.Instance?.PlayBGM(endDayBGMKey);
 
@@ -205,8 +216,7 @@ public class GameManager : MonoBehaviour
     public void OnEndDayNextButton(EndDayResult result)
     {
         Time.timeScale = 1f;
-
-        AudioManager.Instance?.StopBGM(); // ? STOP BEFORE TRANSITION
+        AudioManager.Instance?.StopBGM();
 
         switch (result)
         {
@@ -225,7 +235,7 @@ public class GameManager : MonoBehaviour
     public void OnEndDayQuitButton()
     {
         Time.timeScale = 1f;
-        AudioManager.Instance?.StopBGM(); // ? STOP BGM
+        AudioManager.Instance?.StopBGM();
         SceneManager.LoadScene("MainMenu");
     }
 }

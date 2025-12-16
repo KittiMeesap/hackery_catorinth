@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Map0_D2
   m_EditorClassIdentifier: Assembly-CSharp::DayConfigSO
   dayIndex: 2
-  targetOrders: 10
+  targetOrders: 8
   startHour24: 8
   vipSpawnChance: 0.1
   waitTimeMultiplier: 1

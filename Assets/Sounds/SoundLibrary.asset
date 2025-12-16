@@ -22,11 +22,11 @@ MonoBehaviour:
   - key: SFX_Pantry_Item_Place
     clip: {fileID: 8300000, guid: 57e6f2444c7f60d4db7167b890d1515f, type: 3}
   - key: SFX_Oven_Success
-    clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
+    clip: {fileID: 8300000, guid: e44288a542c45fc44a9d71ca5d2cecc6, type: 3}
   - key: SFX_Oven_Loop
     clip: {fileID: 8300000, guid: 92ff7def751cb6f44af30fd321d13f64, type: 3}
   - key: SFX_Packing_Loop
-    clip: {fileID: 8300000, guid: 39e01149acab0294fbd4da9788fca138, type: 3}
+    clip: {fileID: 8300000, guid: b525c5d9da0857740a411a7af0f514ea, type: 3}
   - key: SFX_Packing_Success
     clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
   - key: SFX_Player_Footstep
@@ -34,17 +34,15 @@ MonoBehaviour:
   - key: SFX_Player_Sleep
     clip: {fileID: 0}
   - key: SFX_Mixer_Loop
-    clip: {fileID: 8300000, guid: 39e01149acab0294fbd4da9788fca138, type: 3}
-  - key: SFX_Mixer_Loop
-    clip: {fileID: 8300000, guid: 39e01149acab0294fbd4da9788fca138, type: 3}
+    clip: {fileID: 8300000, guid: 45a4fe01e95d75b4495f6423739f3157, type: 3}
   - key: SFX_Mixer_Mash
-    clip: {fileID: 8300000, guid: 57e6f2444c7f60d4db7167b890d1515f, type: 3}
+    clip: {fileID: 8300000, guid: 4a76feb4cadda2940a9a81bb25dd752c, type: 3}
   - key: SFX_Mixer_Success
     clip: {fileID: 8300000, guid: 7e48af130bfae5c43a3e92de20c12c12, type: 3}
   - key: SFX_Timer_Countdown
-    clip: {fileID: 8300000, guid: 39e01149acab0294fbd4da9788fca138, type: 3}
+    clip: {fileID: 8300000, guid: 048e3b9ce5e84cc448513d1472713f49, type: 3}
   - key: SFX_Timer_Timeout
-    clip: {fileID: 8300000, guid: b335a78151fed3e4fb88fb65c45e1534, type: 3}
+    clip: {fileID: 8300000, guid: 54c8722a548fc9144b60df2297457189, type: 3}
   - key: SFX_Counter_Take
     clip: {fileID: 8300000, guid: 9801dc0cefc0d15438a3aae1907023a8, type: 3}
   - key: SFX_Counter_Place
@@ -67,3 +65,5 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: f176be830f33c8341b43e95d7189d884, type: 3}
   - key: BGM_MainMenu
     clip: {fileID: 8300000, guid: db43fdeeddbf482459ce15cb6199752e, type: 3}
+  - key: SFX_Order_Success
+    clip: {fileID: 8300000, guid: dceb571e21ae6e545b9dddcbda9598c4, type: 3}
